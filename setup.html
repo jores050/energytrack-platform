@@ -92,9 +92,13 @@ Configurer le capteur
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
 <script>
 
-function configureSensor(){
+async function configureSensor(){
 
 const code=document.getElementById('sensorCode').value;
 
@@ -106,9 +110,58 @@ return;
 
 }
 
+/*
+UTILISATEUR CONNECTÉ
+*/
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+alert('Utilisateur non connecté.');
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId=userData.user.id;
+
+/*
+UPDATE SUPABASE
+*/
+
+const { error } =
+await supabaseClient
+.from('profiles')
+.update({
+
+sensor_configured:true
+
+})
+.eq('id',userId);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+/*
+LOCAL STORAGE
+*/
+
 localStorage.setItem('sensorConfigured','true');
 
 localStorage.setItem('sensorCode',code);
+
+/*
+SUCCESS UI
+*/
 
 document.getElementById('configResult').innerHTML=`
 
