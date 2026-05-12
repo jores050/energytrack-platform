@@ -687,7 +687,7 @@ document.getElementById('paymentSensor').innerHTML='Capteur : '+document.getElem
 
 closeModal();
 
-document.getElementById('landingPage').style.display='none';
+document.getElementById('landingNavbar').style.display='none';
 document.querySelector('.sidebar').style.display='block';
 document.querySelector('.main').style.display='block';
 }
@@ -725,7 +725,7 @@ Votre capteur EnergyTrack est en préparation. Veuillez patienter pendant la liv
 
 function simulateDelivery(){
 localStorage.setItem('deliveryStatus','delivered');
-document.getElementById('landingPage').style.display='none';
+document.getElementById('landingNavbar').style.display='none';
 document.getElementById('setupPage').style.display='block';
 }
 
