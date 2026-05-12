@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Rapports EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+Energy<span>Track</span>
+</div>
+
+<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+
+<a class="nav-item" href="consommation.html">⚡ Consommation</a>
+
+<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+
+<a class="nav-item active" href="rapports.html">📊 Rapports</a>
+
+<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+
+<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+
+<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+
+<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+
+<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
+
+</div>
+
+<div class="main" style="display:block;">
+
+<h1 style="margin-bottom:20px;">
+Rapports Énergétiques
+</h1>
+
+<div class="section">
+
+<h2>
+Rapport WhatsApp
+</h2>
+
+<p>
+Envoyer automatiquement les statistiques énergétiques hebdomadaires.
+</p>
+
+<button onclick="sendReport()">
+Envoyer le rapport
+</button>
+
+<p id="reportStatus" style="margin-top:20px"></p>
+
+</div>
+
+<div class="section">
+
+<h2>
+Exporter les données
+</h2>
+
+<button onclick="downloadCSV()">
+Télécharger CSV
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+if(localStorage.getItem('sensorConfigured')!=='true'){
+
+window.location.href='auth.html';
+
+}
+
+function sendReport(){
+
+document.getElementById('reportStatus').innerHTML=
+'✅ Rapport WhatsApp envoyé avec succès.';
+
+}
+
+function downloadCSV(){
+
+const csv='Jour,kWh,FCFA\\nLundi,12,1092\\nMardi,19,1729';
+
+const blob=new Blob([csv],{type:'text/csv'});
+
+const url=window.URL.createObjectURL(blob);
+
+const a=document.createElement('a');
+
+a.href=url;
+
+a.download='energytrack-report.csv';
+
+a.click();
+
+}
+
+function logoutUser(){
+
+localStorage.clear();
+
+window.location.href='index.html';
+
+}
+
+</script>
+
+</body>
+</html>

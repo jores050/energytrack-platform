@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Livraison EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+
+<div style="max-width:700px;text-align:center;background:#182235;padding:50px;border-radius:35px;">
+
+<div style="font-size:90px;margin-bottom:20px;">
+📦
+</div>
+
+<h1 style="font-size:42px;margin-bottom:20px;">
+Commande effectuée avec succès
+</h1>
+
+<p style="color:#94a3b8;line-height:1.8;font-size:18px;">
+
+Votre capteur EnergyTrack est en préparation.
+
+Veuillez patienter pendant la livraison.
+
+</p>
+
+<div style="margin-top:35px;background:#0f1729;padding:20px;border-radius:20px;">
+
+<p>
+Statut :
+<span style="color:#ffb547">
+En attente de livraison
+</span>
+</p>
+
+<p style="margin-top:10px" id="deliverySensor">
+Capteur :
+</p>
+
+</div>
+
+<button onclick="simulateDelivery()" style="margin-top:30px;">
+
+Simuler livraison
+
+</button>
+
+</div>
+
+</section>
+
+<script>
+
+window.onload=function(){
+
+const sensor=localStorage.getItem('selectedSensor');
+
+if(sensor){
+
+document.getElementById('deliverySensor').innerHTML=
+'Capteur : '+sensor;
+
+}
+
+}
+
+function simulateDelivery(){
+
+localStorage.setItem('deliveryStatus','delivered');
+
+alert('Capteur livré avec succès.');
+
+window.location.href='setup.html';
+
+}
+
+</script>
+
+</body>
+</html>

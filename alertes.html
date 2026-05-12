@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Alertes EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+Energy<span>Track</span>
+</div>
+
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
+
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
+
+<a class="nav-item active" href="alertes.html">
+🔔 Alertes
+</a>
+
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item" href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
+
+<a class="nav-item" href="ia.html">
+🤖 Analyse IA
+</a>
+
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
+
+<div class="nav-item" onclick="logoutUser()">
+🚪 Déconnexion
+</div>
+
+</div>
+
+<div class="main" style="display:block;">
+
+<h1 style="margin-bottom:20px">
+Alertes Intelligentes
+</h1>
+
+<div class="alert alert-danger">
+⚠️ Surconsommation détectée dans le bâtiment principal.
+</div>
+
+<div class="alert alert-warning">
+⚡ Coupure SBEE détectée depuis 14h22.
+</div>
+
+<div class="alert alert-success">
+✅ Réduction possible de 12 000 FCFA/mois.
+</div>
+
+<button onclick="generateAlert()">
+Générer une nouvelle alerte
+</button>
+
+<div id="newAlert"></div>
+
+</div>
+
+<script>
+
+if(localStorage.getItem('sensorConfigured')!=='true'){
+
+window.location.href='auth.html';
+
+}
+
+function generateAlert(){
+
+const alerts=[
+
+'⚠️ Nouvelle surtension détectée sur ET-BJ-002.',
+
+'⚡ Consommation anormale détectée cette nuit.',
+
+'🔋 Groupe électrogène actif depuis 5h.'
+
+];
+
+const random=alerts[Math.floor(Math.random()*alerts.length)];
+
+document.getElementById('newAlert').innerHTML=
+
+'<div class=\"alert alert-warning\">'+random+'</div>';
+
+}
+
+function logoutUser(){
+
+localStorage.clear();
+
+window.location.href='index.html';
+
+}
+
+</script>
+
+</body>
+</html>

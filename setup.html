@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Configuration Capteur EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<div style="min-height:100vh;background:#0b1220;padding:80px 8%;">
+
+<div style="max-width:700px;margin:auto;">
+
+<h1 style="font-size:48px;margin-bottom:20px;">
+
+Configuration du capteur EnergyTrack
+
+</h1>
+
+<p style="color:#94a3b8;line-height:1.8;margin-bottom:40px;">
+
+Votre capteur a été livré avec succès.
+
+Branchez votre appareil puis configurez-le.
+
+</p>
+
+<div style="background:#182235;padding:35px;border-radius:28px;">
+
+<h2 style="margin-bottom:25px;">
+
+Activation du capteur
+
+</h2>
+
+<input type="text"
+id="sensorCode"
+placeholder="Code capteur (ex: ET-BJ-001)">
+
+<input type="text"
+id="wifiName"
+placeholder="Nom réseau Wi-Fi (optionnel)">
+
+<input type="password"
+id="wifiPassword"
+placeholder="Mot de passe Wi-Fi">
+
+<select id="siteType">
+
+<option>Restaurant</option>
+
+<option>Hôtel</option>
+
+<option>Boutique</option>
+
+<option>Maison</option>
+
+<option>Usine</option>
+
+</select>
+
+<select id="energyMode">
+
+<option>Réseau SBEE</option>
+
+<option>Réseau + Groupe électrogène</option>
+
+<option>Solaire + Réseau</option>
+
+</select>
+
+<button onclick="configureSensor()">
+
+Configurer le capteur
+
+</button>
+
+<div id="configResult" style="margin-top:25px"></div>
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+function configureSensor(){
+
+const code=document.getElementById('sensorCode').value;
+
+if(code===''){
+
+alert('Veuillez entrer le code du capteur');
+
+return;
+
+}
+
+localStorage.setItem('sensorConfigured','true');
+
+localStorage.setItem('sensorCode',code);
+
+document.getElementById('configResult').innerHTML=`
+
+<div style="background:rgba(0,200,150,0.15);
+padding:20px;
+border-radius:18px;
+border:1px solid rgba(0,200,150,0.3);">
+
+✅ Capteur configuré avec succès.<br><br>
+
+Connexion MQTT établie.<br>
+
+Synchronisation cloud active.<br>
+
+Surveillance énergétique démarrée.
+
+</div>
+
+`;
+
+setTimeout(()=>{
+
+window.location.href='dashboard.html';
+
+},2500);
+
+}
+
+</script>
+
+</body>
+</html>
