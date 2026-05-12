@@ -553,13 +553,40 @@ function closeModal(){
 document.getElementById('authModal').style.display='none';
 }
 
-function completeSignup(){
+async function completeSignup(){
+
 const name=document.getElementById('name').value;
 const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
 
-if(name===''||email===''){
+if(name==='' || email==='' || password===''){
 alert('Veuillez remplir les informations.');
 return;
+}
+
+const { data, error } = await supabase.auth.signUp({
+email: email,
+password: password
+});
+
+if(error){
+alert(error.message);
+return;
+}
+
+localStorage.setItem('energytrackUser',JSON.stringify({
+name:name,
+email:email
+}));
+
+alert('Compte créé avec succès.');
+
+document.getElementById('paymentModal').style.display='flex';
+
+document.getElementById('paymentSensor').innerHTML=
+'Capteur : '+document.getElementById('selectedSensor').value;
+
+closeModal();
 }
 
 localStorage.setItem('energytrackUser',JSON.stringify({
