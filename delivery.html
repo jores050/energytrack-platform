@@ -61,6 +61,10 @@ Simuler livraison
 
 </section>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
 <script>
 
 window.onload=function(){
@@ -76,9 +80,57 @@ document.getElementById('deliverySensor').innerHTML=
 
 }
 
-function simulateDelivery(){
+async function simulateDelivery(){
 
-localStorage.setItem('deliveryStatus','delivered');
+/*
+UTILISATEUR CONNECTÉ
+*/
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+alert('Utilisateur non connecté.');
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId=userData.user.id;
+
+/*
+UPDATE SUPABASE
+*/
+
+const { error } =
+await supabaseClient
+.from('profiles')
+.update({
+
+delivery_status:'delivered'
+
+})
+.eq('id',userId);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+/*
+LOCAL STORAGE
+*/
+
+localStorage.setItem(
+'deliveryStatus',
+'delivered'
+);
 
 alert('Capteur livré avec succès.');
 
