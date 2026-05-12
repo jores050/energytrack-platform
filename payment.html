@@ -37,7 +37,25 @@ Paiement via MTN Mobile Money / Moov Money / Carte bancaire.
 <input type="text" placeholder="Nom complet">
 
 <input type="text" placeholder="Numéro Mobile Money">
+<select id="selectedSensor">
 
+<option value="">
+Choisir un capteur
+</option>
+
+<option value="Starter Home">
+Starter Home
+</option>
+
+<option value="Starter PME">
+Starter PME
+</option>
+
+<option value="Industrial Pro">
+Industrial Pro
+</option>
+
+</select>
 <select>
 <option>MTN Mobile Money</option>
 <option>Moov Money</option>
@@ -72,7 +90,20 @@ document.getElementById('paymentSensor').innerHTML=
 
 }
 
-function confirmPayment(){
+async function confirmPayment(){
+
+const sensor =
+document.getElementById('selectedSensor').value;
+
+if(sensor===''){
+
+alert('Veuillez sélectionner un capteur.');
+
+return;
+
+}
+
+localStorage.setItem('selectedSensor',sensor);
 
 localStorage.setItem('paymentStatus','paid');
 
