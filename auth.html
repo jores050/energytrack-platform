@@ -400,21 +400,16 @@ return;
 
 }
 
-localStorage.setItem('energytrackUser',
+const userId=data.user.id;
 
-JSON.stringify({
+const { data:profile } =
+await supabaseClient
+.from('profiles')
+.select('*')
+.eq('id',userId)
+.single();
 
-email:email
-
-})
-
-);
-
-/*
-Parcours utilisateur SaaS
-*/
-
-if(localStorage.getItem('sensorConfigured')==='true'){
+if(profile.sensor_configured===true){
 
 window.location.href='dashboard.html';
 
@@ -422,7 +417,7 @@ return;
 
 }
 
-if(localStorage.getItem('deliveryStatus')==='delivered'){
+if(profile.delivery_status==='delivered'){
 
 window.location.href='setup.html';
 
@@ -430,7 +425,7 @@ return;
 
 }
 
-if(localStorage.getItem('paymentStatus')==='paid'){
+if(profile.payment_status==='paid'){
 
 window.location.href='delivery.html';
 
@@ -438,7 +433,7 @@ return;
 
 }
 
-if(localStorage.getItem('selectedSensor')){
+if(profile.selected_sensor!==''){
 
 window.location.href='payment.html';
 
