@@ -602,7 +602,46 @@ document.getElementById('paymentSensor').innerHTML=
 
 closeModal();
 }
+async function loginUser(){
 
+const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
+
+if(email==='' || password===''){
+alert('Veuillez entrer votre email et mot de passe.');
+return;
+}
+
+const { data, error } = await supabaseClient.auth.signInWithPassword({
+email: email,
+password: password
+});
+
+if(error){
+alert('Email ou mot de passe incorrect.');
+return;
+}
+
+localStorage.setItem('energytrackUser',JSON.stringify({
+email:email
+}));
+
+alert('Connexion réussie.');
+
+closeModal();
+
+if(localStorage.getItem('sensorConfigured')==='true'){
+
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+
+}else{
+
+showOrderWaiting();
+
+}
+}
 function closePayment(){
 document.getElementById('paymentModal').style.display='none';
 }
