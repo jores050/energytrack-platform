@@ -520,7 +520,20 @@ Votre capteur a été livré avec succès. Branchez votre appareil puis configur
 </div>
 
 </div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script>
+
+const supabaseUrl = 'https://prvsatpdgybnevolzhhf.supabase.co';
+
+const supabaseKey = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
+
+const supabase = window.supabase.createClient(
+supabaseUrl,
+supabaseKey
+);
+
+</script>
 <script>
 function scrollToPricing(){
 document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
