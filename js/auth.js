@@ -1,3 +1,62 @@
+async function completeSignup(){
+
+const name=document.getElementById('name').value;
+
+const email=document.getElementById('email').value;
+
+const password=document.getElementById('password').value;
+
+if(name==='' || email==='' || password===''){
+
+alert('Veuillez remplir tous les champs.');
+
+return;
+
+}
+
+const { data, error } = await supabaseClient.auth.signUp({
+
+email:email,
+
+password:password
+
+});
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+/*
+CRÉATION PROFIL SUPABASE
+*/
+
+await supabaseClient
+.from('profiles')
+.insert([{
+
+id:data.user.id,
+
+email:email
+
+}]);
+
+localStorage.setItem('energytrackUser',JSON.stringify({
+
+name:name,
+
+email:email
+
+}));
+
+alert('Inscription réussie.');
+
+window.location.href='payment.html';
+
+}
 async function loginUser(){
 
 const email=document.getElementById('email').value;
