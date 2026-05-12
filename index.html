@@ -774,20 +774,20 @@ return;
 }
 
 if(delivery && !configured){
-document.getElementById('landingPage').style.display='none';
+document.getElementById('landingNavbar').style.display='none';
 document.getElementById('setupPage').style.display='block';
 return;
 }
 
 if(configured){
-document.getElementById('landingPage').style.display='none';
+document.getElementById('landingNavbar').style.display='none';
 document.querySelector('.sidebar').style.display='block';
 document.querySelector('.main').style.display='block';
 return;
 }
 
 if(user){
-document.getElementById('landingPage').style.display='none';
+document.getElementById('landingNavbar').style.display='none';
 document.querySelector('.sidebar').style.display='block';
 document.querySelector('.main').style.display='block';
 }else{
