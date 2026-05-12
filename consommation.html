@@ -151,21 +151,3 @@ document.getElementById('costResult').innerHTML=
 
 
 </script>
-window.onload = async function(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return;
-
-}
-
-console.log('Utilisateur connecté');
-
-}
-</body>
-</html>
