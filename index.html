@@ -65,6 +65,8 @@ background:#101826;
 padding:25px;
 border-right:1px solid rgba(255,255,255,0.05);
 z-index:100;
+overflow-y:auto;
+overflow-x:hidden;
 }
 .logo{
 font-family:'Orbitron',sans-serif;
@@ -216,6 +218,34 @@ width:100%;
 @media(max-width:900px){
 .sidebar{position:relative;width:100%;height:auto}
 .main{margin-left:0}
+}
+
+@media(max-width:768px){
+nav{
+flex-direction:column;
+gap:20px;
+padding:20px;
+}
+
+nav div:last-child{
+justify-content:center;
+}
+
+.title h1{
+font-size:26px;
+}
+
+.card-grid{
+grid-template-columns:1fr;
+}
+
+.section{
+padding:20px;
+}
+
+.main{
+padding:20px;
+}
 }
 </style>
 </head>
@@ -671,10 +701,14 @@ alert('Démonstration EnergyTrack en cours de préparation.');
 
 function showSignup(){
 document.getElementById('authModal').style.display='flex';
+document.querySelector('#authModal h2').innerHTML='Créer votre compte EnergyTrack';
+document.getElementById('selectedSensor').style.display='block';
 }
 
 function showLogin(){
 document.getElementById('authModal').style.display='flex';
+document.querySelector('#authModal h2').innerHTML='Connexion EnergyTrack';
+document.getElementById('selectedSensor').style.display='none';
 }
 
 function closeModal(){
@@ -776,15 +810,41 @@ alert('Vous devez être connecté et avoir configuré votre capteur pour accéde
 });
 
 window.onload=function(){
-const user=localStorage.getItem('energytrackUser');
 
+const user=localStorage.getItem('energytrackUser');
 const payment=localStorage.getItem('paymentStatus');
 const delivery=localStorage.getItem('deliveryStatus');
 const configured=localStorage.getItem('sensorConfigured');
 
+document.querySelector('.sidebar').style.display='none';
+document.querySelector('.main').style.display='none';
+
 if(payment && !delivery){
 showOrderWaiting();
 return;
+}
+
+if(delivery && !configured){
+document.getElementById('landingPage').style.display='none';
+document.getElementById('setupPage').style.display='block';
+return;
+}
+
+if(configured){
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+return;
+}
+
+if(user){
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+}else{
+document.querySelector('.sidebar').style.display='none';
+document.querySelector('.main').style.display='none';
+}
 }
 
 if(delivery && !configured){
