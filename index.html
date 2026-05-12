@@ -630,17 +630,54 @@ alert('Connexion réussie.');
 
 closeModal();
 
-if(localStorage.getItem('sensorConfigured')==='true'){
+const configured = localStorage.getItem('sensorConfigured');
+const payment = localStorage.getItem('paymentStatus');
+const delivery = localStorage.getItem('deliveryStatus');
+
+
+// UTILISATEUR AYANT DÉJÀ CONFIGURÉ LE CAPTEUR
+if(configured==='true'){
 
 document.getElementById('landingPage').style.display='none';
+
 document.querySelector('.sidebar').style.display='block';
+
 document.querySelector('.main').style.display='block';
 
-}else{
+document.getElementById('dashboard').classList.add('active');
+
+return;
+
+}
+
+
+// UTILISATEUR AYANT PAYÉ MAIS PAS ENCORE LIVRÉ
+if(payment && !delivery){
 
 showOrderWaiting();
 
+return;
+
 }
+
+
+// UTILISATEUR LIVRÉ MAIS PAS CONFIGURÉ
+if(delivery && configured!=='true'){
+
+document.getElementById('landingPage').style.display='none';
+
+document.getElementById('setupPage').style.display='block';
+
+return;
+
+}
+
+
+// UTILISATEUR CONNECTÉ SANS ACHAT
+alert('Aucun capteur associé à ce compte.');
+
+scrollToPricing();
+
 }
 function closePayment(){
 document.getElementById('paymentModal').style.display='none';
