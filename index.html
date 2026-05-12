@@ -1,23 +1,36 @@
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>EnergyTrack Platform</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="js/app.js"></script>
-
-</head>
-
 <body>
+
+<div class="background-glow"></div>
+
+<nav class="navbar">
+
+<div class="logo">
+Energy<span>Track</span>
+</div>
+
+<div class="nav-links">
+
+<a href="#pricing">
+Capteurs
+</a>
+
+<a href="#">
+Fonctionnalités
+</a>
+
+<a href="#">
+IA Énergétique
+</a>
+
+<button onclick="window.location.href='auth.html'">
+
+Connexion
+
+</button>
+
+</div>
+
+</nav>
 
 <section style="min-height:100vh;padding:80px 8%;display:flex;align-items:center;justify-content:center;">
 
@@ -40,11 +53,8 @@ Plateforme intelligente de monitoring énergétique
 
 </div>
 
-<h1 style="
-font-size:65px;
-line-height:1.1;
+<h1 class="hero-title" style="
 margin-bottom:25px;
-font-family:'Orbitron',sans-serif;
 ">
 
 Optimisez votre énergie avec
@@ -220,11 +230,7 @@ grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
 gap:25px;
 ">
 
-<div style="
-background:#182235;
-padding:35px;
-border-radius:28px;
-">
+<div class="card">
 
 <h3 style="margin-bottom:15px;">
 Starter Home
@@ -306,11 +312,7 @@ Acheter
 
 </div>
 
-<div style="
-background:#182235;
-padding:35px;
-border-radius:28px;
-">
+<div class="card">
 
 <h3 style="margin-bottom:15px;">
 Industrial Pro
@@ -438,4 +440,3 @@ color:#94a3b8;
 </footer>
 
 </body>
-</html>
