@@ -521,6 +521,20 @@ Votre capteur a été livré avec succès. Branchez votre appareil puis configur
 
 </div>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script>
+
+const supabaseUrl = 'https://prvsatpdgybnevolzhhf.supabase.co';
+
+const supabaseKey = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
+
+const supabase = window.supabase.createClient(
+supabaseUrl,
+supabaseKey
+);
+
+</script>
 <script>
 function scrollToPricing(){
 document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
@@ -540,29 +554,40 @@ function closeModal(){
 document.getElementById('authModal').style.display='none';
 }
 
-function completeSignup(){
+async function completeSignup(){
+
 const name=document.getElementById('name').value;
 const email=document.getElementById('email').value;
+const password=document.getElementById('password').value;
 
-if(name===''||email===''){
+if(name==='' || email==='' || password===''){
 alert('Veuillez remplir les informations.');
+return;
+}
+
+const { data, error } = await supabase.auth.signUp({
+email: email,
+password: password
+});
+
+if(error){
+alert(error.message);
 return;
 }
 
 localStorage.setItem('energytrackUser',JSON.stringify({
 name:name,
-email:email,
-sensor:document.getElementById('selectedSensor').value
+email:email
 }));
 
+alert('Compte créé avec succès.');
+
 document.getElementById('paymentModal').style.display='flex';
-document.getElementById('paymentSensor').innerHTML='Capteur : '+document.getElementById('selectedSensor').value;
+
+document.getElementById('paymentSensor').innerHTML=
+'Capteur : '+document.getElementById('selectedSensor').value;
 
 closeModal();
-
-document.getElementById('landingPage').style.display='none';
-document.querySelector('.sidebar').style.display='block';
-document.querySelector('.main').style.display='block';
 }
 
 function closePayment(){
