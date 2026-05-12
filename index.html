@@ -353,6 +353,7 @@ Votre capteur a été livré avec succès. Branchez votre appareil puis configur
 <div class="nav-item" onclick="showPage('capteurs',this)">📡 Capteurs IoT</div>
 <div class="nav-item" onclick="showPage('ia',this)">🤖 Analyse IA</div>
 <div class="nav-item" onclick="showPage('parametres',this)">⚙️ Paramètres</div>
+<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
 </div>
 
 <div class="main">
@@ -769,6 +770,18 @@ const analyses=[
 ];
 const result=analyses[Math.floor(Math.random()*analyses.length)];
 document.getElementById('aiResult').innerHTML='<div class="alert alert-success">'+result+'</div>';
+}
+
+function logoutUser(){
+localStorage.removeItem('energytrackUser');
+localStorage.removeItem('paymentStatus');
+localStorage.removeItem('deliveryStatus');
+localStorage.removeItem('sensorConfigured');
+localStorage.removeItem('sensorCode');
+
+alert('Déconnexion effectuée.');
+
+window.location.reload();
 }
 
 function saveSettings(){
