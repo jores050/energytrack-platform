@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="fr">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="js/supabase.js"></script>
 <head>
 
 <meta charset="UTF-8">
@@ -135,12 +137,6 @@ Calculer le coût
 
 <script>
 
-if(localStorage.getItem('sensorConfigured')!=='true'){
-
-window.location.href='auth.html';
-
-}
-
 function calculateCost(){
 
 const kwh=document.getElementById('kwhInput').value;
@@ -152,15 +148,24 @@ document.getElementById('costResult').innerHTML=
 
 }
 
-function logoutUser(){
 
-localStorage.clear();
 
-window.location.href='index.html';
+</script>
+window.onload = async function(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
 
 }
 
-</script>
+console.log('Utilisateur connecté');
 
+}
 </body>
 </html>
