@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>EnergyTrack Platform</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+font-family:'Poppins',sans-serif;
+background:#0b1220;
+color:#fff;
+overflow-x:hidden;
+}
+:root{
+--primary:#00c896;
+--secondary:#00aeef;
+--card:#182235;
+--dark:#101826;
+--danger:#ff4c61;
+--warning:#ffb547;
+--text:#e6edf7;
+--muted:#94a3b8;
+}
+.sidebar{
+position:fixed;
+left:0;
+top:0;
+width:260px;
+height:100vh;
+background:#101826;
+padding:25px;
+border-right:1px solid rgba(255,255,255,0.05);
+z-index:100;
+overflow-y:auto;
+}
+.logo{
+font-family:'Orbitron',sans-serif;
+font-size:28px;
+color:var(--primary);
+margin-bottom:35px;
+}
+.logo span{color:#fff}
+.nav-item{
+padding:15px;
+border-radius:14px;
+margin-bottom:12px;
+cursor:pointer;
+transition:0.3s;
+color:var(--muted);
+}
+.nav-item:hover,.nav-item.active{
+background:rgba(0,200,150,0.15);
+color:#fff;
+}
+.main{
+margin-left:260px;
+padding:30px;
+}
+.page{display:none}
+.page.active{display:block}
+.topbar{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+}
+.title h1{font-size:32px}
+.title p{color:var(--muted)}
+.card-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:20px;
+margin-bottom:25px;
+}
+.card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:22px;
+border:1px solid rgba(255,255,255,0.05);
+}
+.card-title{color:var(--muted);margin-bottom:12px}
+.card-value{font-size:30px;font-weight:700}
+.green{color:var(--primary)}
+.red{color:var(--danger)}
+.orange{color:var(--warning)}
+.section{
+background:var(--card);
+padding:25px;
+border-radius:22px;
+margin-bottom:25px;
+}
+.section h2{margin-bottom:20px}
+button{
+background:linear-gradient(135deg,var(--primary),var(--secondary));
+border:none;
+padding:14px 18px;
+border-radius:14px;
+color:#fff;
+font-weight:600;
+cursor:pointer;
+margin-top:15px;
+}
+button:hover{opacity:0.9}
+input,select,textarea{
+width:100%;
+padding:14px;
+border:none;
+border-radius:12px;
+background:#0f1729;
+color:#fff;
+margin-top:10px;
+margin-bottom:15px;
+}
+.table{
+width:100%;
+border-collapse:collapse;
+}
+.table th,.table td{
+padding:16px;
+text-align:left;
+border-bottom:1px solid rgba(255,255,255,0.05)
+}
+.status{
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+}
+.online{
+background:rgba(0,200,150,0.15);
+color:var(--primary)
+}
+.offline{
+background:rgba(255,76,97,0.15);
+color:var(--danger)
+}
+.alert{
+padding:16px;
+border-radius:16px;
+margin-bottom:15px;
+}
+.alert-danger{
+background:rgba(255,76,97,0.15);
+border:1px solid rgba(255,76,97,0.2)
+}
+.alert-warning{
+background:rgba(255,181,71,0.15);
+border:1px solid rgba(255,181,71,0.2)
+}
+.alert-success{
+background:rgba(0,200,150,0.15);
+border:1px solid rgba(0,200,150,0.2)
+}
+.flex{
+display:flex;
+gap:20px;
+flex-wrap:wrap;
+}
+.flex .section{flex:1}
+.site-card{
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+margin-bottom:15px;
+}
+@media(max-width:900px){
+.sidebar{position:relative;width:100%;height:auto}
+.main{margin-left:0}
+}
+</style>
+</head>
+<body>
+
+<div id="landingPage" style="min-height:100vh;background:linear-gradient(135deg,#08111f,#101826);display:block;">
+
+<section style="padding:80px 8%;display:flex;align-items:center;justify-content:space-between;gap:50px;flex-wrap:wrap;min-height:100vh;">
+
+<div style="flex:1;min-width:320px;">
+<div style="font-family:'Orbitron',sans-serif;font-size:52px;line-height:1.2;margin-bottom:25px;">
+<span style="color:#00c896">Energy</span>Track
+</div>
+
+<h1 style="font-size:48px;line-height:1.2;margin-bottom:20px;max-width:700px;">
+La plateforme intelligente de gestion énergétique pour l'Afrique.
+</h1>
+
+<p style="font-size:18px;color:#94a3b8;line-height:1.8;max-width:650px;margin-bottom:30px;">
+Surveillez votre consommation électrique en temps réel, détectez les pertes invisibles, recevez des alertes intelligentes et économisez jusqu'à plusieurs dizaines de milliers de FCFA par mois grâce aux capteurs IoT EnergyTrack.
+</p>
+
+<div style="display:flex;gap:20px;flex-wrap:wrap;">
+<button onclick="scrollToPricing()" style="padding:18px 30px;font-size:16px;">Acheter un capteur</button>
+<button onclick="showLogin()" style="padding:18px 30px;font-size:16px;background:#182235;">Connexion Client</button>
+</div>
+</div>
+
+<div style="flex:1;min-width:320px;">
+<div style="background:linear-gradient(145deg,#182235,#101826);padding:35px;border-radius:30px;border:1px solid rgba(255,255,255,0.05);box-shadow:0 20px 60px rgba(0,0,0,0.4);">
+<h2 style="margin-bottom:25px;font-size:28px;">Aperçu EnergyTrack</h2>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+<div style="background:#0f1729;padding:20px;border-radius:18px;">
+<p style="color:#94a3b8">Facture estimée</p>
+<h3 style="margin-top:10px">47 200 FCFA</h3>
+</div>
+<div style="background:#0f1729;padding:20px;border-radius:18px;">
+<p style="color:#94a3b8">Économie possible</p>
+<h3 style="margin-top:10px;color:#00c896">12 400 FCFA</h3>
+</div>
+<div style="background:#0f1729;padding:20px;border-radius:18px;">
+<p style="color:#94a3b8">Sites actifs</p>
+<h3 style="margin-top:10px">12</h3>
+</div>
+<div style="background:#0f1729;padding:20px;border-radius:18px;">
+<p style="color:#94a3b8">Alertes IA</p>
+<h3 style="margin-top:10px;color:#ffb547">3</h3>
+</div>
+</div>
+</div>
+</div>
+
+</section>
+
+<section id="pricing" style="padding:80px 8%;background:#0d1626;">
+<h2 style="font-size:42px;margin-bottom:15px;text-align:center;">Choisissez votre capteur</h2>
+<p style="color:#94a3b8;text-align:center;margin-bottom:50px;">Déployable sans Wi-Fi grâce à la SIM GSM embarquée.</p>
+
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:25px;">
+
+<div style="background:#182235;padding:35px;border-radius:25px;border:1px solid rgba(255,255,255,0.05);">
+<h3 style="font-size:28px;margin-bottom:10px;">Starter PME</h3>
+<p style="color:#94a3b8;margin-bottom:25px;">Monitoring monophasé intelligent</p>
+<h1 style="font-size:48px;margin-bottom:20px;">45 000 FCFA</h1>
+<ul style="line-height:2;color:#cbd5e1;list-style:none;">
+<li>✔ Monitoring temps réel</li>
+<li>✔ Alertes WhatsApp</li>
+<li>✔ Dashboard SaaS</li>
+<li>✔ Analyse IA basique</li>
+</ul>
+<button onclick="buySensor('Starter PME')">Acheter</button>
+</div>
+
+<div style="background:linear-gradient(145deg,#00c89622,#182235);padding:35px;border-radius:25px;border:1px solid #00c896;position:relative;">
+<div style="position:absolute;top:15px;right:15px;background:#00c896;color:#08111f;padding:8px 14px;border-radius:999px;font-size:12px;font-weight:700;">POPULAIRE</div>
+<h3 style="font-size:28px;margin-bottom:10px;">Business Pro</h3>
+<p style="color:#94a3b8;margin-bottom:25px;">Pour hôtels et restaurants</p>
+<h1 style="font-size:48px;margin-bottom:20px;">65 000 FCFA</h1>
+<ul style="line-height:2;color:#cbd5e1;list-style:none;">
+<li>✔ Multi-sites</li>
+<li>✔ Rapports automatiques</li>
+<li>✔ IA avancée</li>
+<li>✔ Monitoring groupe électrogène</li>
+</ul>
+<button onclick="buySensor('Business Pro')">Acheter</button>
+</div>
+
+</div>
+</section>
+
+<section style="padding:80px 8%;">
+<h2 style="font-size:42px;text-align:center;margin-bottom:50px;">Comment ça fonctionne ?</h2>
+<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:25px;">
+<div style="background:#182235;padding:30px;border-radius:24px;">
+<h3 style="margin-bottom:15px;">1. Installation</h3>
+<p style="color:#94a3b8;line-height:1.8;">Le technicien installe le capteur IoT sur votre tableau électrique.</p>
+</div>
+<div style="background:#182235;padding:30px;border-radius:24px;">
+<h3 style="margin-bottom:15px;">2. Transmission</h3>
+<p style="color:#94a3b8;line-height:1.8;">Les données sont envoyées automatiquement via GSM/4G.</p>
+</div>
+<div style="background:#182235;padding:30px;border-radius:24px;">
+<h3 style="margin-bottom:15px;">3. Analyse IA</h3>
+<p style="color:#94a3b8;line-height:1.8;">EnergyTrack détecte les pertes et recommande des économies.</p>
+</div>
+<div style="background:#182235;padding:30px;border-radius:24px;">
+<h3 style="margin-bottom:15px;">4. Économies</h3>
+<p style="color:#94a3b8;line-height:1.8;">Recevez vos rapports énergétiques en FCFA et réduisez vos coûts.</p>
+</div>
+</div>
+</section>
+
+</div>
+
+<div id="paymentModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.8);display:none;align-items:center;justify-content:center;z-index:999;">
+<div style="width:95%;max-width:600px;background:#182235;padding:35px;border-radius:30px;">
+<h2 style="margin-bottom:25px;">Paiement sécurisé EnergyTrack</h2>
+<div style="background:#0f1729;padding:20px;border-radius:18px;margin-bottom:20px;">
+<h3 id="paymentSensor">Capteur : Starter PME</h3>
+<p style="margin-top:10px;color:#94a3b8;">Paiement via MTN Mobile Money / Moov Money / Carte bancaire.</p>
+</div>
+<input type="text" placeholder="Nom complet">
+<input type="text" placeholder="Numéro Mobile Money">
+<select>
+<option>MTN Mobile Money</option>
+<option>Moov Money</option>
+<option>Carte bancaire</option>
+</select>
+<button onclick="confirmPayment()" style="width:100%;">Confirmer le paiement</button>
+<button onclick="closePayment()" style="width:100%;background:#0f1729;margin-top:10px;">Annuler</button>
+</div>
+</div>
+
+<div id="setupPage" style="display:none;min-height:100vh;background:#0b1220;padding:80px 8%;">
+<div style="max-width:700px;margin:auto;">
+<h1 style="font-size:48px;margin-bottom:20px;">Configuration du capteur EnergyTrack</h1>
+<p style="color:#94a3b8;line-height:1.8;margin-bottom:40px;">
+Votre capteur a été livré avec succès. Branchez votre appareil puis configurez-le.
+</p>
+<div style="background:#182235;padding:35px;border-radius:28px;">
+<h2 style="margin-bottom:25px;">Activation du capteur</h2>
+<input type="text" id="sensorCode" placeholder="Code capteur (ex: ET-BJ-001)">
+<input type="text" id="wifiName" placeholder="Nom réseau Wi-Fi (optionnel)">
+<input type="password" id="wifiPassword" placeholder="Mot de passe Wi-Fi">
+<select id="siteType">
+<option>Restaurant</option>
+<option>Hôtel</option>
+<option>Boutique</option>
+<option>Maison</option>
+<option>Usine</option>
+</select>
+<select id="energyMode">
+<option>Réseau SBEE</option>
+<option>Réseau + Groupe électrogène</option>
+<option>Solaire + Réseau</option>
+</select>
+<button onclick="configureSensor()">Configurer le capteur</button>
+<div id="configResult" style="margin-top:25px"></div>
+</div>
+</div>
+</div>
+
+<div id="authModal" style="position:fixed;inset:0;background:rgba(0,0,0,0.7);display:none;align-items:center;justify-content:center;z-index:999;">
+<div style="width:95%;max-width:500px;background:#182235;padding:35px;border-radius:30px;">
+<h2 style="margin-bottom:25px;">Créer votre compte EnergyTrack</h2>
+<input type="text" id="name" placeholder="Nom complet">
+<input type="email" id="email" placeholder="Adresse email">
+<input type="password" id="password" placeholder="Mot de passe">
+<input type="text" id="company" placeholder="Nom entreprise">
+<input type="text" id="selectedSensor" placeholder="Capteur choisi" readonly>
+<button onclick="completeSignup()" style="width:100%;">Finaliser l'inscription</button>
+<button onclick="closeModal()" style="width:100%;background:#0f1729;margin-top:10px;">Annuler</button>
+</div>
+</div>
+
+<div class="sidebar">
+<div class="logo">Energy<span>Track</span></div>
+<div class="nav-item active" onclick="showPage('dashboard',this)">🏠 Dashboard</div>
+<div class="nav-item" onclick="showPage('consommation',this)">⚡ Consommation</div>
+<div class="nav-item" onclick="showPage('alertes',this)">🔔 Alertes</div>
+<div class="nav-item" onclick="showPage('rapports',this)">📊 Rapports</div>
+<div class="nav-item" onclick="showPage('sites',this)">🏢 Multi-sites</div>
+<div class="nav-item" onclick="showPage('capteurs',this)">📡 Capteurs IoT</div>
+<div class="nav-item" onclick="showPage('ia',this)">🤖 Analyse IA</div>
+<div class="nav-item" onclick="showPage('parametres',this)">⚙️ Paramètres</div>
+<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
+</div>
+
+<div class="main">
+
+<div id="dashboard" class="page active">
+<div class="topbar">
+<div class="title">
+<h1>Dashboard Énergétique</h1>
+<p>Monitoring temps réel des installations électriques</p>
+</div>
+</div>
+
+<div class="card-grid">
+<div class="card">
+<div class="card-title">Facture estimée</div>
+<div class="card-value" id="facture">47 200 FCFA</div>
+</div>
+
+<div class="card">
+<div class="card-title">Économie estimée</div>
+<div class="card-value green">12 400 FCFA</div>
+</div>
+
+<div class="card">
+<div class="card-title">Groupe électrogène</div>
+<div class="card-value orange">18h</div>
+</div>
+
+<div class="card">
+<div class="card-title">État réseau SBEE</div>
+<div class="card-value red">Coupure détectée</div>
+</div>
+</div>
+
+<div class="section">
+<h2>Consommation hebdomadaire</h2>
+<canvas id="chart"></canvas>
+</div>
+</div>
+
+<div id="consommation" class="page">
+<h1 style="margin-bottom:20px">Consommation Énergétique</h1>
+<div class="flex">
+<div class="section">
+<h2>Historique</h2>
+<table class="table">
+<tr><th>Jour</th><th>kWh</th><th>Coût</th></tr>
+<tr><td>Lundi</td><td>12 kWh</td><td>1 092 FCFA</td></tr>
+<tr><td>Mardi</td><td>19 kWh</td><td>1 729 FCFA</td></tr>
+<tr><td>Mercredi</td><td>15 kWh</td><td>1 365 FCFA</td></tr>
+<tr><td>Jeudi</td><td>22 kWh</td><td>2 002 FCFA</td></tr>
+</table>
+</div>
+
+<div class="section">
+<h2>Calculateur</h2>
+<input type="number" id="kwhInput" placeholder="Entrer les kWh">
+<button onclick="calculateCost()">Calculer le coût</button>
+<p id="costResult" style="margin-top:20px"></p>
+</div>
+</div>
+</div>
+
+<div id="alertes" class="page">
+<h1 style="margin-bottom:20px">Alertes Intelligentes</h1>
+<div class="alert alert-danger">⚠️ Surconsommation détectée dans le bâtiment principal.</div>
+<div class="alert alert-warning">⚡ Coupure SBEE détectée depuis 14h22.</div>
+<div class="alert alert-success">✅ Réduction possible de 12 000 FCFA/mois.</div>
+<button onclick="generateAlert()">Générer une nouvelle alerte</button>
+<div id="newAlert"></div>
+</div>
+
+<div id="rapports" class="page">
+<h1 style="margin-bottom:20px">Rapports</h1>
+<div class="section">
+<h2>Rapport WhatsApp</h2>
+<p>Envoyer automatiquement les statistiques énergétiques hebdomadaires.</p>
+<button onclick="sendReport()">Envoyer le rapport</button>
+<p id="reportStatus" style="margin-top:20px"></p>
+</div>
+
+<div class="section">
+<h2>Exporter les données</h2>
+<button onclick="downloadCSV()">Télécharger CSV</button>
+</div>
+</div>
+
+<div id="sites" class="page">
+<h1 style="margin-bottom:20px">Gestion Multi-sites</h1>
+<div class="site-card">
+<h3>Restaurant Akpakpa</h3>
+<p>Puissance : 3.2 kW</p>
+<p>Statut : ONLINE</p>
+</div>
+<div class="site-card">
+<h3>Hôtel Fidjrossè</h3>
+<p>Puissance : 4.8 kW</p>
+<p>Statut : ONLINE</p>
+</div>
+<div class="site-card">
+<h3>Boutique Ganhi</h3>
+<p>Puissance : 0 kW</p>
+<p>Statut : OFFLINE</p>
+</div>
+</div>
+
+<div id="capteurs" class="page">
+<h1 style="margin-bottom:20px">Capteurs IoT</h1>
+<table class="table">
+<tr>
+<th>ID</th>
+<th>Tension</th>
+<th>Courant</th>
+<th>Statut</th>
+</tr>
+<tr>
+<td>ET-BJ-001</td>
+<td>221V</td>
+<td>12A</td>
+<td><span class="status online">ONLINE</span></td>
+</tr>
+<tr>
+<td>ET-BJ-002</td>
+<td>208V</td>
+<td>17A</td>
+<td><span class="status online">ONLINE</span></td>
+</tr>
+<tr>
+<td>ET-BJ-003</td>
+<td>0V</td>
+<td>0A</td>
+<td><span class="status offline">OFFLINE</span></td>
+</tr>
+</table>
+</div>
+
+<div id="ia" class="page">
+<h1 style="margin-bottom:20px">Analyse IA</h1>
+<div class="section">
+<h2>Conseils intelligents</h2>
+<p>• Votre climatiseur principal consomme 28% de plus après 22h.</p>
+<p>• Réduction possible : 7 500 FCFA/mois.</p>
+<p>• Le groupe électrogène tourne inutilement 4h chaque nuit.</p>
+<button onclick="generateAI()">Générer une analyse</button>
+<div id="aiResult" style="margin-top:20px"></div>
+</div>
+</div>
+
+<div id="parametres" class="page">
+<h1 style="margin-bottom:20px">Paramètres</h1>
+<div class="section">
+<h2>Configuration utilisateur</h2>
+<input type="text" placeholder="Nom entreprise">
+<input type="email" placeholder="Email">
+<select>
+<option>Tarif SBEE 91 FCFA/kWh</option>
+<option>Tarif Groupe 350 FCFA/kWh</option>
+</select>
+<textarea placeholder="Description"></textarea>
+<button onclick="saveSettings()">Enregistrer</button>
+<p id="saveMessage" style="margin-top:20px"></p>
+</div>
+</div>
+
+</div>
+
+<script>
+function scrollToPricing(){
+document.getElementById('pricing').scrollIntoView({behavior:'smooth'});
+}
+
+function buySensor(sensor){
+localStorage.setItem('selectedSensor',sensor);
+document.getElementById('authModal').style.display='flex';
+document.getElementById('selectedSensor').value=sensor;
+}
+
+function showLogin(){
+document.getElementById('authModal').style.display='flex';
+}
+
+function closeModal(){
+document.getElementById('authModal').style.display='none';
+}
+
+function completeSignup(){
+const name=document.getElementById('name').value;
+const email=document.getElementById('email').value;
+
+if(name===''||email===''){
+alert('Veuillez remplir les informations.');
+return;
+}
+
+localStorage.setItem('energytrackUser',JSON.stringify({
+name:name,
+email:email,
+sensor:document.getElementById('selectedSensor').value
+}));
+
+document.getElementById('paymentModal').style.display='flex';
+document.getElementById('paymentSensor').innerHTML='Capteur : '+document.getElementById('selectedSensor').value;
+
+closeModal();
+
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+}
+
+function closePayment(){
+document.getElementById('paymentModal').style.display='none';
+}
+
+function confirmPayment(){
+localStorage.setItem('paymentStatus','paid');
+alert('Paiement confirmé. Votre commande a été enregistrée.');
+closePayment();
+closeModal();
+showOrderWaiting();
+}
+
+function showOrderWaiting(){
+document.getElementById('landingPage').innerHTML=`
+<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+<div style="max-width:700px;text-align:center;background:#182235;padding:50px;border-radius:35px;">
+<div style="font-size:90px;margin-bottom:20px;">📦</div>
+<h1 style="font-size:42px;margin-bottom:20px;">Commande effectuée avec succès</h1>
+<p style="color:#94a3b8;line-height:1.8;font-size:18px;">
+Votre capteur EnergyTrack est en préparation. Veuillez patienter pendant la livraison.
+</p>
+<div style="margin-top:35px;background:#0f1729;padding:20px;border-radius:20px;">
+<p>Statut : <span style="color:#ffb547">En attente de livraison</span></p>
+<p style="margin-top:10px">Capteur : ${localStorage.getItem('selectedSensor')}</p>
+</div>
+<button onclick="simulateDelivery()" style="margin-top:30px;">Simuler livraison</button>
+</div>
+</section>
+`;
+}
+
+function simulateDelivery(){
+localStorage.setItem('deliveryStatus','delivered');
+document.getElementById('landingPage').style.display='none';
+document.getElementById('setupPage').style.display='block';
+}
+
+function configureSensor(){
+const code=document.getElementById('sensorCode').value;
+if(code===''){
+alert('Veuillez entrer le code du capteur');
+return;
+}
+localStorage.setItem('sensorConfigured','true');
+localStorage.setItem('sensorCode',code);
+document.getElementById('configResult').innerHTML=`
+<div style="background:rgba(0,200,150,0.15);padding:20px;border-radius:18px;border:1px solid rgba(0,200,150,0.3);">
+✅ Capteur configuré avec succès.<br><br>
+Connexion MQTT établie.<br>
+Synchronisation cloud active.<br>
+Surveillance énergétique démarrée.
+</div>
+`;
+setTimeout(()=>{
+document.getElementById('setupPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+document.getElementById('dashboard').classList.add('active');
+},2500);
+}
+
+document.querySelectorAll('.nav-item').forEach(item=>{
+item.addEventListener('click',()=>{
+if(!isAuthenticated()){
+alert('Vous devez être connecté et avoir configuré votre capteur pour accéder au dashboard EnergyTrack.');
+}
+});
+});
+
+window.onload=function(){
+const user=localStorage.getItem('energytrackUser');
+
+const payment=localStorage.getItem('paymentStatus');
+const delivery=localStorage.getItem('deliveryStatus');
+const configured=localStorage.getItem('sensorConfigured');
+
+if(payment && !delivery){
+showOrderWaiting();
+return;
+}
+
+if(delivery && !configured){
+document.getElementById('landingPage').style.display='none';
+document.getElementById('setupPage').style.display='block';
+return;
+}
+
+if(configured){
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+return;
+}
+
+if(user){
+document.getElementById('landingPage').style.display='none';
+document.querySelector('.sidebar').style.display='block';
+document.querySelector('.main').style.display='block';
+}else{
+document.querySelector('.sidebar').style.display='none';
+document.querySelector('.main').style.display='none';
+
+const protectedSections=['dashboard','consommation','alertes','rapports','sites','capteurs','ia','parametres'];
+
+protectedSections.forEach(section=>{
+const element=document.getElementById(section);
+if(element){
+element.innerHTML=`
+<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+<div style="max-width:700px;background:#182235;padding:50px;border-radius:35px;text-align:center;">
+<div style="font-size:90px;margin-bottom:20px;">🔒</div>
+<h1 style="font-size:42px;margin-bottom:20px;">Accès réservé aux clients EnergyTrack</h1>
+<p style="color:#94a3b8;line-height:1.8;font-size:18px;">
+Veuillez créer un compte, acheter un capteur et terminer la configuration pour accéder au monitoring énergétique.
+</p>
+<button onclick="location.reload()" style="margin-top:30px;">Retour accueil</button>
+</div>
+</div>
+`;
+}
+});
+}
+}
+
+function isAuthenticated(){
+return localStorage.getItem('sensorConfigured')==='true';
+}
+
+function protectAccess(){
+if(!isAuthenticated()){
+alert('Accès refusé. Veuillez acheter, configurer et activer votre capteur EnergyTrack.');
+return false;
+}
+return true;
+}
+
+function showPage(id,el){
+if(!protectAccess()) return;
+document.querySelectorAll('.page').forEach(page=>page.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+document.querySelectorAll('.nav-item').forEach(nav=>nav.classList.remove('active'));
+el.classList.add('active');
+}
+
+const ctx=document.getElementById('chart');
+new Chart(ctx,{
+type:'line',
+data:{
+labels:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+datasets:[{
+label:'Consommation kWh',
+data:[12,19,15,22,18,14,25],
+borderColor:'#00c896',
+backgroundColor:'rgba(0,200,150,0.1)',
+fill:true,
+tension:0.4
+}]
+},
+options:{
+responsive:true,
+plugins:{legend:{labels:{color:'white'}}},
+scales:{
+x:{ticks:{color:'white'},grid:{color:'rgba(255,255,255,0.05)'}},
+y:{ticks:{color:'white'},grid:{color:'rgba(255,255,255,0.05)'}}
+}
+}
+});
+
+function calculateCost(){
+const kwh=document.getElementById('kwhInput').value;
+const cost=kwh*91;
+document.getElementById('costResult').innerHTML='Coût estimé : '+cost.toLocaleString()+' FCFA';
+}
+
+function generateAlert(){
+const alerts=[
+'⚠️ Nouvelle surtension détectée sur ET-BJ-002.',
+'⚡ Consommation anormale détectée cette nuit.',
+'🔋 Groupe électrogène actif depuis 5h.'
+];
+const random=alerts[Math.floor(Math.random()*alerts.length)];
+document.getElementById('newAlert').innerHTML='<div class="alert alert-warning">'+random+'</div>';
+}
+
+function sendReport(){
+document.getElementById('reportStatus').innerHTML='✅ Rapport WhatsApp envoyé avec succès.';
+}
+
+function downloadCSV(){
+const csv='Jour,kWh,FCFA\nLundi,12,1092\nMardi,19,1729';
+const blob=new Blob([csv],{type:'text/csv'});
+const url=window.URL.createObjectURL(blob);
+const a=document.createElement('a');
+a.href=url;
+a.download='energytrack-report.csv';
+a.click();
+}
+
+function generateAI(){
+const analyses=[
+'IA : Votre site peut économiser 18% en réduisant la climatisation nocturne.',
+'IA : Les pics de consommation apparaissent entre 18h et 22h.',
+'IA : Le bâtiment principal montre une dérive de consommation de 12%.'
+];
+const result=analyses[Math.floor(Math.random()*analyses.length)];
+document.getElementById('aiResult').innerHTML='<div class="alert alert-success">'+result+'</div>';
+}
+
+function logoutUser(){
+localStorage.removeItem('energytrackUser');
+localStorage.removeItem('paymentStatus');
+localStorage.removeItem('deliveryStatus');
+localStorage.removeItem('sensorConfigured');
+localStorage.removeItem('sensorCode');
+
+alert('Déconnexion effectuée.');
+
+window.location.reload();
+}
+
+function saveSettings(){
+document.getElementById('saveMessage').innerHTML='✅ Paramètres enregistrés avec succès.';
+}
+
+setInterval(()=>{
+const random=Math.floor(Math.random()*10000)+40000;
+document.getElementById('facture').innerHTML=random.toLocaleString()+' FCFA';
+},5000);
+</script>
+
+</body>
+</html>
