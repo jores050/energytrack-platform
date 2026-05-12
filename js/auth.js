@@ -1,49 +1,3 @@
-async function completeSignup(){
-
-const name=document.getElementById('name').value;
-
-const email=document.getElementById('email').value;
-
-const password=document.getElementById('password').value;
-
-if(name==='' || email==='' || password===''){
-
-alert('Veuillez remplir tous les champs.');
-
-return;
-
-}
-
-const { data, error } = await supabaseClient.auth.signUp({
-
-email:email,
-
-password:password
-
-});
-
-if(error){
-
-alert(error.message);
-
-return;
-
-}
-
-localStorage.setItem('energytrackUser',JSON.stringify({
-
-name:name,
-
-email:email
-
-}));
-
-alert('Inscription réussie.');
-
-window.location.href='payment.html';
-
-}
-
 async function loginUser(){
 
 const email=document.getElementById('email').value;
@@ -52,7 +6,7 @@ const password=document.getElementById('password').value;
 
 if(email==='' || password===''){
 
-alert('Veuillez entrer vos informations.');
+alert('Veuillez entrer votre email et mot de passe.');
 
 return;
 
@@ -61,7 +15,6 @@ return;
 const { data, error } = await supabaseClient.auth.signInWithPassword({
 
 email:email,
-
 password:password
 
 });
@@ -80,6 +33,10 @@ email:email
 
 }));
 
+/*
+PARCOURS UTILISATEUR
+*/
+
 if(localStorage.getItem('sensorConfigured')==='true'){
 
 window.location.href='dashboard.html';
@@ -88,7 +45,7 @@ return;
 
 }
 
-if(localStorage.getItem('deliveryStatus')){
+if(localStorage.getItem('deliveryStatus')==='delivered'){
 
 window.location.href='setup.html';
 
@@ -96,7 +53,7 @@ return;
 
 }
 
-if(localStorage.getItem('paymentStatus')){
+if(localStorage.getItem('paymentStatus')==='paid'){
 
 window.location.href='delivery.html';
 
@@ -104,21 +61,24 @@ return;
 
 }
 
-const selectedSensor = localStorage.getItem('selectedSensor');
-
-if(selectedSensor){
+if(localStorage.getItem('selectedSensor')){
 
 window.location.href='payment.html';
 
-}else{
+return;
 
-alert('Veuillez choisir un capteur.');
+}
+
+/*
+NOUVEL UTILISATEUR
+*/
+
+alert('Aucun capteur associé à ce compte.');
 
 window.location.href='index.html';
 
 }
 
-}
 
 async function resetPassword(){
 
