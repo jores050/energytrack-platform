@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Paiement EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+</head>
+
+<body>
+
+<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
+
+<div style="width:100%;max-width:600px;background:#182235;padding:35px;border-radius:30px;">
+
+<h2 style="margin-bottom:25px;">
+Paiement sécurisé EnergyTrack
+</h2>
+
+<div style="background:#0f1729;padding:20px;border-radius:18px;margin-bottom:20px;">
+
+<h3 id="paymentSensor">
+Capteur : Starter PME
+</h3>
+
+<p style="margin-top:10px;color:#94a3b8;">
+Paiement via MTN Mobile Money / Moov Money / Carte bancaire.
+</p>
+
+</div>
+
+<input type="text" placeholder="Nom complet">
+
+<input type="text" placeholder="Numéro Mobile Money">
+
+<select>
+<option>MTN Mobile Money</option>
+<option>Moov Money</option>
+<option>Carte bancaire</option>
+</select>
+
+<button onclick="confirmPayment()" style="width:100%;">
+Confirmer le paiement
+</button>
+
+<button onclick="window.location.href='index.html'"
+style="width:100%;background:#0f1729;margin-top:10px;">
+Annuler
+</button>
+
+</div>
+
+</section>
+
+<script>
+
+window.onload=function(){
+
+const sensor=localStorage.getItem('selectedSensor');
+
+if(sensor){
+
+document.getElementById('paymentSensor').innerHTML=
+'Capteur : '+sensor;
+
+}
+
+}
+
+function confirmPayment(){
+
+localStorage.setItem('paymentStatus','paid');
+
+alert('Paiement confirmé. Votre commande a été enregistrée.');
+
+window.location.href='delivery.html';
+
+}
+
+</script>
+
+</body>
+</html>
