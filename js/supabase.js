@@ -1,8 +1,8 @@
-const supabaseUrl='https://prvsatpdgybnevolzhhf.supabase.co';
+const supabaseUrl = 'https://prvsatpdgybnevolzhhf.supabase.co';
 
-const supabaseKey='TA_CLE_PUBLIQUE_SUPABASE';
+const supabaseKey = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
 
-const supabaseClient=supabase.createClient(
+const supabaseClient = supabase.createClient(
 supabaseUrl,
 supabaseKey
 );
