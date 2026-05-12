@@ -1,192 +1,441 @@
-export default function EnergyTrackLanding() {
-  return (
-    <div className="min-h-screen bg-[#0b1220] text-white font-sans overflow-x-hidden">
-      <div className="fixed inset-0 -z-10 bg-[radial-gradient(circle_at_top_left,rgba(0,200,150,0.15),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(0,174,239,0.12),transparent_30%)]" />
+<!DOCTYPE html>
+<html lang="fr">
 
-      {/* Navbar */}
-      <nav className="flex items-center justify-between px-8 py-6 border-b border-white/5 backdrop-blur-md sticky top-0 bg-[#0b1220]/70 z-50">
-        <div className="text-3xl font-bold tracking-wide">
-          <span className="text-[#00c896]">Energy</span>Track
-        </div>
+<head>
 
-        <div className="hidden md:flex items-center gap-8 text-slate-400 font-medium">
-          <a href="#features" className="hover:text-white transition">Fonctionnalités</a>
-          <a href="#pricing" className="hover:text-white transition">Tarifs</a>
-          <a href="#about" className="hover:text-white transition">À propos</a>
+<meta charset="UTF-8">
 
-          <button className="bg-[#182235] px-5 py-3 rounded-2xl text-white hover:opacity-90 transition">
-            Connexion
-          </button>
-        </div>
-      </nav>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-      {/* Hero */}
-      <section className="px-8 lg:px-20 py-20 flex flex-col lg:flex-row items-center gap-16">
-        <div className="flex-1">
-          <div className="inline-flex items-center gap-2 px-5 py-3 rounded-full border border-[#00c896]/30 bg-[#00c896]/10 text-[#00c896] font-semibold mb-8">
-            ⚡ Plateforme énergétique intelligente
-          </div>
+<title>EnergyTrack Platform</title>
 
-          <h1 className="text-5xl md:text-7xl font-black leading-tight mb-8">
-            Optimisez
-            <br />
-            votre énergie
-            <br />
-            avec
-            <span className="text-[#00c896]"> EnergyTrack</span>
-          </h1>
+<link rel="stylesheet" href="css/style.css">
 
-          <p className="text-slate-400 text-lg leading-9 max-w-2xl mb-10">
-            EnergyTrack est une plateforme SaaS IoT intelligente permettant
-            de surveiller votre consommation énergétique en temps réel,
-            détecter les anomalies et réduire automatiquement les coûts.
-          </p>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-          <div className="flex flex-wrap gap-5">
-            <button className="bg-gradient-to-r from-[#00c896] to-[#00aeef] px-8 py-4 rounded-2xl font-semibold text-lg shadow-2xl shadow-[#00c896]/20 hover:scale-105 transition">
-              Acheter un capteur
-            </button>
+<script src="js/app.js"></script>
 
-            <button className="bg-[#182235] px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-[#1f2d46] transition">
-              Voir le dashboard
-            </button>
-          </div>
-        </div>
+</head>
 
-        {/* Dashboard Preview */}
-        <div className="flex-1 w-full bg-gradient-to-br from-[#182235] to-[#101826] rounded-[32px] p-8 border border-white/5 shadow-2xl shadow-black/50">
-          <h2 className="text-4xl font-bold mb-8">Aperçu Dashboard</h2>
+<body>
 
-          <div className="grid grid-cols-2 gap-5">
-            <div className="bg-[#0f1729] rounded-3xl p-6">
-              <p className="text-slate-400 mb-3">Facture estimée</p>
-              <h3 className="text-4xl font-bold">47 200 FCFA</h3>
-            </div>
+<section style="min-height:100vh;padding:80px 8%;display:flex;align-items:center;justify-content:center;">
 
-            <div className="bg-[#0f1729] rounded-3xl p-6">
-              <p className="text-slate-400 mb-3">Économie</p>
-              <h3 className="text-4xl font-bold text-[#00c896]">12 400 FCFA</h3>
-            </div>
+<div style="width:100%;max-width:1400px;display:flex;gap:50px;align-items:center;flex-wrap:wrap;">
 
-            <div className="bg-[#0f1729] rounded-3xl p-6">
-              <p className="text-slate-400 mb-3">Capteurs actifs</p>
-              <h3 className="text-4xl font-bold">24</h3>
-            </div>
+<div style="flex:1;min-width:320px;">
 
-            <div className="bg-[#0f1729] rounded-3xl p-6">
-              <p className="text-slate-400 mb-3">État réseau</p>
-              <h3 className="text-4xl font-bold text-yellow-400">Stable</h3>
-            </div>
-          </div>
-        </div>
-      </section>
+<div style="
+display:inline-block;
+padding:10px 18px;
+background:rgba(0,200,150,0.12);
+border:1px solid rgba(0,200,150,0.25);
+border-radius:999px;
+margin-bottom:25px;
+color:#00c896;
+font-weight:600;
+">
 
-      {/* Features */}
-      <section id="features" className="px-8 lg:px-20 py-24">
-        <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold mb-6">
-            Une plateforme SaaS EnergyTech complète
-          </h2>
+Plateforme intelligente de monitoring énergétique
 
-          <p className="text-slate-400 text-lg max-w-3xl mx-auto leading-9">
-            Pensée pour les particuliers, PME et industries africaines.
-          </p>
-        </div>
+</div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          {[
-            {
-              icon: '⚡',
-              title: 'Monitoring temps réel',
-              desc: 'Suivez votre consommation énergétique instantanément.'
-            },
-            {
-              icon: '🤖',
-              title: 'Analyse IA',
-              desc: 'Recevez des recommandations intelligentes et prédictives.'
-            },
-            {
-              icon: '📡',
-              title: 'Capteurs IoT',
-              desc: 'Synchronisation MQTT et monitoring cloud sécurisé.'
-            }
-          ].map((feature, index) => (
-            <div
-              key={index}
-              className="bg-gradient-to-br from-[#182235] to-[#101826] rounded-[28px] p-8 border border-white/5 hover:-translate-y-2 transition"
-            >
-              <div className="text-6xl mb-6">{feature.icon}</div>
+<h1 style="
+font-size:65px;
+line-height:1.1;
+margin-bottom:25px;
+font-family:'Orbitron',sans-serif;
+">
 
-              <h3 className="text-2xl font-bold mb-4">
-                {feature.title}
-              </h3>
+Optimisez votre énergie avec
 
-              <p className="text-slate-400 leading-8">
-                {feature.desc}
-              </p>
-            </div>
-          ))}
-        </div>
-      </section>
+<span style="color:#00c896;">
+EnergyTrack
+</span>
 
-      {/* Pricing */}
-      <section id="pricing" className="px-8 lg:px-20 py-24">
-        <div className="text-center mb-20">
-          <h2 className="text-5xl font-bold mb-6">
-            Choisissez votre kit EnergyTrack
-          </h2>
+</h1>
 
-          <p className="text-slate-400 text-lg">
-            Des solutions adaptées à tous les besoins.
-          </p>
-        </div>
+<p style="
+font-size:18px;
+line-height:1.9;
+color:#94a3b8;
+margin-bottom:35px;
+max-width:700px;
+">
 
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="bg-gradient-to-br from-[#182235] to-[#101826] rounded-[30px] p-10 border border-white/5">
-            <h3 className="text-3xl font-bold mb-6">Starter Home</h3>
-            <div className="text-6xl font-black mb-8">49K</div>
-            <p className="text-slate-400 leading-8 mb-10">
-              Monitoring maison intelligent et alertes de consommation.
-            </p>
-            <button className="w-full bg-gradient-to-r from-[#00c896] to-[#00aeef] py-4 rounded-2xl font-semibold text-lg">
-              Commander
-            </button>
-          </div>
+EnergyTrack est une plateforme SaaS IoT intelligente permettant
+de surveiller votre consommation énergétique en temps réel,
+détecter les anomalies,
+réduire les coûts électriques
+et améliorer la performance énergétique de vos installations.
 
-          <div className="bg-gradient-to-br from-[#00c896] to-[#00aeef] rounded-[30px] p-10 scale-105 shadow-2xl shadow-[#00c896]/20">
-            <h3 className="text-3xl font-bold mb-6">Starter PME</h3>
-            <div className="text-6xl font-black mb-8">129K</div>
-            <p className="leading-8 mb-10 text-white/90">
-              IA énergétique, monitoring avancé et rapports automatiques.
-            </p>
-            <button className="w-full bg-white text-[#101826] py-4 rounded-2xl font-bold text-lg">
-              Acheter maintenant
-            </button>
-          </div>
+</p>
 
-          <div className="bg-gradient-to-br from-[#182235] to-[#101826] rounded-[30px] p-10 border border-white/5">
-            <h3 className="text-3xl font-bold mb-6">Industrial Pro</h3>
-            <div className="text-5xl font-black mb-8">Sur devis</div>
-            <p className="text-slate-400 leading-8 mb-10">
-              Infrastructure industrielle complète avec API et IA prédictive.
-            </p>
-            <button className="w-full bg-gradient-to-r from-[#00c896] to-[#00aeef] py-4 rounded-2xl font-semibold text-lg">
-              Nous contacter
-            </button>
-          </div>
-        </div>
-      </section>
+<div style="display:flex;gap:15px;flex-wrap:wrap;">
 
-      {/* Footer */}
-      <footer className="border-t border-white/5 px-8 lg:px-20 py-12 text-slate-400 flex flex-col md:flex-row justify-between gap-5">
-        <div>
-          © 2026 EnergyTrack • Smart Energy SaaS
-        </div>
+<button onclick="scrollToPricing()"
+style="padding:18px 30px;font-size:16px;">
 
-        <div>
-          Made for Africa ⚡
-        </div>
-      </footer>
-    </div>
-  )
-}
+Acheter un capteur
+
+</button>
+
+<button onclick="window.location.href='auth.html'"
+style="
+padding:18px 30px;
+font-size:16px;
+background:#182235;
+">
+
+Connexion Client
+
+</button>
+
+</div>
+
+</div>
+
+<div style="flex:1;min-width:320px;">
+
+<div style="
+background:linear-gradient(145deg,#182235,#101826);
+padding:35px;
+border-radius:30px;
+border:1px solid rgba(255,255,255,0.05);
+box-shadow:0 20px 60px rgba(0,0,0,0.4);
+">
+
+<h2 style="margin-bottom:25px;font-size:28px;">
+
+Aperçu Dashboard
+
+</h2>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+Facture estimée
+</p>
+
+<h3 style="margin-top:10px">
+47 200 FCFA
+</h3>
+
+</div>
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+Économie
+</p>
+
+<h3 style="margin-top:10px;color:#00c896;">
+12 400 FCFA
+</h3>
+
+</div>
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+Capteurs actifs
+</p>
+
+<h3 style="margin-top:10px">
+24
+</h3>
+
+</div>
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+État réseau
+</p>
+
+<h3 style="margin-top:10px;color:#ffb547;">
+Stable
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+</section>
+
+<section id="pricing" style="padding:80px 8%;">
+
+<div style="text-align:center;margin-bottom:60px;">
+
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
+
+Nos capteurs intelligents
+
+</h2>
+
+<p style="
+color:#94a3b8;
+max-width:700px;
+margin:auto;
+line-height:1.8;
+">
+
+Choisissez le kit EnergyTrack adapté à votre maison,
+entreprise ou industrie.
+
+</p>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:25px;
+">
+
+<div style="
+background:#182235;
+padding:35px;
+border-radius:28px;
+">
+
+<h3 style="margin-bottom:15px;">
+Starter Home
+</h3>
+
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
+
+49 000 FCFA
+
+</h1>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:25px;
+">
+
+Monitoring maison,
+alertes basiques,
+dashboard mobile.
+
+</p>
+
+<button onclick="buySensor('Starter Home')"
+style="width:100%;">
+
+Acheter
+
+</button>
+
+</div>
+
+<div style="
+background:linear-gradient(145deg,#00c896,#00aeef);
+padding:35px;
+border-radius:28px;
+color:#fff;
+transform:scale(1.03);
+">
+
+<h3 style="margin-bottom:15px;">
+Starter PME
+</h3>
+
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
+
+129 000 FCFA
+
+</h1>
+
+<p style="
+line-height:1.8;
+margin-bottom:25px;
+">
+
+IA énergétique,
+monitoring avancé,
+rapports automatiques,
+multi-sites.
+
+</p>
+
+<button onclick="buySensor('Starter PME')"
+style="
+width:100%;
+background:#fff;
+color:#101826;
+">
+
+Acheter
+
+</button>
+
+</div>
+
+<div style="
+background:#182235;
+padding:35px;
+border-radius:28px;
+">
+
+<h3 style="margin-bottom:15px;">
+Industrial Pro
+</h3>
+
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
+
+Sur devis
+
+</h1>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:25px;
+">
+
+IoT industriel,
+monitoring usine,
+API,
+IA prédictive,
+support dédié.
+
+</p>
+
+<button onclick="buySensor('Industrial Pro')"
+style="width:100%;">
+
+Contacter
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<section style="
+padding:80px 8%;
+text-align:center;
+">
+
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
+
+Pourquoi EnergyTrack ?
+
+</h2>
+
+<p style="
+color:#94a3b8;
+max-width:800px;
+margin:auto;
+line-height:1.9;
+margin-bottom:60px;
+">
+
+Réduisez vos coûts électriques,
+détectez les anomalies avant les pannes
+et pilotez votre énergie grâce à l’intelligence artificielle.
+
+</p>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:25px;
+">
+
+<div class="card">
+
+<h3 style="margin-bottom:15px;">
+⚡ Temps réel
+</h3>
+
+<p style="color:#94a3b8;line-height:1.8;">
+Surveillance instantanée de votre consommation.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:15px;">
+🤖 IA énergétique
+</h3>
+
+<p style="color:#94a3b8;line-height:1.8;">
+Analyse intelligente et recommandations automatiques.
+</p>
+
+</div>
+
+<div class="card">
+
+<h3 style="margin-bottom:15px;">
+📡 IoT connecté
+</h3>
+
+<p style="color:#94a3b8;line-height:1.8;">
+Capteurs ESP32 synchronisés cloud et MQTT.
+</p>
+
+</div>
+
+</div>
+
+</section>
+
+<footer style="
+padding:40px 8%;
+border-top:1px solid rgba(255,255,255,0.05);
+text-align:center;
+color:#94a3b8;
+">
+
+© 2026 EnergyTrack — Smart Energy Monitoring Platform
+
+</footer>
+
+</body>
+</html>
