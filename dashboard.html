@@ -14,7 +14,9 @@
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<script src="js/supabase.js"></script>
 </head>
 
 <body>
@@ -147,11 +149,7 @@ Consommation hebdomadaire
 
 <script>
 
-if(localStorage.getItem('sensorConfigured')!=='true'){
 
-window.location.href='auth.html';
-
-}
 
 function logoutUser(){
 
@@ -251,6 +249,21 @@ random.toLocaleString()+' FCFA';
 },5000);
 
 </script>
+window.onload = async function(){
 
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+console.log('Utilisateur connecté');
+
+}
 </body>
 </html>
