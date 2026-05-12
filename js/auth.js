@@ -104,9 +104,19 @@ return;
 
 }
 
-alert('Aucun capteur associé à ce compte.');
+const selectedSensor = localStorage.getItem('selectedSensor');
+
+if(selectedSensor){
+
+window.location.href='payment.html';
+
+}else{
+
+alert('Veuillez choisir un capteur.');
 
 window.location.href='index.html';
+
+}
 
 }
 
