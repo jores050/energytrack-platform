@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Paiement EnergyTrack</title>
@@ -9,6 +12,10 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
 
 </head>
 
@@ -37,6 +44,7 @@ Paiement via MTN Mobile Money / Moov Money / Carte bancaire.
 <input type="text" placeholder="Nom complet">
 
 <input type="text" placeholder="Numéro Mobile Money">
+
 <select id="selectedSensor">
 
 <option value="">
@@ -56,19 +64,35 @@ Industrial Pro
 </option>
 
 </select>
+
 <select>
-<option>MTN Mobile Money</option>
-<option>Moov Money</option>
-<option>Carte bancaire</option>
+
+<option>
+MTN Mobile Money
+</option>
+
+<option>
+Moov Money
+</option>
+
+<option>
+Carte bancaire
+</option>
+
 </select>
 
 <button onclick="confirmPayment()" style="width:100%;">
+
 Confirmer le paiement
+
 </button>
 
-<button onclick="window.location.href='index.html'"
+<button
+onclick="window.location.href='index.html'"
 style="width:100%;background:#0f1729;margin-top:10px;">
+
 Annuler
+
 </button>
 
 </div>
@@ -85,6 +109,8 @@ if(sensor){
 
 document.getElementById('paymentSensor').innerHTML=
 'Capteur : '+sensor;
+
+document.getElementById('selectedSensor').value=sensor;
 
 }
 
@@ -103,11 +129,62 @@ return;
 
 }
 
+/*
+UTILISATEUR CONNECTÉ
+*/
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+alert('Utilisateur non connecté.');
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+/*
+UPDATE SUPABASE
+*/
+
+const { error } =
+await supabaseClient
+.from('profiles')
+.update({
+
+selected_sensor:sensor,
+
+payment_status:'paid'
+
+})
+.eq('id',userId);
+
+if(error){
+
+alert(error.message);
+
+return;
+
+}
+
+/*
+LOCAL STORAGE
+*/
+
 localStorage.setItem('selectedSensor',sensor);
 
 localStorage.setItem('paymentStatus','paid');
 
-alert('Paiement confirmé. Votre commande a été enregistrée.');
+/*
+SUCCESS
+*/
+
+alert('Paiement confirmé.');
 
 window.location.href='delivery.html';
 
