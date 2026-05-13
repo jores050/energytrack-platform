@@ -1,8 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="js/supabase.js"></script>
 <head>
 
 <meta charset="UTF-8">
@@ -14,6 +12,12 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -65,58 +69,88 @@ Energy<span>Track</span>
 
 <div class="main" style="display:block;">
 
-<h1 style="margin-bottom:20px">
+<h1 style="margin-bottom:25px">
 Consommation Énergétique
 </h1>
 
-<div class="flex">
+<div class="card-grid">
 
-<div class="section">
+<div class="card">
 
-<h2>
-Historique
-</h2>
+<div class="card-title">
+Consommation actuelle
+</div>
 
-<table class="table">
+<div class="card-value" id="livePower">
+0 W
+</div>
 
-<tr>
-<th>Jour</th>
-<th>kWh</th>
-<th>Coût</th>
-</tr>
+</div>
 
-<tr>
-<td>Lundi</td>
-<td>12 kWh</td>
-<td>1 092 FCFA</td>
-</tr>
+<div class="card">
 
-<tr>
-<td>Mardi</td>
-<td>19 kWh</td>
-<td>1 729 FCFA</td>
-</tr>
+<div class="card-title">
+Tension actuelle
+</div>
 
-<tr>
-<td>Mercredi</td>
-<td>15 kWh</td>
-<td>1 365 FCFA</td>
-</tr>
+<div class="card-value green" id="liveVoltage">
+0 V
+</div>
 
-<tr>
-<td>Jeudi</td>
-<td>22 kWh</td>
-<td>2 002 FCFA</td>
-</tr>
+</div>
 
-</table>
+<div class="card">
+
+<div class="card-title">
+Source énergétique
+</div>
+
+<div class="card-value orange" id="liveSource">
+SBEE
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Coût estimé
+</div>
+
+<div class="card-value red" id="liveCost">
+0 FCFA
+</div>
+
+</div>
 
 </div>
 
 <div class="section">
 
 <h2>
-Calculateur
+Historique énergétique
+</h2>
+
+<canvas id="energyChart"></canvas>
+
+</div>
+
+<div class="section">
+
+<h2>
+Historique détaillé
+</h2>
+
+<div id="historyContainer">
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>
+Calculateur énergétique
 </h2>
 
 <input type="number"
@@ -133,21 +167,318 @@ Calculer le coût
 
 </div>
 
-</div>
-
 <script>
+
+let chart;
+
+/*
+CALCULATEUR
+*/
 
 function calculateCost(){
 
-const kwh=document.getElementById('kwhInput').value;
+const kwh =
+document.getElementById('kwhInput').value;
 
-const cost=kwh*91;
+const cost = kwh * 91;
 
-document.getElementById('costResult').innerHTML=
-'Coût estimé : '+cost.toLocaleString()+' FCFA';
+document.getElementById('costResult').innerHTML =
+'Coût estimé : '
++ Number(cost).toLocaleString()
++' FCFA';
 
 }
 
+/*
+DÉCONNEXION
+*/
 
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
+
+window.location.href='auth.html';
+
+}
+
+/*
+LOAD HISTORIQUE
+*/
+
+async function loadHistory(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+/*
+RÉCUP DONNÉES
+*/
+
+const { data, error } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId)
+
+.order('created_at',{ascending:true})
+
+.limit(20);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+/*
+LIVE DATA
+*/
+
+if(data.length > 0){
+
+const latest = data[data.length - 1];
+
+document.getElementById('livePower').innerHTML =
+Math.round(latest.power_w)+' W';
+
+document.getElementById('liveVoltage').innerHTML =
+Math.round(latest.voltage)+' V';
+
+document.getElementById('liveSource').innerHTML =
+latest.source;
+
+const estimatedCost =
+Math.round(latest.kwh_total * 91);
+
+document.getElementById('liveCost').innerHTML =
+estimatedCost.toLocaleString()+' FCFA';
+
+}
+
+/*
+TABLEAU
+*/
+
+const container =
+document.getElementById('historyContainer');
+
+container.innerHTML='';
+
+data.reverse().forEach(item=>{
+
+const cost =
+Math.round(item.kwh_total * 91);
+
+container.innerHTML += `
+
+<div style="
+background:#182235;
+padding:18px;
+border-radius:18px;
+margin-bottom:15px;
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:12px;
+">
+
+<div>
+
+<h3>
+
+${item.power_w} W
+
+</h3>
+
+<p style="
+color:#94a3b8;
+margin-top:6px;
+">
+
+${item.voltage} V
+• ${item.source}
+
+</p>
+
+</div>
+
+<div>
+
+<h3>
+
+${cost.toLocaleString()} FCFA
+
+</h3>
+
+<p style="
+color:#94a3b8;
+margin-top:6px;
+">
+
+${new Date(item.created_at).toLocaleString()}
+
+</p>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+/*
+GRAPHIQUE
+*/
+
+const labels =
+data.map(item=>
+
+new Date(item.created_at)
+
+.toLocaleTimeString()
+
+);
+
+const powers =
+data.map(item=>item.power_w);
+
+const ctx =
+document.getElementById('energyChart');
+
+if(chart){
+
+chart.destroy();
+
+}
+
+chart = new Chart(ctx,{
+
+type:'line',
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:'Puissance (W)',
+
+data:powers,
+
+borderColor:'#00c896',
+
+backgroundColor:'rgba(0,200,150,0.1)',
+
+fill:true,
+
+tension:0.4
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+labels:{
+
+color:'white'
+
+}
+
+}
+
+},
+
+scales:{
+
+x:{
+
+ticks:{color:'white'},
+
+grid:{color:'rgba(255,255,255,0.05)'}
+
+},
+
+y:{
+
+ticks:{color:'white'},
+
+grid:{color:'rgba(255,255,255,0.05)'}
+
+}
+
+}
+
+}
+
+});
+
+}
+
+/*
+LOAD INITIAL
+*/
+
+loadHistory();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('telemetry-history')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadHistory();
+
+}
+
+)
+
+.subscribe();
 
 </script>
+
+</body>
+</html>
