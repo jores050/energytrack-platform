@@ -1,23 +1,19 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Consommation EnergyTrack</title>
+<title>Consommation - EnergyTrack</title>
 
 <link rel="stylesheet" href="css/style.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 </head>
 
@@ -29,139 +25,25 @@
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">
-🏠 Dashboard
-</a>
-
-<a class="nav-item active" href="consommation.html">
-⚡ Consommation
-</a>
-
-<a class="nav-item" href="alertes.html">
-🔔 Alertes
-</a>
-
-<a class="nav-item" href="rapports.html">
-📊 Rapports
-</a>
-
-<a class="nav-item" href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item" href="capteurs.html">
-📡 Capteurs IoT
-</a>
-
-<a class="nav-item" href="ia.html">
-🤖 Analyse IA
-</a>
-
-<a class="nav-item" href="parametres.html">
-⚙️ Paramètres
-</a>
-
-<div class="nav-item" onclick="logoutUser()">
-🚪 Déconnexion
-</div>
+<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+<a class="nav-item active" href="consommation.html">⚡ Consommation</a>
+<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+<a class="nav-item" href="rapports.html">📊 Rapports</a>
+<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
 
 </div>
 
-<div class="main" style="display:block;">
+<div class="main">
 
-<h1 style="margin-bottom:25px">
-Consommation Énergétique
+<h1>
+Consommation énergétique
 </h1>
 
-<div class="card-grid">
-
-<div class="card">
-
-<div class="card-title">
-Consommation actuelle
-</div>
-
-<div class="card-value" id="livePower">
-0 W
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Tension actuelle
-</div>
-
-<div class="card-value green" id="liveVoltage">
-0 V
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Source énergétique
-</div>
-
-<div class="card-value orange" id="liveSource">
-SBEE
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Coût estimé
-</div>
-
-<div class="card-value red" id="liveCost">
-0 FCFA
-</div>
-
-</div>
-
-</div>
-
 <div class="section">
 
-<h2>
-Historique énergétique
-</h2>
-
-<canvas id="energyChart"></canvas>
-
-</div>
-
-<div class="section">
-
-<h2>
-Historique détaillé
-</h2>
-
-<div id="historyContainer">
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h2>
-Calculateur énergétique
-</h2>
-
-<input type="number"
-id="kwhInput"
-placeholder="Entrer les kWh">
-
-<button onclick="calculateCost()">
-Calculer le coût
-</button>
-
-<p id="costResult" style="margin-top:20px"></p>
+<canvas id="consumptionChart"></canvas>
 
 </div>
 
@@ -171,41 +53,43 @@ Calculer le coût
 
 let chart;
 
-/*
-CALCULATEUR
-*/
+function initChart(){
 
-function calculateCost(){
+const ctx =
+document.getElementById('consumptionChart');
 
-const kwh =
-document.getElementById('kwhInput').value;
+chart =
+new Chart(ctx,{
 
-const cost = kwh * 91;
+type:'bar',
 
-document.getElementById('costResult').innerHTML =
-'Coût estimé : '
-+ Number(cost).toLocaleString()
-+' FCFA';
+data:{
+
+labels:[],
+
+datasets:[{
+
+label:'Puissance W',
+
+data:[],
+
+backgroundColor:'#00c896'
+
+}]
+
+},
+
+options:{
+
+responsive:true
 
 }
 
-/*
-DÉCONNEXION
-*/
-
-async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
+});
 
 }
 
-/*
-LOAD HISTORIQUE
-*/
-
-async function loadHistory(){
+async function loadConsumption(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -218,13 +102,10 @@ return;
 
 }
 
-const userId = userData.user.id;
+const userId =
+userData.user.id;
 
-/*
-RÉCUP DONNÉES
-*/
-
-const { data, error } =
+const { data } =
 await supabaseClient
 
 .from('telemetry')
@@ -233,224 +114,42 @@ await supabaseClient
 
 .eq('sensor_id',userId)
 
-.order('created_at',{ascending:true})
+.order('created_at',{ascending:false})
 
 .limit(20);
 
-if(error){
+chart.data.labels=[];
 
-console.log(error);
-
-return;
-
-}
-
-/*
-LIVE DATA
-*/
-
-if(data.length > 0){
-
-const latest = data[data.length - 1];
-
-document.getElementById('livePower').innerHTML =
-Math.round(latest.power_w)+' W';
-
-document.getElementById('liveVoltage').innerHTML =
-Math.round(latest.voltage)+' V';
-
-document.getElementById('liveSource').innerHTML =
-latest.source;
-
-const estimatedCost =
-Math.round(latest.kwh_total * 91);
-
-document.getElementById('liveCost').innerHTML =
-estimatedCost.toLocaleString()+' FCFA';
-
-}
-
-/*
-TABLEAU
-*/
-
-const container =
-document.getElementById('historyContainer');
-
-container.innerHTML='';
+chart.data.datasets[0].data=[];
 
 data.reverse().forEach(item=>{
 
-const cost =
-Math.round(item.kwh_total * 91);
-
-container.innerHTML += `
-
-<div style="
-background:#182235;
-padding:18px;
-border-radius:18px;
-margin-bottom:15px;
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:12px;
-">
-
-<div>
-
-<h3>
-
-${item.power_w} W
-
-</h3>
-
-<p style="
-color:#94a3b8;
-margin-top:6px;
-">
-
-${item.voltage} V
-• ${item.source}
-
-</p>
-
-</div>
-
-<div>
-
-<h3>
-
-${cost.toLocaleString()} FCFA
-
-</h3>
-
-<p style="
-color:#94a3b8;
-margin-top:6px;
-">
-
-${new Date(item.created_at).toLocaleString()}
-
-</p>
-
-</div>
-
-</div>
-
-`;
-
-});
-
-/*
-GRAPHIQUE
-*/
-
-const labels =
-data.map(item=>
+chart.data.labels.push(
 
 new Date(item.created_at)
-
 .toLocaleTimeString()
 
 );
 
-const powers =
-data.map(item=>item.power_w);
+chart.data.datasets[0].data.push(
 
-const ctx =
-document.getElementById('energyChart');
+item.power_w
 
-if(chart){
-
-chart.destroy();
-
-}
-
-chart = new Chart(ctx,{
-
-type:'line',
-
-data:{
-
-labels:labels,
-
-datasets:[{
-
-label:'Puissance (W)',
-
-data:powers,
-
-borderColor:'#00c896',
-
-backgroundColor:'rgba(0,200,150,0.1)',
-
-fill:true,
-
-tension:0.4
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-
-legend:{
-
-labels:{
-
-color:'white'
-
-}
-
-}
-
-},
-
-scales:{
-
-x:{
-
-ticks:{color:'white'},
-
-grid:{color:'rgba(255,255,255,0.05)'}
-
-},
-
-y:{
-
-ticks:{color:'white'},
-
-grid:{color:'rgba(255,255,255,0.05)'}
-
-}
-
-}
-
-}
+);
 
 });
 
+chart.update();
+
 }
 
-/*
-LOAD INITIAL
-*/
+initChart();
 
-loadHistory();
-
-/*
-REALTIME
-*/
+loadConsumption();
 
 supabaseClient
 
-.channel('telemetry-history')
+.channel('consumption-live')
 
 .on(
 
@@ -466,11 +165,9 @@ table:'telemetry'
 
 },
 
-(payload)=>{
+()=>{
 
-console.log(payload);
-
-loadHistory();
+loadConsumption();
 
 }
 
