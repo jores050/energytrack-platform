@@ -28,7 +28,7 @@ padding:60px;
 background:#182235;
 padding:35px;
 border-radius:28px;
-max-width:700px;
+max-width:750px;
 margin:auto;
 }
 
@@ -60,6 +60,11 @@ transform:translateY(-2px);
 opacity:0.95;
 }
 
+.stop-btn{
+background:#ff4c61;
+margin-left:15px;
+}
+
 .log{
 margin-top:25px;
 background:#0f1729;
@@ -72,13 +77,31 @@ line-height:1.8;
 
 select{
 width:100%;
-padding:16px;
+padding:18px;
 border:none;
 border-radius:16px;
-margin-top:20px;
+margin-top:25px;
 background:#101826;
 color:white;
 font-size:16px;
+}
+
+.badge{
+display:inline-block;
+padding:8px 14px;
+border-radius:999px;
+background:rgba(0,200,150,0.15);
+color:#00c896;
+font-size:12px;
+font-weight:600;
+margin-bottom:20px;
+}
+
+.grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+gap:20px;
+margin-top:30px;
 }
 
 </style>
@@ -89,12 +112,22 @@ font-size:16px;
 
 <div class="card">
 
+<div class="badge">
+Simulation IoT Temps Réel
+</div>
+
 <h1>
-⚡ EnergyTrack Live Simulator
+⚡ EnergyTrack Simulator v2
 </h1>
 
-<p>
-Simulation temps réel d’un capteur énergétique ESP32.
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+Simulation énergétique multi-sites compatible dashboard,
+alertes, rapports et IA.
+
 </p>
 
 <select id="siteSelector">
@@ -105,10 +138,12 @@ Choisir un site
 
 </select>
 
-<div style="margin-top:30px;">
+<div class="grid">
+
+<div>
 
 <p>
-Tension :
+Tension
 </p>
 
 <div class="value" id="voltage">
@@ -117,10 +152,10 @@ Tension :
 
 </div>
 
-<div style="margin-top:25px;">
+<div>
 
 <p>
-Puissance :
+Puissance
 </p>
 
 <div class="value" id="power">
@@ -129,10 +164,10 @@ Puissance :
 
 </div>
 
-<div style="margin-top:25px;">
+<div>
 
 <p>
-Source :
+Source
 </p>
 
 <div class="value" id="source">
@@ -141,19 +176,17 @@ SBEE
 
 </div>
 
+</div>
+
 <button onclick="startSimulation()">
-
 Démarrer la simulation
-
 </button>
 
-<button onclick="stopSimulation()"
-style="
-background:#ff4c61;
-margin-left:15px;
-">
+<button
+class="stop-btn"
+onclick="stopSimulation()">
 
-Arrêter la simulation
+Arrêter
 
 </button>
 
@@ -172,6 +205,27 @@ let simulationRunning = false;
 let simulationInterval = null;
 
 let lastAlertTime = {};
+
+/*
+AUTH
+*/
+
+async function getUser(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return null;
+
+}
+
+return userData.user;
+
+}
 
 /*
 ANTI-SPAM ALERTES
@@ -207,19 +261,13 @@ LOAD SITES
 
 async function loadSites(){
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+const user = await getUser();
 
-if(!userData.user){
-
-window.location.href='auth.html';
+if(!user){
 
 return;
 
 }
-
-const userId =
-userData.user.id;
 
 const { data:sites, error } =
 await supabaseClient
@@ -228,7 +276,9 @@ await supabaseClient
 
 .select('*')
 
-.eq('user_id',userId);
+.eq('user_id',user.id)
+
+.order('created_at',{ascending:false});
 
 if(error){
 
@@ -266,7 +316,7 @@ ${site.name}
 }
 
 /*
-START SIMULATION
+SIMULATION
 */
 
 async function startSimulation(){
@@ -288,25 +338,15 @@ return;
 
 }
 
-simulationRunning = true;
+const user = await getUser();
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-alert('Utilisateur non connecté');
+if(!user){
 
 return;
 
 }
 
-const userId = userData.user.id;
-
-const siteName =
-document.getElementById('siteSelector')
-.selectedOptions[0]
-.text;
+simulationRunning = true;
 
 simulationInterval = setInterval(async()=>{
 
@@ -329,132 +369,12 @@ KWH RÉALISTE
 */
 
 const kwh =
-((power * 5) / 3600000).toFixed(5);
+((power*5)/3600000).toFixed(5);
 
 const source =
 Math.random()>0.8
 ? 'GROUPE'
 : 'SBEE';
-
-/*
-ALERTES AUTOMATIQUES
-*/
-
-if(
-voltage < 190
-&& canTriggerAlert('LOW_VOLTAGE')
-){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-site_name:siteName,
-
-type:'LOW_VOLTAGE',
-
-message:'Tension basse détectée',
-
-value:voltage,
-
-threshold:190
-
-}]);
-
-}
-
-if(
-power > 3000
-&& canTriggerAlert('OVERCONSUMPTION')
-){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-site_name:siteName,
-
-type:'OVERCONSUMPTION',
-
-message:'Surconsommation détectée',
-
-value:power,
-
-threshold:3000
-
-}]);
-
-}
-
-if(
-voltage < 50
-&& canTriggerAlert('SBEE_OUTAGE')
-){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-site_name:siteName,
-
-type:'SBEE_OUTAGE',
-
-message:'Coupure SBEE détectée',
-
-value:voltage,
-
-threshold:50
-
-}]);
-
-}
-
-if(
-voltage > 250
-&& canTriggerAlert('HIGH_VOLTAGE')
-){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-site_name:siteName,
-
-type:'HIGH_VOLTAGE',
-
-message:'Surtension détectée',
-
-value:voltage,
-
-threshold:250
-
-}]);
-
-}
 
 /*
 UI
@@ -480,11 +400,9 @@ await supabaseClient
 
 .insert([{
 
-sensor_id:userId,
+sensor_id:user.id,
 
 site_id:selectedSite,
-
-site_name:siteName,
 
 voltage:voltage,
 
@@ -503,6 +421,118 @@ if(error){
 console.log(error);
 
 return;
+
+}
+
+/*
+ALERTES
+*/
+
+if(
+voltage < 190
+&& canTriggerAlert('LOW_VOLTAGE')
+){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:user.id,
+
+site_id:selectedSite,
+
+type:'LOW_VOLTAGE',
+
+message:'Tension basse détectée',
+
+value:voltage,
+
+threshold:190
+
+}]);
+
+}
+
+if(
+power > 3000
+&& canTriggerAlert('OVERCONSUMPTION')
+){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:user.id,
+
+site_id:selectedSite,
+
+type:'OVERCONSUMPTION',
+
+message:'Surconsommation détectée',
+
+value:power,
+
+threshold:3000
+
+}]);
+
+}
+
+if(
+voltage < 50
+&& canTriggerAlert('SBEE_OUTAGE')
+){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:user.id,
+
+site_id:selectedSite,
+
+type:'SBEE_OUTAGE',
+
+message:'Coupure SBEE détectée',
+
+value:voltage,
+
+threshold:50
+
+}]);
+
+}
+
+if(
+voltage > 250
+&& canTriggerAlert('HIGH_VOLTAGE')
+){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:user.id,
+
+site_id:selectedSite,
+
+type:'HIGH_VOLTAGE',
+
+message:'Surtension détectée',
+
+value:voltage,
+
+threshold:250
+
+}]);
 
 }
 
@@ -527,10 +557,6 @@ log.innerHTML =
 
 +source
 
-+'<br>🏢 '
-
-+siteName
-
 +'<br><br>'
 
 +log.innerHTML;
@@ -547,7 +573,7 @@ function stopSimulation(){
 
 clearInterval(simulationInterval);
 
-simulationRunning=false;
+simulationRunning = false;
 
 document.getElementById('log').innerHTML =
 
