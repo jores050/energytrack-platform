@@ -366,9 +366,11 @@ window.location.href='payment.html';
 
 async function loginUser(){
 
-const email=document.getElementById('loginEmail').value;
+const email =
+document.getElementById('loginEmail').value;
 
-const password=document.getElementById('loginPassword').value;
+const password =
+document.getElementById('loginPassword').value;
 
 if(email==='' || password===''){
 
@@ -400,16 +402,41 @@ return;
 
 }
 
-const userId=data.user.id;
+const userId = data.user.id;
 
-const { data:profile } =
+/*
+VÉRIFIER SI UTILISATEUR
+A DÉJÀ UN SITE
+*/
+
+const { data:sites, error:siteError } =
 await supabaseClient
-.from('profiles')
-.select('*')
-.eq('id',userId)
-.single();
 
-if(profile.sensor_configured===true){
+.from('sites')
+
+.select('*')
+
+.eq('user_id',userId);
+
+if(siteError){
+
+console.log(siteError);
+
+showMessage(
+'Erreur chargement utilisateur.',
+'error'
+);
+
+return;
+
+}
+
+/*
+SI SITE EXISTE
+→ DASHBOARD
+*/
+
+if(sites && sites.length > 0){
 
 window.location.href='dashboard.html';
 
@@ -417,31 +444,12 @@ return;
 
 }
 
-if(profile.delivery_status==='delivered'){
+/*
+SINON
+→ SETUP
+*/
 
 window.location.href='setup.html';
-
-return;
-
-}
-
-if(profile.payment_status==='paid'){
-
-window.location.href='delivery.html';
-
-return;
-
-}
-
-if(profile.selected_sensor===''){
-
-window.location.href='payment.html';
-
-return;
-
-}
-
-window.location.href='delivery.html';
 
 }
 
