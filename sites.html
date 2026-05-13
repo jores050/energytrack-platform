@@ -4,67 +4,286 @@
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Multi-sites EnergyTrack</title>
+<title>Multi-sites - EnergyTrack</title>
 
-<link rel="stylesheet" href="css/style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="js/supabase.js"></script>
 
 <style>
 
-.site-grid{
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#081120;
+color:white;
+font-family:'Poppins',sans-serif;
+display:flex;
+min-height:100vh;
+overflow-x:hidden;
+}
+
+.sidebar{
+width:260px;
+background:#0d1728;
+padding:30px 20px;
+border-right:1px solid rgba(255,255,255,0.05);
+position:fixed;
+top:0;
+left:0;
+bottom:0;
+}
+
+.logo{
+font-family:'Orbitron',sans-serif;
+font-size:28px;
+font-weight:700;
+margin-bottom:50px;
+}
+
+.logo span{
+color:#00c896;
+}
+
+.menu{
+display:flex;
+flex-direction:column;
+gap:12px;
+}
+
+.menu a{
+padding:15px 18px;
+border-radius:14px;
+text-decoration:none;
+color:#94a3b8;
+transition:0.3s;
+font-weight:500;
+}
+
+.menu a:hover,
+.menu a.active{
+background:rgba(0,200,150,0.15);
+color:white;
+}
+
+.main{
+margin-left:260px;
+width:calc(100% - 260px);
+padding:40px;
+}
+
+.header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:35px;
+flex-wrap:wrap;
+gap:20px;
+}
+
+.header h1{
+font-size:42px;
+font-family:'Orbitron',sans-serif;
+}
+
+.user-box{
+background:#182235;
+padding:14px 20px;
+border-radius:14px;
+}
+
+.banner{
+margin-bottom:30px;
+padding:20px;
+border-radius:20px;
+background:rgba(0,200,150,0.12);
+border:1px solid rgba(0,200,150,0.15);
+}
+
+.banner h3{
+margin-bottom:10px;
+}
+
+.banner p{
+color:#94a3b8;
+line-height:1.8;
+}
+
+.grid{
 display:grid;
 grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:20px;
-margin-top:25px;
+gap:22px;
 }
 
 .site-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:25px;
+background:#182235;
+padding:28px;
 border-radius:24px;
 border:1px solid rgba(255,255,255,0.05);
-transition:0.3s;
 }
 
-.site-card:hover{
-transform:translateY(-5px);
-box-shadow:0 20px 50px rgba(0,0,0,0.35);
+.site-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:18px;
 }
 
-.site-badge{
+.site-header h3{
+font-size:24px;
+}
+
+.status{
 padding:8px 14px;
 border-radius:999px;
-font-size:12px;
-font-weight:600;
 background:rgba(0,200,150,0.15);
 color:#00c896;
-display:inline-block;
+font-size:12px;
+font-weight:700;
+}
+
+.site-card p{
+color:#94a3b8;
+margin-bottom:12px;
+line-height:1.8;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:15px;
+margin-top:20px;
+}
+
+.stat-box{
+background:#0f1729;
+padding:18px;
+border-radius:16px;
+}
+
+.stat-box h4{
+font-size:13px;
+color:#94a3b8;
+margin-bottom:8px;
+}
+
+.stat-box h2{
+font-size:24px;
+}
+
+.add-site{
+margin-top:30px;
+padding:30px;
+border-radius:24px;
+background:#182235;
+border:1px solid rgba(255,255,255,0.05);
+}
+
+.add-site h3{
+margin-bottom:20px;
+font-size:28px;
 }
 
 .form-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
+grid-template-columns:1fr 1fr;
+gap:18px;
+}
+
+input{
+width:100%;
+padding:16px;
+border:none;
+border-radius:14px;
+background:#0f1729;
+color:white;
+outline:none;
+}
+
+.btn{
+padding:16px 24px;
+border:none;
+border-radius:14px;
+background:linear-gradient(135deg,#00c896,#00aeef);
+color:white;
+font-weight:700;
+font-size:15px;
+cursor:pointer;
 margin-top:20px;
 }
 
-.delete-btn{
-background:#ff4c61;
-margin-top:20px;
-}
-
-.empty-state{
+.upgrade-screen{
+display:none;
+background:#182235;
+padding:50px;
+border-radius:30px;
 text-align:center;
-padding:60px;
+max-width:850px;
+margin:auto;
+margin-top:80px;
+}
+
+.upgrade-screen h2{
+font-size:42px;
+margin-bottom:20px;
+font-family:'Orbitron',sans-serif;
+}
+
+.upgrade-screen p{
 color:#94a3b8;
+line-height:1.9;
+margin-bottom:30px;
+}
+
+.upgrade-list{
+text-align:left;
+max-width:450px;
+margin:auto;
+margin-bottom:30px;
+}
+
+.upgrade-list div{
+margin-bottom:14px;
+}
+
+.lock-icon{
+font-size:70px;
+margin-bottom:20px;
+}
+
+@media(max-width:768px){
+
+.sidebar{
+position:relative;
+width:100%;
+height:auto;
+}
+
+.main{
+margin-left:0;
+width:100%;
+padding:25px;
+}
+
+body{
+flex-direction:column;
+}
+
+.form-grid{
+grid-template-columns:1fr;
+}
+
+.header h1{
+font-size:30px;
+}
+
 }
 
 </style>
@@ -79,117 +298,271 @@ color:#94a3b8;
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">
+<div class="menu">
+
+<a href="dashboard.html">
 🏠 Dashboard
 </a>
 
-<a class="nav-item" href="consommation.html">
+<a href="consommation.html">
 ⚡ Consommation
 </a>
 
-<a class="nav-item" href="alertes.html">
-🔔 Alertes
+<a href="alertes.html">
+🚨 Alertes
 </a>
 
-<a class="nav-item" href="rapports.html">
-📊 Rapports
-</a>
-
-<a class="nav-item active" href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item" href="capteurs.html">
+<a href="capteurs.html">
 📡 Capteurs IoT
 </a>
 
-<a class="nav-item" href="ia.html">
+<a href="multisite.html" class="active">
+🏢 Multi-sites
+</a>
+
+<a href="ia.html">
 🤖 Analyse IA
 </a>
 
-<a class="nav-item" href="parametres.html">
-⚙️ Paramètres
+<a href="billing.html">
+💳 Facturation
 </a>
 
-<div class="nav-item"
-onclick="logoutUser()">
-🚪 Déconnexion
 </div>
 
 </div>
 
-<div class="main" style="display:block;">
+<div class="main">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-margin-bottom:25px;
-">
+<!-- PREMIUM CONTENT -->
+
+<div id="premiumContent">
+
+<div class="header">
 
 <div>
 
 <h1>
-Supervision Multi-sites
+Gestion Multi-sites
 </h1>
 
-<p style="
-color:#94a3b8;
-margin-top:10px;
-">
+<p style="color:#94a3b8;margin-top:10px;">
+Supervisez plusieurs bâtiments et installations énergétiques.
+</p>
 
-Gestion centralisée des installations EnergyTrack.
+</div>
+
+<div class="user-box" id="userEmail">
+Chargement...
+</div>
+
+</div>
+
+<div class="banner">
+
+<h3>
+🏢 Business Cloud Multi-sites
+</h3>
+
+<p>
+
+Centralisez tous vos bâtiments,
+usines,
+hôtels,
+restaurants
+et agences depuis un seul dashboard.
 
 </p>
 
 </div>
 
-<div class="site-badge">
-Temps réel actif
+<div class="grid" id="sitesContainer">
+
+<div class="site-card">
+
+<div class="site-header">
+
+<h3>
+Hôtel Marina
+</h3>
+
+<div class="status">
+ACTIF
 </div>
 
 </div>
 
-<div class="section">
+<p>
+📍 Cotonou
+</p>
+
+<p>
+📡 4 capteurs connectés
+</p>
+
+<div class="stats">
+
+<div class="stat-box">
+
+<h4>
+Consommation
+</h4>
 
 <h2>
-Ajouter un site
+142 kWh
 </h2>
+
+</div>
+
+<div class="stat-box">
+
+<h4>
+Coût estimé
+</h4>
+
+<h2>
+28K FCFA
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="site-card">
+
+<div class="site-header">
+
+<h3>
+Restaurant Nova
+</h3>
+
+<div class="status">
+ACTIF
+</div>
+
+</div>
+
+<p>
+📍 Porto-Novo
+</p>
+
+<p>
+📡 2 capteurs connectés
+</p>
+
+<div class="stats">
+
+<div class="stat-box">
+
+<h4>
+Consommation
+</h4>
+
+<h2>
+84 kWh
+</h2>
+
+</div>
+
+<div class="stat-box">
+
+<h4>
+Coût estimé
+</h4>
+
+<h2>
+17K FCFA
+</h2>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<div class="add-site">
+
+<h3>
+➕ Ajouter un nouveau site
+</h3>
 
 <div class="form-grid">
 
-<input type="text"
-id="siteName"
+<input
+type="text"
 placeholder="Nom du site">
 
-<input type="text"
-id="siteCity"
-placeholder="Ville">
+<input
+type="text"
+placeholder="Localisation">
 
 </div>
 
-<input type="text"
-id="siteAddress"
-placeholder="Adresse complète">
-
-<button onclick="createSite()">
-Ajouter le site
+<button class="btn">
+Créer le site
 </button>
 
 </div>
 
-<div class="section">
+</div>
+
+<!-- UPGRADE SCREEN -->
+
+<div id="upgradeScreen" class="upgrade-screen">
+
+<div class="lock-icon">
+🔒
+</div>
 
 <h2>
-Sites surveillés
+Multi-sites Premium
 </h2>
 
-<div class="site-grid"
-id="sitesContainer">
+<p>
+
+La gestion multi-sites est disponible
+uniquement avec Business Cloud.
+
+Passez à Premium pour superviser
+plusieurs bâtiments depuis un seul dashboard.
+
+</p>
+
+<div class="upgrade-list">
+
+<div>
+✅ Monitoring multi-sites
+</div>
+
+<div>
+✅ Vue centralisée
+</div>
+
+<div>
+✅ Analytics avancés
+</div>
+
+<div>
+✅ Rapports globaux
+</div>
+
+<div>
+✅ IA énergétique multi-sites
+</div>
 
 </div>
+
+<button
+class="btn"
+onclick="window.location.href='pricing.html'">
+
+Passer à Business Cloud
+
+</button>
 
 </div>
 
@@ -197,11 +570,7 @@ id="sitesContainer">
 
 <script>
 
-/*
-AUTH CHECK
-*/
-
-async function checkAuth(){
+async function checkUser(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -210,314 +579,92 @@ if(!userData.user){
 
 window.location.href='auth.html';
 
-return null;
-
-}
-
-return userData.user;
-
-}
-
-/*
-LOGOUT
-*/
-
-async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
-}
-
-/*
-CREATE SITE
-*/
-
-async function createSite(){
-
-const user =
-await checkAuth();
-
-if(!user){
-
 return;
 
 }
 
-const name =
-document.getElementById('siteName').value;
-
-const city =
-document.getElementById('siteCity').value;
-
-const address =
-document.getElementById('siteAddress').value;
-
-if(
-
-name===''
-
-||
-
-city===''
-
-||
-
-address===''
-
-){
-
-alert('Veuillez remplir tous les champs.');
-
-return;
+document.getElementById('userEmail').innerHTML =
+userData.user.email;
 
 }
 
-const { error } =
+async function checkPremiumAccess(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+return false;
+
+}
+
+const userId = userData.user.id;
+
+const { data:subscription } =
 await supabaseClient
 
-.from('sites')
-
-.insert([{
-
-user_id:user.id,
-
-name:name,
-
-city:city,
-
-address:address
-
-}]);
-
-if(error){
-
-console.log(error);
-
-alert(error.message);
-
-return;
-
-}
-
-document.getElementById('siteName').value='';
-
-document.getElementById('siteCity').value='';
-
-document.getElementById('siteAddress').value='';
-
-loadSites();
-
-}
-
-/*
-DELETE SITE
-*/
-
-async function deleteSite(siteId){
-
-const confirmDelete =
-confirm('Supprimer ce site ?');
-
-if(!confirmDelete){
-
-return;
-
-}
-
-const { error } =
-await supabaseClient
-
-.from('sites')
-
-.delete()
-
-.eq('id',siteId);
-
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-loadSites();
-
-}
-
-/*
-LOAD SITES
-*/
-
-async function loadSites(){
-
-const user =
-await checkAuth();
-
-if(!user){
-
-return;
-
-}
-
-const { data:sites, error } =
-await supabaseClient
-
-.from('sites')
+.from('subscriptions')
 
 .select('*')
 
-.eq('user_id',user.id)
+.eq('user_id',userId)
 
-.order('created_at',{ascending:false});
+.single();
 
-if(error){
+if(!subscription){
 
-console.log(error);
+return false;
+
+}
+
+const now = new Date();
+
+const expiresAt =
+new Date(subscription.expires_at);
+
+if(
+
+subscription.status !== 'active'
+
+||
+
+expiresAt < now
+
+){
+
+return false;
+
+}
+
+return true;
+
+}
+
+async function initPage(){
+
+await checkUser();
+
+const hasAccess =
+await checkPremiumAccess();
+
+if(!hasAccess){
+
+document.getElementById('premiumContent').style.display='none';
+
+document.getElementById('upgradeScreen').style.display='block';
 
 return;
 
 }
 
-const container =
-document.getElementById('sitesContainer');
+document.getElementById('premiumContent').style.display='block';
 
-container.innerHTML='';
-
-if(sites.length===0){
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-<h2>
-Aucun site enregistré
-</h2>
-
-<p style="margin-top:15px;">
-
-Ajoutez votre premier site EnergyTrack.
-
-</p>
-
-</div>
-
-`;
-
-return;
+document.getElementById('upgradeScreen').style.display='none';
 
 }
 
-sites.forEach(site=>{
-
-container.innerHTML += `
-
-<div class="site-card">
-
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:10px;
-margin-bottom:20px;
-">
-
-<h2>
-
-${site.name}
-
-</h2>
-
-<div class="site-badge">
-
-ACTIF
-
-</div>
-
-</div>
-
-<p style="
-color:#94a3b8;
-line-height:1.8;
-">
-
-📍 ${site.city}
-
-<br><br>
-
-${site.address}
-
-</p>
-
-<p style="
-margin-top:20px;
-font-size:13px;
-color:#94a3b8;
-">
-
-Créé le :
-${new Date(site.created_at).toLocaleString()}
-
-</p>
-
-<button
-class="delete-btn"
-onclick="deleteSite('${site.id}')">
-
-Supprimer
-
-</button>
-
-</div>
-
-`;
-
-});
-
-}
-
-/*
-INIT
-*/
-
-loadSites();
-
-/*
-REALTIME
-*/
-
-supabaseClient
-
-.channel('sites-realtime')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'*',
-
-schema:'public',
-
-table:'sites'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadSites();
-
-}
-
-)
-
-.subscribe();
+initPage();
 
 </script>
 
