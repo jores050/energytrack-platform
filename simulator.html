@@ -52,6 +52,12 @@ color:white;
 font-weight:600;
 cursor:pointer;
 margin-top:30px;
+transition:0.3s;
+}
+
+button:hover{
+transform:translateY(-2px);
+opacity:0.95;
 }
 
 .log{
@@ -61,6 +67,7 @@ padding:20px;
 border-radius:18px;
 max-height:250px;
 overflow:auto;
+line-height:1.8;
 }
 
 </style>
@@ -120,6 +127,7 @@ SBEE
 Démarrer la simulation
 
 </button>
+
 <button onclick="stopSimulation()"
 style="
 background:#ff4c61;
@@ -129,6 +137,7 @@ margin-left:15px;
 Arrêter la simulation
 
 </button>
+
 <div class="log" id="log">
 
 Logs simulation...
@@ -136,24 +145,13 @@ Logs simulation...
 </div>
 
 </div>
-function stopSimulation(){
 
-clearInterval(simulationInterval);
-
-simulationRunning=false;
-
-document.getElementById('log').innerHTML =
-
-'⛔ Simulation arrêtée.<br><br>'
-
-+document.getElementById('log').innerHTML;
-
-}
 <script>
 
-let simulationRunning=false;
-let simulationInterval=null;
-  
+let simulationRunning = false;
+
+let simulationInterval = null;
+
 async function startSimulation(){
 
 if(simulationRunning){
@@ -162,7 +160,7 @@ return;
 
 }
 
-simulationRunning=true;
+simulationRunning = true;
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -184,7 +182,7 @@ VALEURS SIMULÉES
 */
 
 const voltage =
-Math.floor(Math.random()*260);
+Math.floor(Math.random()*220)+40;
 
 const power =
 Math.floor(Math.random()*5000);
@@ -199,6 +197,7 @@ const source =
 Math.random()>0.8
 ? 'GROUPE'
 : 'SBEE';
+
 /*
 ALERTES AUTOMATIQUES
 */
@@ -246,6 +245,51 @@ threshold:3000
 }]);
 
 }
+
+if(voltage < 50){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'SBEE_OUTAGE',
+
+message:'Coupure SBEE détectée',
+
+value:voltage,
+
+threshold:50
+
+}]);
+
+}
+
+if(voltage > 250){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'HIGH_VOLTAGE',
+
+message:'Surtension détectée',
+
+value:voltage,
+
+threshold:250
+
+}]);
+
+}
+
 /*
 UI
 */
@@ -260,7 +304,7 @@ document.getElementById('source').innerHTML =
 source;
 
 /*
-INSERT SUPABASE
+INSERT TELEMETRY
 */
 
 const { error } =
@@ -301,7 +345,8 @@ document.getElementById('log');
 
 log.innerHTML =
 
-'✅ '+new Date().toLocaleTimeString()
+'✅ '
++new Date().toLocaleTimeString()
 
 +' → '
 
@@ -316,6 +361,20 @@ log.innerHTML =
 +log.innerHTML;
 
 },5000);
+
+}
+
+function stopSimulation(){
+
+clearInterval(simulationInterval);
+
+simulationRunning=false;
+
+document.getElementById('log').innerHTML =
+
+'⛔ Simulation arrêtée.<br><br>'
+
++document.getElementById('log').innerHTML;
 
 }
 
