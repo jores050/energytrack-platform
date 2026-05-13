@@ -1,148 +1,142 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Analyse IA - EnergyTrack</title>
+    
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/style.css">
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
 
-<meta charset="UTF-8">
+    <style>
+        /* Styles spécifiques à la Sidebar et l'état Active */
+        .sidebar {
+            width: 260px;
+            background: #111a2e;
+            height: 100vh;
+            position: fixed;
+            padding: 20px;
+            border-right: 1px solid rgba(255,255,255,0.05);
+        }
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+        .nav-item {
+            display: block;
+            padding: 12px 15px;
+            color: #94a3b8;
+            text-decoration: none;
+            border-radius: 10px;
+            margin-bottom: 5px;
+            transition: 0.3s;
+            cursor: pointer;
+        }
 
-<title>Capteurs IoT EnergyTrack</title>
+        /* LA CORRECTION : Le sélecteur bleu/vert */
+        .nav-item.active {
+            background: rgba(0, 200, 150, 0.12);
+            color: #00c896;
+            font-weight: 600;
+        }
 
-<link rel="stylesheet" href="css/style.css">
+        .main {
+            margin-left: 260px;
+            padding: 40px;
+            background: #0f1729;
+            min-height: 100vh;
+            color: white;
+        }
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+        .ai-card {
+            background: linear-gradient(145deg, #182235, #111a2e);
+            padding: 25px;
+            border-radius: 20px;
+            border: 1px solid rgba(0, 200, 150, 0.2);
+            margin-bottom: 20px;
+        }
 
-<script src="js/supabase.js"></script>
+        .status-badge {
+            padding: 5px 12px;
+            border-radius: 999px;
+            font-size: 12px;
+            background: rgba(0, 200, 150, 0.2);
+            color: #00c896;
+        }
+    </style>
 </head>
 
 <body>
 
 <div class="sidebar">
+    <div class="logo" style="font-family:'Orbitron'; font-size: 22px; margin-bottom: 40px; color: white;">
+        Energy<span style="color:#00c896;">Track</span>
+    </div>
 
-<div class="logo">
-Energy<span>Track</span>
+    <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+    <a class="nav-item" href="consommation.html">⚡ Consommation</a>
+    <a class="nav-item" href="alertes.html">🔔 Alertes</a>
+    <a class="nav-item" href="rapports.html">📊 Rapports</a>
+    <a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+    <a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+    
+    <a class="nav-item active" href="ia.html">🤖 Analyse IA</a>
+    
+    <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+    <div class="nav-item" onclick="logoutUser()" style="margin-top: 50px; color: #ff6b6b;">🚪 Déconnexion</div>
 </div>
 
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+<div class="main">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-family: 'Orbitron';">Analyse Prédictive IA</h1>
+        <span class="status-badge">Moteur IA : Actif</span>
+    </div>
 
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+        
+        <div class="ai-card">
+            <h3 style="color: #00c896;">🔮 Prédiction Facture</h3>
+            <p style="color: #94a3b8; font-size: 14px;">Basé sur vos 7 derniers jours</p>
+            <h2 style="margin: 15px 0;">48 500 FCFA</h2>
+            <p style="color: #ffb547; font-size: 13px;">↑ 2% de hausse prévue</p>
+        </div>
 
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+        <div class="ai-card">
+            <h3 style="color: #00c896;">💡 Optimisation</h3>
+            <p style="color: #94a3b8; font-size: 14px;">Recommandation système</p>
+            <p style="margin-top: 15px; line-height: 1.6;">
+                Réduisez la puissance du groupe froid entre 12h et 15h pour économiser <strong>4 200 FCFA</strong> cette semaine.
+            </p>
+        </div>
 
-<a class="nav-item" href="rapports.html">📊 Rapports</a>
+    </div>
 
-<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-
-<a class="nav-item active" href="capteurs.html">📡 Capteurs IoT</a>
-
-<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
-
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
-
-<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
-
-</div>
-
-<div class="main" style="display:block;">
-
-<h1 style="margin-bottom:20px">
-Capteurs IoT
-</h1>
-
-<table class="table">
-
-<tr>
-
-<th>ID</th>
-
-<th>Tension</th>
-
-<th>Courant</th>
-
-<th>Statut</th>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-001</td>
-
-<td>221V</td>
-
-<td>12A</td>
-
-<td>
-<span class="status online">
-ONLINE
-</span>
-</td>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-002</td>
-
-<td>208V</td>
-
-<td>17A</td>
-
-<td>
-<span class="status online">
-ONLINE
-</span>
-</td>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-003</td>
-
-<td>0V</td>
-
-<td>0A</td>
-
-<td>
-<span class="status offline">
-OFFLINE
-</span>
-</td>
-
-</tr>
-
-</table>
-
+    <div class="ai-card" style="margin-top: 20px;">
+        <h3>📊 Analyse des anomalies (24h)</h3>
+        <p style="color: #94a3b8;">Aucune anomalie critique détectée par l'algorithme EnergyTrack.</p>
+    </div>
 </div>
 
 <script>
-window.onload = async function(){
+    // Vérification de session Supabase
+    window.onload = async function(){
+        const { data: { user } } = await supabase.auth.getUser();
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+        if(!user){
+            window.location.href = 'auth.html';
+            return;
+        }
+        console.log('Utilisateur connecté:', user.email);
+    }
 
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return;
-
-}
-
-console.log('Utilisateur connecté');
-
-}
-
-
-function logoutUser(){
-
-localStorage.clear();
-
-
-
-}
-
+    // Fonction de déconnexion propre
+    async function logoutUser(){
+        const { error } = await supabase.auth.signOut();
+        if(!error) {
+            localStorage.clear();
+            window.location.href = 'auth.html';
+        }
+    }
 </script>
 
 </body>
