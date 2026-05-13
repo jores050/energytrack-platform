@@ -180,6 +180,52 @@ recommendation;
 loadAI();
 
 </script>
+<script src="js/subscription.js"></script>
 
+<script>
+
+async function protectPage(){
+
+const hasAccess =
+await checkPremiumAccess();
+
+if(!hasAccess){
+
+alert(
+'Votre abonnement Business est requis pour accéder à cette fonctionnalité.'
+);
+
+window.location.href='pricing.html';
+
+}
+
+}
+
+protectPage();
+
+</script><script src="js/subscription.js"></script>
+
+<script>
+
+async function protectPage(){
+
+const hasAccess =
+await checkPremiumAccess();
+
+if(!hasAccess){
+
+alert(
+'Votre abonnement Business est requis pour accéder à cette fonctionnalité.'
+);
+
+window.location.href='pricing.html';
+
+}
+
+}
+
+protectPage();
+
+</script>
 </body>
 </html>
