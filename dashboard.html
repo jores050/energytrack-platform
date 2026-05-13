@@ -94,7 +94,7 @@ Facture estimée
 </div>
 
 <div class="card-value" id="facture">
-47 200 FCFA
+0 FCFA
 </div>
 
 </div>
@@ -105,8 +105,8 @@ Facture estimée
 Économie estimée
 </div>
 
-<div class="card-value green">
-12 400 FCFA
+<div class="card-value green" id="power">
+0 W
 </div>
 
 </div>
@@ -117,8 +117,8 @@ Facture estimée
 Groupe électrogène
 </div>
 
-<div class="card-value orange">
-18h
+<div class="card-value orange" id="voltage">
+0 V
 </div>
 
 </div>
@@ -129,8 +129,8 @@ Groupe électrogène
 État réseau SBEE
 </div>
 
-<div class="card-value red">
-Coupure détectée
+<div class="card-value" id="sourceStatus">
+SBEE
 </div>
 
 </div>
@@ -150,7 +150,119 @@ Consommation hebdomadaire
 </div>
 
 <script>
+async function loadTelemetry(){
 
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+/*
+RÉCUPÉRATION DERNIÈRE DONNÉE
+*/
+
+const { data, error } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId)
+
+.order('created_at',{ascending:false})
+
+.limit(1);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+if(data.length > 0){
+
+const telemetry = data[0];
+
+/*
+PUISSANCE
+*/
+
+document.getElementById('power').innerHTML =
+Math.round(telemetry.power_w)+' W';
+
+/*
+TENSION
+*/
+
+document.getElementById('voltage').innerHTML =
+Math.round(telemetry.voltage)+' V';
+
+/*
+SOURCE
+*/
+
+document.getElementById('sourceStatus').innerHTML =
+telemetry.source;
+
+/*
+FACTURE
+*/
+
+const estimatedCost =
+Math.round(telemetry.kwh_total * 91);
+
+document.getElementById('facture').innerHTML =
+estimatedCost.toLocaleString()+' FCFA';
+
+}
+
+}
+  loadTelemetry();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('telemetry-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log('Nouvelle donnée',payload);
+
+loadTelemetry();
+
+}
+
+)
+
+.subscribe();
 window.onload = async function(){
 
 const { data:userData } =
@@ -255,15 +367,6 @@ grid:{color:'rgba(255,255,255,0.05)'}
 }
 
 });
-
-setInterval(()=>{
-
-const random=Math.floor(Math.random()*10000)+40000;
-
-document.getElementById('facture').innerHTML=
-random.toLocaleString()+' FCFA';
-
-},5000);
 
 </script>
 
