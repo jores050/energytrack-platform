@@ -1,142 +1,502 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Analyse IA - EnergyTrack</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="css/style.css">
-    
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="js/supabase.js"></script>
 
-    <style>
-        /* Styles spécifiques à la Sidebar et l'état Active */
-        .sidebar {
-            width: 260px;
-            background: #111a2e;
-            height: 100vh;
-            position: fixed;
-            padding: 20px;
-            border-right: 1px solid rgba(255,255,255,0.05);
-        }
+<meta charset="UTF-8">
 
-        .nav-item {
-            display: block;
-            padding: 12px 15px;
-            color: #94a3b8;
-            text-decoration: none;
-            border-radius: 10px;
-            margin-bottom: 5px;
-            transition: 0.3s;
-            cursor: pointer;
-        }
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        /* LA CORRECTION : Le sélecteur bleu/vert */
-        .nav-item.active {
-            background: rgba(0, 200, 150, 0.12);
-            color: #00c896;
-            font-weight: 600;
-        }
+<title>Analyse IA - EnergyTrack</title>
 
-        .main {
-            margin-left: 260px;
-            padding: 40px;
-            background: #0f1729;
-            min-height: 100vh;
-            color: white;
-        }
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-        .ai-card {
-            background: linear-gradient(145deg, #182235, #111a2e);
-            padding: 25px;
-            border-radius: 20px;
-            border: 1px solid rgba(0, 200, 150, 0.2);
-            margin-bottom: 20px;
-        }
+<link rel="stylesheet" href="css/style.css">
 
-        .status-badge {
-            padding: 5px 12px;
-            border-radius: 999px;
-            font-size: 12px;
-            background: rgba(0, 200, 150, 0.2);
-            color: #00c896;
-        }
-    </style>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
+<style>
+
+.sidebar{
+width:260px;
+background:#111a2e;
+height:100vh;
+position:fixed;
+padding:20px;
+border-right:1px solid rgba(255,255,255,0.05);
+}
+
+.nav-item{
+display:block;
+padding:12px 15px;
+color:#94a3b8;
+text-decoration:none;
+border-radius:10px;
+margin-bottom:5px;
+transition:0.3s;
+cursor:pointer;
+}
+
+.nav-item:hover{
+background:rgba(255,255,255,0.05);
+color:white;
+}
+
+.nav-item.active{
+background:rgba(0,200,150,0.12);
+color:#00c896;
+font-weight:600;
+}
+
+.main{
+margin-left:260px;
+padding:40px;
+background:#0f1729;
+min-height:100vh;
+color:white;
+}
+
+.ai-card{
+background:linear-gradient(145deg,#182235,#111a2e);
+padding:25px;
+border-radius:20px;
+border:1px solid rgba(0,200,150,0.2);
+margin-bottom:20px;
+}
+
+.status-badge{
+padding:5px 12px;
+border-radius:999px;
+font-size:12px;
+background:rgba(0,200,150,0.2);
+color:#00c896;
+}
+
+.alert{
+padding:18px;
+border-radius:18px;
+margin-top:18px;
+line-height:1.8;
+}
+
+.alert-warning{
+background:rgba(255,181,71,0.12);
+border:1px solid rgba(255,181,71,0.25);
+}
+
+.alert-danger{
+background:rgba(255,76,97,0.12);
+border:1px solid rgba(255,76,97,0.25);
+}
+
+.alert-success{
+background:rgba(0,200,150,0.12);
+border:1px solid rgba(0,200,150,0.25);
+}
+
+</style>
+
 </head>
 
 <body>
 
 <div class="sidebar">
-    <div class="logo" style="font-family:'Orbitron'; font-size: 22px; margin-bottom: 40px; color: white;">
-        Energy<span style="color:#00c896;">Track</span>
-    </div>
 
-    <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
-    <a class="nav-item" href="consommation.html">⚡ Consommation</a>
-    <a class="nav-item" href="alertes.html">🔔 Alertes</a>
-    <a class="nav-item" href="rapports.html">📊 Rapports</a>
-    <a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-    <a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
-    
-    <a class="nav-item active" href="ia.html">🤖 Analyse IA</a>
-    
-    <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
-    <div class="nav-item" onclick="logoutUser()" style="margin-top: 50px; color: #ff6b6b;">🚪 Déconnexion</div>
+<div class="logo" style="
+font-family:'Orbitron';
+font-size:22px;
+margin-bottom:40px;
+color:white;
+">
+
+Energy<span style="color:#00c896;">
+Track
+</span>
+
+</div>
+
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
+
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
+
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
+</a>
+
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item" href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
+
+<a class="nav-item active" href="ia.html">
+🤖 Analyse IA
+</a>
+
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
+
+<div class="nav-item"
+onclick="logoutUser()"
+style="
+margin-top:50px;
+color:#ff6b6b;
+">
+
+🚪 Déconnexion
+
+</div>
+
 </div>
 
 <div class="main">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h1 style="font-family: 'Orbitron';">Analyse Prédictive IA</h1>
-        <span class="status-badge">Moteur IA : Actif</span>
-    </div>
 
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
-        
-        <div class="ai-card">
-            <h3 style="color: #00c896;">🔮 Prédiction Facture</h3>
-            <p style="color: #94a3b8; font-size: 14px;">Basé sur vos 7 derniers jours</p>
-            <h2 style="margin: 15px 0;">48 500 FCFA</h2>
-            <p style="color: #ffb547; font-size: 13px;">↑ 2% de hausse prévue</p>
-        </div>
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:30px;
+flex-wrap:wrap;
+gap:15px;
+">
 
-        <div class="ai-card">
-            <h3 style="color: #00c896;">💡 Optimisation</h3>
-            <p style="color: #94a3b8; font-size: 14px;">Recommandation système</p>
-            <p style="margin-top: 15px; line-height: 1.6;">
-                Réduisez la puissance du groupe froid entre 12h et 15h pour économiser <strong>4 200 FCFA</strong> cette semaine.
-            </p>
-        </div>
+<h1 style="font-family:'Orbitron';">
+Analyse IA Énergétique
+</h1>
 
-    </div>
+<span class="status-badge">
+Moteur IA actif
+</span>
 
-    <div class="ai-card" style="margin-top: 20px;">
-        <h3>📊 Analyse des anomalies (24h)</h3>
-        <p style="color: #94a3b8;">Aucune anomalie critique détectée par l'algorithme EnergyTrack.</p>
-    </div>
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
+">
+
+<div class="ai-card">
+
+<h3 style="color:#00c896;">
+🔮 Prédiction Facture
+</h3>
+
+<p style="
+color:#94a3b8;
+font-size:14px;
+">
+
+Basé sur les données récentes
+
+</p>
+
+<h2 id="predictedBill"
+style="
+margin:15px 0;
+">
+
+0 FCFA
+
+</h2>
+
+<p style="
+color:#ffb547;
+font-size:13px;
+">
+
+Estimation dynamique IA
+
+</p>
+
+</div>
+
+<div class="ai-card">
+
+<h3 style="color:#00c896;">
+⚡ Consommation Moyenne
+</h3>
+
+<p style="
+color:#94a3b8;
+font-size:14px;
+">
+
+Analyse temps réel
+
+</p>
+
+<h2 id="avgPower"
+style="
+margin:15px 0;
+">
+
+0 W
+
+</h2>
+
+<p style="
+color:#94a3b8;
+font-size:13px;
+">
+
+Calcul automatique
+
+</p>
+
+</div>
+
+</div>
+
+<div class="ai-card"
+style="margin-top:20px;">
+
+<h3 style="margin-bottom:20px;">
+🤖 Recommandations IA
+</h3>
+
+<div id="aiContainer">
+
+</div>
+
+</div>
+
 </div>
 
 <script>
-    // Vérification de session Supabase
-    window.onload = async function(){
-        const { data: { user } } = await supabase.auth.getUser();
 
-        if(!user){
-            window.location.href = 'auth.html';
-            return;
-        }
-        console.log('Utilisateur connecté:', user.email);
-    }
+async function logoutUser(){
 
-    // Fonction de déconnexion propre
-    async function logoutUser(){
-        const { error } = await supabase.auth.signOut();
-        if(!error) {
-            localStorage.clear();
-            window.location.href = 'auth.html';
-        }
-    }
+await supabaseClient.auth.signOut();
+
+window.location.href='auth.html';
+
+}
+
+async function loadAIAnalysis(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+const { data, error } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId)
+
+.order('created_at',{ascending:false})
+
+.limit(20);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+if(data.length===0){
+
+return;
+
+}
+
+const container =
+document.getElementById('aiContainer');
+
+container.innerHTML='';
+
+let avgPower=0;
+
+let lowVoltageCount=0;
+
+let groupeCount=0;
+
+let totalKwh=0;
+
+data.forEach(item=>{
+
+avgPower += Number(item.power_w);
+
+totalKwh += Number(item.kwh_total);
+
+if(item.voltage < 190){
+
+lowVoltageCount++;
+
+}
+
+if(item.source==='GROUPE'){
+
+groupeCount++;
+
+}
+
+});
+
+avgPower =
+Math.round(avgPower/data.length);
+
+const predictedBill =
+Math.round(totalKwh*91);
+
+document.getElementById('avgPower').innerHTML =
+avgPower+' W';
+
+document.getElementById('predictedBill').innerHTML =
+predictedBill.toLocaleString()+' FCFA';
+
+/*
+SURCONSOMMATION
+*/
+
+if(avgPower > 2500){
+
+container.innerHTML += `
+
+<div class="alert alert-warning">
+
+⚠️ Consommation élevée détectée.
+Une optimisation énergétique pourrait réduire vos coûts de 10 à 15%.
+
+</div>
+
+`;
+
+}
+
+/*
+BASSE TENSION
+*/
+
+if(lowVoltageCount > 5){
+
+container.innerHTML += `
+
+<div class="alert alert-danger">
+
+⚡ Instabilité réseau détectée.
+Un système de protection électrique est recommandé.
+
+</div>
+
+`;
+
+}
+
+/*
+GROUPE ÉLECTROGÈNE
+*/
+
+if(groupeCount > 5){
+
+container.innerHTML += `
+
+<div class="alert alert-warning">
+
+⛽ Utilisation importante du groupe électrogène.
+Le coût carburant semble élevé cette semaine.
+
+</div>
+
+`;
+
+}
+
+/*
+NORMAL
+*/
+
+if(
+
+avgPower < 2500
+&& lowVoltageCount <= 5
+&& groupeCount <= 5
+
+){
+
+container.innerHTML += `
+
+<div class="alert alert-success">
+
+✅ Votre installation énergétique fonctionne normalement.
+Aucune anomalie critique détectée.
+
+</div>
+
+`;
+
+}
+
+}
+
+/*
+LOAD INITIAL
+*/
+
+loadAIAnalysis();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('ai-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadAIAnalysis();
+
+}
+
+)
+
+.subscribe();
+
 </script>
 
 </body>
