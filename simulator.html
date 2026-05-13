@@ -120,7 +120,15 @@ SBEE
 Démarrer la simulation
 
 </button>
+<button onclick="stopSimulation()"
+style="
+background:#ff4c61;
+margin-left:15px;
+">
 
+Arrêter la simulation
+
+</button>
 <div class="log" id="log">
 
 Logs simulation...
@@ -128,11 +136,24 @@ Logs simulation...
 </div>
 
 </div>
+function stopSimulation(){
 
+clearInterval(simulationInterval);
+
+simulationRunning=false;
+
+document.getElementById('log').innerHTML =
+
+'⛔ Simulation arrêtée.<br><br>'
+
++document.getElementById('log').innerHTML;
+
+}
 <script>
 
 let simulationRunning=false;
-
+let simulationInterval=null;
+  
 async function startSimulation(){
 
 if(simulationRunning){
@@ -156,7 +177,7 @@ return;
 
 const userId = userData.user.id;
 
-setInterval(async()=>{
+simulationInterval = setInterval(async()=>{
 
 /*
 VALEURS SIMULÉES
