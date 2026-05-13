@@ -174,7 +174,97 @@ const current =
 const kwh =
 (power/1000).toFixed(2);
 
-const source =
+const source = /*
+ALERTES
+*/
+
+if(voltage < 190){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'LOW_VOLTAGE',
+
+message:'Tension basse détectée',
+
+value:voltage,
+
+threshold:190
+
+}]);
+
+}
+
+if(voltage > 250){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'HIGH_VOLTAGE',
+
+message:'Surtension détectée',
+
+value:voltage,
+
+threshold:250
+
+}]);
+
+}
+
+if(power > 3000){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'OVERCONSUMPTION',
+
+message:'Surconsommation détectée',
+
+value:power,
+
+threshold:3000
+
+}]);
+
+}
+
+if(voltage < 50){
+
+await supabaseClient
+
+.from('alerts')
+
+.insert([{
+
+sensor_id:userId,
+
+type:'SBEE_OUTAGE',
+
+message:'Coupure SBEE détectée',
+
+value:voltage,
+
+threshold:50
+
+}]);
+
+}
 Math.random()>0.8
 ? 'GROUPE'
 : 'SBEE';
