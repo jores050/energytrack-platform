@@ -1,7 +1,10 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Rapports EnergyTrack</title>
@@ -9,9 +12,11 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+
 </head>
 
 <body>
@@ -22,23 +27,41 @@
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
 
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
 
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
+</a>
 
-<a class="nav-item active" href="rapports.html">📊 Rapports</a>
+<a class="nav-item active" href="rapports.html">
+📊 Rapports
+</a>
 
-<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+<a class="nav-item" href="sites.html">
+🏢 Multi-sites
+</a>
 
-<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
 
-<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+<a class="nav-item" href="ia.html">
+🤖 Analyse IA
+</a>
 
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
 
-<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
+<div class="nav-item" onclick="logoutUser()">
+🚪 Déconnexion
+</div>
 
 </div>
 
@@ -47,6 +70,18 @@ Energy<span>Track</span>
 <h1 style="margin-bottom:20px;">
 Rapports Énergétiques
 </h1>
+
+<div class="section">
+
+<h2>
+Rapport énergétique intelligent
+</h2>
+
+<div id="reportContainer">
+
+</div>
+
+</div>
 
 <div class="section">
 
@@ -81,19 +116,202 @@ Télécharger CSV
 </div>
 
 <script>
-window.onload = async function(){
+
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
+
+window.location.href='auth.html';
+
+}
+
+async function loadReport(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
 
 if(!userData.user){
 
+window.location.href='auth.html';
 
 return;
 
 }
 
-console.log('Utilisateur connecté');
+const userId = userData.user.id;
+
+/*
+RÉCUP TÉLÉMÉTRIE
+*/
+
+const { data:telemetry } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId);
+
+/*
+RÉCUP ALERTES
+*/
+
+const { data:alerts } =
+await supabaseClient
+
+.from('alerts')
+
+.select('*')
+
+.eq('sensor_id',userId);
+
+/*
+CALCULS
+*/
+
+let totalKwh=0;
+
+let groupeCount=0;
+
+let avgPower=0;
+
+telemetry.forEach(item=>{
+
+totalKwh += Number(item.kwh_total);
+
+avgPower += Number(item.power_w);
+
+if(item.source==='GROUPE'){
+
+groupeCount++;
+
+}
+
+});
+
+avgPower =
+Math.round(avgPower/telemetry.length);
+
+const totalCost =
+Math.round(totalKwh * 91);
+
+const groupePercent =
+Math.round(
+
+(groupeCount/telemetry.length)*100
+
+);
+
+const outages =
+alerts.filter(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+).length;
+
+/*
+IA
+*/
+
+let recommendation='';
+
+if(avgPower > 2500){
+
+recommendation =
+'Réduction de consommation recommandée pour limiter les coûts énergétiques.';
+
+}else if(groupePercent > 30){
+
+recommendation =
+'Utilisation importante du groupe électrogène détectée.';
+
+}else{
+
+recommendation =
+'Installation énergétique stable et optimisée.';
+
+}
+
+/*
+AFFICHAGE
+*/
+
+document.getElementById('reportContainer').innerHTML = `
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+">
+
+<div class="card">
+
+<h3>
+⚡ Consommation totale
+</h3>
+
+<h1 style="margin-top:15px;">
+${totalKwh.toFixed(1)} kWh
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+💰 Coût estimé
+</h3>
+
+<h1 style="margin-top:15px;">
+${totalCost.toLocaleString()} FCFA
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+⛽ Utilisation Groupe
+</h3>
+
+<h1 style="margin-top:15px;">
+${groupePercent}%
+</h1>
+
+</div>
+
+<div class="card">
+
+<h3>
+🔔 Coupures détectées
+</h3>
+
+<h1 style="margin-top:15px;">
+${outages}
+</h1>
+
+</div>
+
+</div>
+
+<div class="section"
+style="margin-top:25px;">
+
+<h2>
+🤖 Recommandation IA
+</h2>
+
+<div class="alert alert-warning"
+style="margin-top:20px;">
+
+${recommendation}
+
+</div>
+
+</div>
+
+`;
 
 }
 
@@ -104,15 +322,50 @@ document.getElementById('reportStatus').innerHTML=
 
 }
 
-function downloadCSV(){
+async function downloadCSV(){
 
-const csv='Jour,kWh,FCFA\\nLundi,12,1092\\nMardi,19,1729';
+const { data:userData } =
+await supabaseClient.auth.getUser();
 
-const blob=new Blob([csv],{type:'text/csv'});
+if(!userData.user){
 
-const url=window.URL.createObjectURL(blob);
+return;
 
-const a=document.createElement('a');
+}
+
+const userId = userData.user.id;
+
+const { data } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId);
+
+let csv =
+'Date,Voltage,Power,Source,kWh\n';
+
+data.forEach(item=>{
+
+csv +=
+`${item.created_at},
+${item.voltage},
+${item.power_w},
+${item.source},
+${item.kwh_total}\n`;
+
+});
+
+const blob =
+new Blob([csv],{type:'text/csv'});
+
+const url =
+window.URL.createObjectURL(blob);
+
+const a =
+document.createElement('a');
 
 a.href=url;
 
@@ -122,13 +375,45 @@ a.click();
 
 }
 
-function logoutUser(){
+/*
+LOAD INITIAL
+*/
 
-localStorage.clear();
+loadReport();
 
-window.location.href='index.html';
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('reports-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadReport();
 
 }
+
+)
+
+.subscribe();
 
 </script>
 
