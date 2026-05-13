@@ -17,6 +17,8 @@
 
 <script src="js/supabase.js"></script>
 
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
 </head>
 
 <body>
@@ -107,8 +109,8 @@ Envoyer le rapport
 Exporter les données
 </h2>
 
-<button onclick="downloadCSV()">
-Télécharger CSV
+<button onclick="downloadPDF()">
+Télécharger PDF
 </button>
 
 </div>
@@ -322,7 +324,11 @@ document.getElementById('reportStatus').innerHTML=
 
 }
 
-async function downloadCSV(){
+async function downloadPDF(){
+
+const { jsPDF } = window.jspdf;
+
+const doc = new jsPDF();
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -335,7 +341,11 @@ return;
 
 const userId = userData.user.id;
 
-const { data } =
+/*
+RÉCUP DATA
+*/
+
+const { data:telemetry } =
 await supabaseClient
 
 .from('telemetry')
@@ -344,34 +354,188 @@ await supabaseClient
 
 .eq('sensor_id',userId);
 
-let csv =
-'Date,Voltage,Power,Source,kWh\n';
+const { data:alerts } =
+await supabaseClient
 
-data.forEach(item=>{
+.from('alerts')
 
-csv +=
-`${item.created_at},
-${item.voltage},
-${item.power_w},
-${item.source},
-${item.kwh_total}\n`;
+.select('*')
+
+.eq('sensor_id',userId);
+
+/*
+CALCULS
+*/
+
+let totalKwh=0;
+
+let groupeCount=0;
+
+let avgPower=0;
+
+telemetry.forEach(item=>{
+
+totalKwh += Number(item.kwh_total);
+
+avgPower += Number(item.power_w);
+
+if(item.source==='GROUPE'){
+
+groupeCount++;
+
+}
 
 });
 
-const blob =
-new Blob([csv],{type:'text/csv'});
+avgPower =
+Math.round(avgPower/telemetry.length);
 
-const url =
-window.URL.createObjectURL(blob);
+const totalCost =
+Math.round(totalKwh * 91);
 
-const a =
-document.createElement('a');
+const groupePercent =
+Math.round(
+(groupeCount/telemetry.length)*100
+);
 
-a.href=url;
+const outages =
+alerts.filter(alert=>
+alert.type==='SBEE_OUTAGE'
+).length;
 
-a.download='energytrack-report.csv';
+/*
+PDF
+*/
 
-a.click();
+doc.setFontSize(22);
+
+doc.text('EnergyTrack - Rapport Energetique',20,25);
+
+doc.setFontSize(12);
+
+doc.text(
+'Genere le : '+new Date().toLocaleString(),
+20,
+35
+);
+
+/*
+RÉSUMÉ
+*/
+
+doc.setFontSize(16);
+
+doc.text('Resume energetique',20,55);
+
+doc.setFontSize(12);
+
+doc.text(
+'Consommation totale : '+totalKwh.toFixed(1)+' kWh',
+20,
+70
+);
+
+doc.text(
+'Cout estime : '+totalCost.toLocaleString()+' FCFA',
+20,
+80
+);
+
+doc.text(
+'Consommation moyenne : '+avgPower+' W',
+20,
+90
+);
+
+doc.text(
+'Taux utilisation groupe : '+groupePercent+'%',
+20,
+100
+);
+
+doc.text(
+'Coupures detectees : '+outages,
+20,
+110
+);
+
+/*
+ALERTES
+*/
+
+let y = 135;
+
+doc.setFontSize(16);
+
+doc.text('Alertes recentes',20,y);
+
+y += 15;
+
+alerts.slice(0,5).forEach(alert=>{
+
+if(y>260){
+
+doc.addPage();
+
+y=20;
+
+}
+
+const line =
+'- '+alert.type+' | '+alert.message;
+
+doc.setFontSize(11);
+
+doc.text(line,20,y);
+
+y += 12;
+
+});
+
+/*
+RECOMMANDATION IA
+*/
+
+if(y>230){
+
+doc.addPage();
+
+y=20;
+
+}
+
+let recommendation='';
+
+if(avgPower > 2500){
+
+recommendation =
+'Reduction de consommation recommandee pour limiter les couts energetiques.';
+
+}else if(groupePercent > 30){
+
+recommendation =
+'Utilisation importante du groupe electrogene detectee.';
+
+}else{
+
+recommendation =
+'Installation energetique stable et optimisee.';
+
+}
+
+doc.setFontSize(16);
+
+doc.text('Recommendation IA',20,y+20);
+
+doc.setFontSize(12);
+
+doc.text(recommendation,20,y+35);
+
+/*
+SAVE
+*/
+
+doc.save('energytrack-report.pdf');
 
 }
 
