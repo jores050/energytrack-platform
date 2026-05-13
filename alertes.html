@@ -15,22 +15,10 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="js/supabase.js"></script>
 </head>
 
 <body>
-<div class="section">
-
-<h2>
-Alertes temps réel
-</h2>
-
-<div id="alertsContainer">
-
-</div>
-
 </div>
 <div class="sidebar">
 
@@ -81,6 +69,15 @@ Energy<span>Track</span>
 <h1 style="margin-bottom:20px">
 Alertes Intelligentes
 </h1>
+<div class="section">
+
+<h2>
+Alertes temps réel
+</h2>
+
+<div id="alertsContainer">
+
+</div>
 
 <div class="alert alert-danger">
 ⚠️ Surconsommation détectée dans le bâtiment principal.
@@ -137,13 +134,11 @@ document.getElementById('newAlert').innerHTML=
 
 }
 
-function logoutUser(){
+async function logoutUser(){
 
-localStorage.clear();
+await supabaseClient.auth.signOut();
 
-window.location.href='index.html';
 
-}
 
 </script>
 <script>
