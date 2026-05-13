@@ -1510,11 +1510,9 @@ LIMITED
 
 function showLimitedDashboard(){
 
-document
-
 document.getElementById(
 'subscriptionBanner'
-).innerHTML = `
+).innerHTML = ` `
 
 <div style="
 background:rgba(255,76,97,0.12);
@@ -1582,14 +1580,59 @@ NO SUBSCRIPTION
 
 function showUpgradePopup(){
 
-document
-.querySelectorAll('.premium-feature')
+document.getElementById(
+'subscriptionBanner'
+).innerHTML = `
 
-.forEach(el=>{
+<div style="
+background:rgba(255,181,71,0.12);
+border:1px solid rgba(255,181,71,0.2);
+padding:22px;
+border-radius:20px;
+margin-bottom:25px;
+">
 
-el.style.display='none';
+<h3 style="
+margin-bottom:12px;
+color:#ffb547;
+">
 
-});
+Abonnement requis
+
+</h3>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:20px;
+">
+
+Certaines fonctionnalités Premium
+nécessitent un abonnement actif.
+
+</p>
+
+<button
+
+style="
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#00c896;
+color:#081120;
+font-weight:700;
+cursor:pointer;
+"
+
+onclick="window.location.href='pricing.html'">
+
+Voir les offres
+
+</button>
+
+</div>
+
+`;
 
 }
 
