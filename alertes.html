@@ -12,13 +12,91 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
 
+<style>
+
+.alert-card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:22px;
+border-radius:24px;
+margin-bottom:20px;
+border-left:6px solid #ffb547;
+transition:0.3s;
+}
+
+.alert-card:hover{
+transform:translateY(-3px);
+box-shadow:0 15px 40px rgba(0,0,0,0.3);
+}
+
+.alert-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:10px;
+margin-bottom:15px;
+}
+
+.alert-badge{
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+}
+
+.badge-active{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.badge-critical{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.badge-resolved{
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+.filter-bar{
+display:flex;
+gap:12px;
+flex-wrap:wrap;
+margin:25px 0;
+}
+
+.filter-btn{
+padding:12px 18px;
+border:none;
+border-radius:14px;
+background:#182235;
+color:white;
+cursor:pointer;
+transition:0.3s;
+}
+
+.filter-btn:hover{
+background:#00c896;
+}
+
+.empty-state{
+padding:60px;
+text-align:center;
+color:#94a3b8;
+}
+
+</style>
+
 </head>
 
 <body>
+
 <div class="sidebar">
 
 <div class="logo">
@@ -57,7 +135,8 @@ Energy<span>Track</span>
 ⚙️ Paramètres
 </a>
 
-<div class="nav-item" onclick="logoutUser()">
+<div class="nav-item"
+onclick="logoutUser()">
 🚪 Déconnexion
 </div>
 
@@ -65,23 +144,116 @@ Energy<span>Track</span>
 
 <div class="main" style="display:block;">
 
-<h1 style="margin-bottom:20px">
-Alertes Intelligentes
-</h1>
-<div class="section">
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
+">
 
-<h2>
-Alertes temps réel
-</h2>
+<div>
+
+<h1>
+Centre d’Alertes
+</h1>
+
+<p style="
+margin-top:10px;
+color:#94a3b8;
+">
+
+Surveillance temps réel des anomalies énergétiques.
+
+</p>
+
+</div>
+
+<div class="alert-badge badge-critical">
+Temps réel actif
+</div>
+
+</div>
+
+<div class="filter-bar">
+
+<button
+class="filter-btn"
+onclick="filterAlerts('ALL')">
+
+Toutes
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterAlerts('SBEE_OUTAGE')">
+
+Coupures
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterAlerts('LOW_VOLTAGE')">
+
+Basse tension
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterAlerts('HIGH_VOLTAGE')">
+
+Surtension
+
+</button>
+
+<button
+class="filter-btn"
+onclick="filterAlerts('OVERCONSUMPTION')">
+
+Surconsommation
+
+</button>
+
+</div>
 
 <div id="alertsContainer">
 
 </div>
 
-
 </div>
 
 <script>
+
+let currentFilter = 'ALL';
+
+/*
+AUTH
+*/
+
+async function getUser(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return null;
+
+}
+
+return userData.user;
+
+}
+
+/*
+LOGOUT
+*/
 
 async function logoutUser(){
 
@@ -91,38 +263,56 @@ window.location.href='auth.html';
 
 }
 
-</script>
-<script>
+/*
+FILTER
+*/
+
+function filterAlerts(type){
+
+currentFilter = type;
+
+loadAlerts();
+
+}
+
+/*
+LOAD ALERTS
+*/
 
 async function loadAlerts(){
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+const user =
+await getUser();
 
-if(!userData.user){
-
-window.location.href='auth.html';
+if(!user){
 
 return;
 
 }
 
-const userId = userData.user.id;
-
-/*
-RÉCUP ALERTES
-*/
-
-const { data, error } =
-await supabaseClient
+let query =
+supabaseClient
 
 .from('alerts')
 
-.select('*')
+.select(`
+*,
+sites(name)
+`)
 
-.eq('sensor_id',userId)
+.eq('sensor_id',user.id)
 
 .order('created_at',{ascending:false});
+
+if(currentFilter!=='ALL'){
+
+query =
+query.eq('type',currentFilter);
+
+}
+
+const { data:alerts, error } =
+await query;
 
 if(error){
 
@@ -137,70 +327,96 @@ document.getElementById('alertsContainer');
 
 container.innerHTML='';
 
-/*
-AFFICHAGE
-*/
+if(alerts.length===0){
 
-data.forEach(alert=>{
+container.innerHTML = `
 
-let color='#ffb547';
+<div class="empty-state">
+
+<h2>
+Aucune alerte
+</h2>
+
+<p style="margin-top:15px;">
+
+Aucune anomalie détectée actuellement.
+
+</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+alerts.forEach(alert=>{
+
+let borderColor='#ffb547';
+
+let badgeClass='badge-active';
 
 if(alert.type==='SBEE_OUTAGE'){
 
-color='#ff4c61';
+borderColor='#ff4c61';
+
+badgeClass='badge-critical';
 
 }
 
 if(alert.type==='LOW_VOLTAGE'){
 
-color='#ffb547';
+borderColor='#ffb547';
+
+badgeClass='badge-active';
 
 }
 
 if(alert.type==='HIGH_VOLTAGE'){
 
-color='#00aeef';
+borderColor='#00aeef';
+
+badgeClass='badge-active';
 
 }
 
 if(alert.type==='OVERCONSUMPTION'){
 
-color='#ffd93d';
+borderColor='#ffd93d';
+
+badgeClass='badge-critical';
 
 }
 
 container.innerHTML += `
 
-<div style="
-background:#182235;
-padding:20px;
-border-radius:20px;
-margin-bottom:18px;
-border-left:6px solid ${color};
-">
+<div class="alert-card"
+style="border-left-color:${borderColor};">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:10px;
-flex-wrap:wrap;
-gap:10px;
-">
+<div class="alert-header">
 
-<h3>
+<div>
+
+<h2>
 
 ${alert.type}
 
-</h3>
+</h2>
 
-<div style="
-background:${color};
-padding:8px 14px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
+<p style="
+margin-top:8px;
+color:#94a3b8;
+font-size:14px;
 ">
+
+🏢 ${alert.sites?.name || 'Site inconnu'}
+
+</p>
+
+</div>
+
+<div class="alert-badge ${badgeClass}">
 
 ${alert.status}
 
@@ -209,37 +425,68 @@ ${alert.status}
 </div>
 
 <p style="
-color:#94a3b8;
 line-height:1.8;
+color:#dbe4f0;
 ">
 
 ${alert.message}
 
 </p>
 
-<p style="
-margin-top:12px;
-font-size:14px;
-color:#94a3b8;
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+gap:15px;
+margin-top:20px;
 ">
 
-Valeur :
+<div>
+
+<p style="color:#94a3b8;">
+Valeur mesurée
+</p>
+
+<h3 style="margin-top:8px;">
+
 ${alert.value}
 
-| Seuil :
+</h3>
+
+</div>
+
+<div>
+
+<p style="color:#94a3b8;">
+Seuil
+</p>
+
+<h3 style="margin-top:8px;">
+
 ${alert.threshold}
 
+</h3>
+
+</div>
+
+<div>
+
+<p style="color:#94a3b8;">
+Date
 </p>
 
-<p style="
-margin-top:10px;
-font-size:13px;
-color:#94a3b8;
+<h3 style="
+margin-top:8px;
+font-size:15px;
 ">
 
-${new Date(alert.created_at).toLocaleString()}
+${new Date(alert.created_at)
+.toLocaleString()}
 
-</p>
+</h3>
+
+</div>
+
+</div>
 
 </div>
 
@@ -250,7 +497,7 @@ ${new Date(alert.created_at).toLocaleString()}
 }
 
 /*
-LOAD INITIAL
+INIT
 */
 
 loadAlerts();
@@ -290,5 +537,7 @@ loadAlerts();
 .subscribe();
 
 </script>
+
 </body>
+
 </html>
