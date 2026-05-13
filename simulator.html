@@ -28,7 +28,7 @@ padding:60px;
 background:#182235;
 padding:35px;
 border-radius:28px;
-max-width:750px;
+max-width:700px;
 margin:auto;
 }
 
@@ -65,13 +65,13 @@ overflow:auto;
 
 select{
 width:100%;
-padding:18px;
+padding:16px;
 border:none;
 border-radius:14px;
-margin-top:20px;
 background:#0f1729;
 color:white;
-font-size:15px;
+margin-top:20px;
+font-size:16px;
 }
 
 </style>
@@ -87,7 +87,7 @@ font-size:15px;
 </h1>
 
 <p>
-Simulation temps réel des capteurs énergétiques multi-sites.
+Simulation temps réel d’un capteur énergétique multi-sites.
 </p>
 
 <select id="siteSelector">
@@ -254,7 +254,7 @@ VALEURS SIMULÉES
 */
 
 const voltage =
-Math.floor(Math.random()*90)+160;
+Math.floor(Math.random()*80)+170;
 
 const power =
 Math.floor(Math.random()*4000)+500;
@@ -436,6 +436,10 @@ log.innerHTML =
 +voltage+' V | '
 
 +source
+
++'<br>📍 Site : '
+
++selectedSite
 
 +'<br><br>'
 
