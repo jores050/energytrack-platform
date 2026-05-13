@@ -1,99 +1,32 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>Analyse IA - EnergyTrack</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="css/style.css">
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="js/supabase.js"></script>
 
 <style>
 
-.sidebar{
-width:260px;
-background:#111a2e;
-height:100vh;
-position:fixed;
-padding:20px;
-border-right:1px solid rgba(255,255,255,0.05);
-}
-
-.nav-item{
-display:block;
-padding:12px 15px;
-color:#94a3b8;
-text-decoration:none;
-border-radius:10px;
-margin-bottom:5px;
-transition:0.3s;
-cursor:pointer;
-}
-
-.nav-item:hover{
-background:rgba(255,255,255,0.05);
-color:white;
-}
-
-.nav-item.active{
-background:rgba(0,200,150,0.12);
-color:#00c896;
-font-weight:600;
-}
-
-.main{
-margin-left:260px;
-padding:40px;
-background:#0f1729;
-min-height:100vh;
-color:white;
-}
-
 .ai-card{
-background:linear-gradient(145deg,#182235,#111a2e);
+background:linear-gradient(145deg,#182235,#101826);
 padding:25px;
-border-radius:20px;
-border:1px solid rgba(0,200,150,0.2);
+border-radius:24px;
 margin-bottom:20px;
 }
 
-.status-badge{
-padding:5px 12px;
-border-radius:999px;
-font-size:12px;
-background:rgba(0,200,150,0.2);
+.ai-score{
+font-size:64px;
 color:#00c896;
-}
-
-.alert{
-padding:18px;
-border-radius:18px;
-margin-top:18px;
-line-height:1.8;
-}
-
-.alert-warning{
-background:rgba(255,181,71,0.12);
-border:1px solid rgba(255,181,71,0.25);
-}
-
-.alert-danger{
-background:rgba(255,76,97,0.12);
-border:1px solid rgba(255,76,97,0.25);
-}
-
-.alert-success{
-background:rgba(0,200,150,0.12);
-border:1px solid rgba(0,200,150,0.25);
+margin-top:20px;
 }
 
 </style>
@@ -104,173 +37,54 @@ border:1px solid rgba(0,200,150,0.25);
 
 <div class="sidebar">
 
-<div class="logo" style="
-font-family:'Orbitron';
-font-size:22px;
-margin-bottom:40px;
-color:white;
-">
-
-Energy<span style="color:#00c896;">
-Track
-</span>
-
+<div class="logo">
+Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">
-🏠 Dashboard
-</a>
-
-<a class="nav-item" href="consommation.html">
-⚡ Consommation
-</a>
-
-<a class="nav-item" href="alertes.html">
-🔔 Alertes
-</a>
-
-<a class="nav-item" href="rapports.html">
-📊 Rapports
-</a>
-
-<a class="nav-item" href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item" href="capteurs.html">
-📡 Capteurs IoT
-</a>
-
-<a class="nav-item active" href="ia.html">
-🤖 Analyse IA
-</a>
-
-<a class="nav-item" href="parametres.html">
-⚙️ Paramètres
-</a>
-
-<div class="nav-item"
-onclick="logoutUser()"
-style="
-margin-top:50px;
-color:#ff6b6b;
-">
-
-🚪 Déconnexion
-
-</div>
+<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+<a class="nav-item" href="consommation.html">⚡ Consommation</a>
+<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+<a class="nav-item" href="rapports.html">📊 Rapports</a>
+<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+<a class="nav-item active" href="ia.html">🤖 Analyse IA</a>
+<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
 
 </div>
 
 <div class="main">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:30px;
-flex-wrap:wrap;
-gap:15px;
-">
-
-<h1 style="font-family:'Orbitron';">
+<h1>
 Analyse IA Énergétique
 </h1>
 
-<span class="status-badge">
-Moteur IA actif
-</span>
-
-</div>
-
-<div style="
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:20px;
-">
-
 <div class="ai-card">
 
-<h3 style="color:#00c896;">
-🔮 Prédiction Facture
-</h3>
-
-<p style="
-color:#94a3b8;
-font-size:14px;
-">
-
-Basé sur les données récentes
-
-</p>
-
-<h2 id="predictedBill"
-style="
-margin:15px 0;
-">
-
-0 FCFA
-
+<h2>
+Score énergétique
 </h2>
 
-<p style="
-color:#ffb547;
-font-size:13px;
-">
-
-Estimation dynamique IA
-
-</p>
+<div class="ai-score" id="energyScore">
+0
+</div>
 
 </div>
 
 <div class="ai-card">
 
-<h3 style="color:#00c896;">
-⚡ Consommation Moyenne
-</h3>
-
-<p style="
-color:#94a3b8;
-font-size:14px;
-">
-
-Analyse temps réel
-
-</p>
-
-<h2 id="avgPower"
-style="
-margin:15px 0;
-">
-
-0 W
-
+<h2>
+Recommandation IA
 </h2>
 
-<p style="
-color:#94a3b8;
-font-size:13px;
+<p id="recommendation"
+style="
+margin-top:20px;
+line-height:1.8;
 ">
 
-Calcul automatique
+Analyse en cours...
 
 </p>
-
-</div>
-
-</div>
-
-<div class="ai-card"
-style="margin-top:20px;">
-
-<h3 style="margin-bottom:20px;">
-🤖 Recommandations IA
-</h3>
-
-<div id="aiContainer">
-
-</div>
 
 </div>
 
@@ -278,15 +92,7 @@ style="margin-top:20px;">
 
 <script>
 
-async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
-}
-
-async function loadAIAnalysis(){
+async function loadAI(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -299,59 +105,25 @@ return;
 
 }
 
-const userId = userData.user.id;
+const userId =
+userData.user.id;
 
-const { data, error } =
+const { data:telemetry } =
 await supabaseClient
 
 .from('telemetry')
 
 .select('*')
 
-.eq('sensor_id',userId)
+.eq('sensor_id',userId);
 
-.order('created_at',{ascending:false})
-
-.limit(20);
-
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-if(data.length===0){
-
-return;
-
-}
-
-const container =
-document.getElementById('aiContainer');
-
-container.innerHTML='';
-
-let avgPower=0;
-
-let lowVoltageCount=0;
+let totalPower=0;
 
 let groupeCount=0;
 
-let totalKwh=0;
+telemetry.forEach(item=>{
 
-data.forEach(item=>{
-
-avgPower += Number(item.power_w);
-
-totalKwh += Number(item.kwh_total);
-
-if(item.voltage < 190){
-
-lowVoltageCount++;
-
-}
+totalPower += Number(item.power_w);
 
 if(item.source==='GROUPE'){
 
@@ -361,141 +133,51 @@ groupeCount++;
 
 });
 
-avgPower =
-Math.round(avgPower/data.length);
+const avgPower =
+Math.round(totalPower/telemetry.length);
 
-const predictedBill =
-Math.round(totalKwh*91);
+let score=95;
 
-document.getElementById('avgPower').innerHTML =
-avgPower+' W';
+if(avgPower>3000){
 
-document.getElementById('predictedBill').innerHTML =
-predictedBill.toLocaleString()+' FCFA';
-
-/*
-SURCONSOMMATION
-*/
-
-if(avgPower > 2500){
-
-container.innerHTML += `
-
-<div class="alert alert-warning">
-
-⚠️ Consommation élevée détectée.
-Une optimisation énergétique pourrait réduire vos coûts de 10 à 15%.
-
-</div>
-
-`;
+score-=20;
 
 }
 
-/*
-BASSE TENSION
-*/
+if(groupeCount>5){
 
-if(lowVoltageCount > 5){
-
-container.innerHTML += `
-
-<div class="alert alert-danger">
-
-⚡ Instabilité réseau détectée.
-Un système de protection électrique est recommandé.
-
-</div>
-
-`;
+score-=15;
 
 }
 
-/*
-GROUPE ÉLECTROGÈNE
-*/
+document.getElementById('energyScore').innerHTML =
+score+'/100';
 
-if(groupeCount > 5){
+let recommendation='';
 
-container.innerHTML += `
+if(score<60){
 
-<div class="alert alert-warning">
+recommendation =
+'Consommation énergétique très élevée détectée. Optimisation urgente recommandée.';
 
-⛽ Utilisation importante du groupe électrogène.
-Le coût carburant semble élevé cette semaine.
+}else if(score<80){
 
-</div>
+recommendation =
+'Installation correcte mais des optimisations sont possibles.';
 
-`;
+}else{
 
-}
-
-/*
-NORMAL
-*/
-
-if(
-
-avgPower < 2500
-&& lowVoltageCount <= 5
-&& groupeCount <= 5
-
-){
-
-container.innerHTML += `
-
-<div class="alert alert-success">
-
-✅ Votre installation énergétique fonctionne normalement.
-Aucune anomalie critique détectée.
-
-</div>
-
-`;
+recommendation =
+'Installation stable et performante.';
 
 }
 
-}
-
-/*
-LOAD INITIAL
-*/
-
-loadAIAnalysis();
-
-/*
-REALTIME
-*/
-
-supabaseClient
-
-.channel('ai-live')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'telemetry'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadAIAnalysis();
+document.getElementById('recommendation').innerHTML =
+recommendation;
 
 }
 
-)
-
-.subscribe();
+loadAI();
 
 </script>
 
