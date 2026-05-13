@@ -1,155 +1,238 @@
-/* --- LOGIQUE DE VÉRIFICATION D'ABONNEMENT --- */
-async function getSubscriptionStatus(userId) {
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard EnergyTrack - Pro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/supabase.js"></script>
+    <style>
+        :root { --bg-dark: #0f172a; --card-grad: linear-gradient(145deg,#182235,#101826); --accent: #00c896; --warning: #ffb547; --danger: #ff4c61; }
+        
+        body { background: var(--bg-dark); color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; overflow-x: hidden; }
+        
+        /* Sidebar & Navigation */
+        .sidebar { width: 260px; background: #0b1120; height: 100vh; padding: 25px; position: fixed; border-right: 1px solid rgba(255,255,255,0.05); z-index: 100; }
+        .logo { font-family: 'Orbitron'; font-size: 22px; margin-bottom: 40px; font-weight: 700; }
+        .logo span { color: var(--accent); }
+        .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; color: #94a3b8; text-decoration: none; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; }
+        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
+        .nav-item.active { background: rgba(0,200,150,0.1); color: var(--accent); font-weight: 600; }
+        
+        /* Premium Locking */
+        .nav-item.locked { opacity: 0.5; cursor: not-allowed; }
+        .premium-badge { background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
+
+        /* Main Content */
+        .main { margin-left: 310px; padding: 40px; width: calc(100% - 310px); }
+        
+        /* Banner Expiration */
+        .upgrade-banner { background: linear-gradient(90deg, #ff4c61, #f43f5e); color: white; padding: 20px 25px; border-radius: 16px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; animation: slideIn 0.5s ease; }
+        .btn-upgrade { background: white; color: #f43f5e; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; }
+
+        /* Grid & Cards */
+        .site-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 25px; }
+        .site-card { background: var(--card-grad); padding: 25px; border-radius: 26px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
+        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .bg-green { background: rgba(0,200,150,0.1); color: var(--accent); }
+        .bg-red { background: rgba(255,76,97,0.1); color: var(--danger); }
+        
+        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
+        .metric-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
+        .metric-val { font-size: 24px; font-weight: 700; display: block; margin-top: 5px; }
+        
+        .locked-card { border: 2px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; min-height: 350px; }
+
+        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+<div class="sidebar">
+    <div class="logo">Energy<span>Track</span></div>
+    <nav id="nav-menu">
+        <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
+        <a href="consommation.html" class="nav-item">⚡ Consommation</a>
+        <a href="capteurs.html" class="nav-item">📡 Capteurs IoT</a>
+        
+        <div style="margin: 20px 0 10px 10px; font-size: 11px; color: #475569; letter-spacing: 1px; font-weight: 700;">PREMIUM</div>
+        <a href="ia.html" class="nav-item" data-premium="true">🤖 Analyse IA</a>
+        <a href="rapports.html" class="nav-item" data-premium="true">📊 Rapports PDF</a>
+        <a href="sites.html" class="nav-item" data-premium="true">🏢 Multi-sites</a>
+        <a href="alertes.html" class="nav-item" data-premium="true">🔔 Alertes IA</a>
+        
+        <a href="parametres.html" class="nav-item" style="margin-top: 30px;">⚙️ Paramètres</a>
+    </nav>
+</div>
+
+<div class="main">
+    <div id="status-area"></div>
+    
+    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
+        <div>
+            <h1 style="margin:0; font-size:28px;">Supervision Multi-sites</h1>
+            <p style="color:#64748b; margin:5px 0 0 0;">Données énergétiques synchronisées en temps réel.</p>
+        </div>
+    </header>
+
+    <div class="site-grid" id="sitesContainer">
+        </div>
+</div>
+
+<script>
+const charts = {};
+
+/** 1. VÉRIFICATION ABONNEMENT (Table 'subscriptions') **/
+async function checkPremiumStatus(userId) {
     try {
         const { data, error } = await supabaseClient
             .from('subscriptions')
             .select('status')
             .eq('user_id', userId)
-            .eq('status', 'active') // On cherche spécifiquement un abonnement actif
-            .maybeSingle(); // Retourne null proprement s'il n'y a rien
+            .eq('status', 'active')
+            .maybeSingle();
 
-        if (error) throw error;
-
-        // Si data existe et que le statut est 'active', on retourne true
         return !!(data && data.status === 'active');
-    } catch (err) {
-        console.error("Erreur vérification abonnement:", err);
-        return false; // Par défaut, on considère comme non-premium en cas d'erreur
+    } catch (e) {
+        return false;
     }
 }
 
-/* --- CHARGEMENT DU DASHBOARD --- */
-async function loadDashboard() {
-    const user = await getUser();
-    if (!user) return;
+/** 2. CHARGEMENT PRINCIPAL **/
+async function initDashboard() {
+    // Auth Check
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) { window.location.href = 'auth.html'; return; }
 
-    // Appel de la nouvelle logique
-    const isPremium = await getSubscriptionStatus(user.id);
-    
+    const isPremium = await checkPremiumStatus(user.id);
     const container = document.getElementById('sitesContainer');
-    const headerPlaceholder = document.getElementById('premium-header-placeholder');
+    const statusArea = document.getElementById('status-area');
 
-    // 1. Gérer l'affichage de la bannière et le verrouillage du menu
+    // UI LIMITÉE (Bannière + Menu)
     if (!isPremium) {
-        headerPlaceholder.innerHTML = `
+        statusArea.innerHTML = `
             <div class="upgrade-banner">
                 <div>
-                    <strong>⚠️ Mode Gratuit Limité</strong><br>
-                    <span>Votre abonnement n'est plus actif. Accès restreint au site principal.</span>
+                    <strong style="font-size:18px;">⚠️ Abonnement Expiré</strong><br>
+                    <span>Vous utilisez le mode gratuit. Vos données sont limitées à 1 site.</span>
                 </div>
-                <a href="upgrade.html" class="btn-upgrade">S'abonner maintenant</a>
+                <a href="billing.html" class="btn-upgrade">RÉACTIVER LE CLOUD</a>
             </div>
         `;
         
-        // Verrouiller les liens marqués 'data-premium' dans le menu
-        document.querySelectorAll('.nav-item[data-premium="true"]').forEach(el => {
-            el.classList.add('locked');
-            if (!el.querySelector('.premium-badge')) {
-                el.innerHTML += ' <span class="premium-badge">PRO</span>';
-            }
-            el.href = "#";
-            el.onclick = (e) => {
+        document.querySelectorAll('.nav-item[data-premium="true"]').forEach(item => {
+            item.classList.add('locked');
+            item.innerHTML += '<span class="premium-badge">PRO</span>';
+            item.onclick = (e) => {
                 e.preventDefault();
-                alert("🔒 Cette fonctionnalité nécessite un abonnement actif.");
+                alert("🚀 Cette fonctionnalité nécessite un abonnement Business Cloud actif.");
             };
         });
     }
 
-    // 2. Charger les sites (Bridage SQL si non-premium)
+    // CHARGEMENT DES SITES (BRIDAGE SQL)
     let query = supabaseClient.from('sites').select('*').eq('user_id', user.id);
-    
-    if (!isPremium) {
-        query = query.limit(1); // On ne récupère que 1 site pour le mode gratuit
-    }
+    if (!isPremium) query = query.limit(1);
 
-    const { data: sites, error: sitesError } = await query;
-    if (sitesError) return;
+    const { data: sites, error } = await query;
+    if (error) return;
 
     container.innerHTML = '';
 
-    // Boucle de rendu des sites
     for (const site of sites) {
-        // Récupération télémétrie (12 derniers points)
+        // Get Telemetry
         const { data: telemetry } = await supabaseClient
             .from('telemetry')
             .select('*')
             .eq('site_id', site.id)
             .order('created_at', { ascending: false })
-            .limit(12);
+            .limit(15);
 
-        if (!telemetry || telemetry.length === 0) {
-            container.innerHTML += `<div class="site-card"><h2>${site.name}</h2><p>Aucune donnée.</p></div>`;
-            continue;
-        }
+        if (!telemetry || telemetry.length === 0) continue;
 
-        const latest = telemetry[0];
-        const totalKwh = telemetry.reduce((acc, curr) => acc + Number(curr.kwh_total || 0), 0);
-
-        // Injection HTML de la carte
+        const live = telemetry[0];
+        const totalKwh = telemetry.reduce((sum, row) => sum + Number(row.kwh_total || 0), 0);
+        
+        // HTML Card
         container.innerHTML += `
             <div class="site-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div style="display:flex; justify-content:space-between; align-items:start;">
                     <div>
-                        <h2 style="margin:0;">🏢 ${site.name}</h2>
-                        <small style="color:#94a3b8">${site.city}</small>
+                        <h2 style="margin:0; font-size:20px;">🏢 ${site.name}</h2>
+                        <span style="color:#64748b; font-size:13px;">📍 ${site.city}</span>
                     </div>
-                    <div class="status-badge ${latest.voltage > 50 ? 'green' : 'red'}">
-                        ${latest.voltage > 50 ? 'SBEE OK' : 'COUPURE'}
+                    <div class="status-badge ${live.voltage > 50 ? 'bg-green' : 'bg-red'}">
+                        ${live.voltage > 50 ? '● SBEE OK' : '● COUPURE'}
                     </div>
                 </div>
+
                 <div class="metrics-grid">
                     <div class="metric-box">
-                        <div style="color:#94a3b8; font-size:12px;">Puissance</div>
-                        <div class="metric-value">${Math.round(latest.power_w)} W</div>
+                        <small style="color:#64748b">Puissance Actuelle</small>
+                        <span class="metric-val">${Math.round(live.power_w)} W</span>
                     </div>
                     <div class="metric-box">
-                        <div style="color:#94a3b8; font-size:12px;">Conso. (session)</div>
-                        <div class="metric-value">${totalKwh.toFixed(2)} kWh</div>
+                        <small style="color:#64748b">Consommation</small>
+                        <span class="metric-val">${totalKwh.toFixed(2)} kWh</span>
                     </div>
                 </div>
-                <div style="margin-top:20px;"><canvas id="chart-${site.id}"></canvas></div>
+
+                <canvas id="chart-${site.id}" height="150"></canvas>
             </div>
         `;
 
-        // Initialisation différée du graphique
-        setTimeout(() => renderChart(site.id, telemetry), 100);
+        // Render Graphique
+        setTimeout(() => renderSiteChart(site.id, telemetry), 100);
     }
 
-    // 3. Ajouter un bouton d'appel à l'action si limité
+    // AJOUTER LE SLOT "BLOQUÉ" SI GRATUIT
     if (!isPremium) {
         container.innerHTML += `
-            <div class="site-card" style="border: 2px dashed rgba(255,181,71,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
-                <p style="color:#94a3b8">Vous avez d'autres sites ?</p>
-                <a href="upgrade.html" style="color:#ffb547; text-decoration:none; font-weight:600;">Débloquer le Multi-sites →</a>
+            <div class="site-card locked-card">
+                <div style="font-size:40px; margin-bottom:15px;">🔒</div>
+                <h3 style="margin:0; color:white;">Multi-sites désactivé</h3>
+                <p style="padding:0 20px; font-size:13px;">Passez à la version Pro pour surveiller tous vos bâtiments en temps réel.</p>
+                <a href="billing.html" style="color:var(--warning); text-decoration:none; font-weight:700; margin-top:10px;">En savoir plus →</a>
             </div>
         `;
     }
 }
 
-// Fonction utilitaire pour Chart.js
-function renderChart(siteId, data) {
-    const ctx = document.getElementById(`chart-${siteId}`);
-    if (!ctx) return;
+function renderSiteChart(id, rawData) {
+    const ctx = document.getElementById(`chart-${id}`).getContext('2d');
+    const data = [...rawData].reverse();
     
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: data.map(d => new Date(d.created_at).toLocaleTimeString()).reverse(),
+            labels: data.map(d => new Date(d.created_at).toLocaleTimeString([], {hour: '2-刻', minute:'2-digit'})),
             datasets: [{
-                data: data.map(d => d.power_w).reverse(),
+                label: 'Watts',
+                data: data.map(d => d.power_w),
                 borderColor: '#00c896',
-                backgroundColor: 'rgba(0, 200, 150, 0.05)',
+                borderWidth: 2,
+                pointRadius: 0,
+                tension: 0.4,
                 fill: true,
-                tension: 0.4
+                backgroundColor: 'rgba(0, 200, 150, 0.05)'
             }]
         },
         options: {
             responsive: true,
             plugins: { legend: { display: false } },
-            scales: { x: { display: false }, y: { ticks: { color: '#64748b' } } }
+            scales: { 
+                x: { display: false },
+                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', size: 10 } }
+            }
         }
     });
 }
 
-// Initialisation
-loadDashboard();
+// Lancement
+initDashboard();
+</script>
+
+</body>
+</html>
