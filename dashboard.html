@@ -709,7 +709,316 @@ loadDashboard();
 .subscribe();
 
 </script>
+/*
+====================================================
+ENERGYTRACK SaaS SUBSCRIPTION CHECK SYSTEM
+====================================================
 
+À METTRE DANS :
+dashboard.html
+
+JUSTE APRÈS :
+supabaseClient.auth.getUser()
+
+====================================================
+*/
+
+async function checkSubscriptionAccess(){
+
+/*
+RÉCUPÉRER UTILISATEUR
+*/
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+/*
+RÉCUPÉRER ABONNEMENT
+*/
+
+const { data:subscription, error } =
+await supabaseClient
+
+.from('subscriptions')
+
+.select('*')
+
+.eq('user_id',userId)
+
+.single();
+
+if(error || !subscription){
+
+showUpgradePopup();
+
+return;
+
+}
+
+/*
+DATE ACTUELLE
+*/
+
+const now = new Date();
+
+/*
+DATE EXPIRATION
+*/
+
+const expiresAt =
+new Date(subscription.expires_at);
+
+/*
+ABONNEMENT EXPIRÉ
+*/
+
+if(
+
+subscription.status !== 'active'
+
+||
+
+expiresAt < now
+
+){
+
+showLimitedDashboard();
+
+return;
+
+}
+
+/*
+ABONNEMENT ACTIF
+*/
+
+showFullDashboard();
+
+}
+
+/*
+====================================================
+DASHBOARD COMPLET
+====================================================
+*/
+
+function showFullDashboard(){
+
+console.log('Business Access Granted');
+
+/*
+SECTIONS PREMIUM
+*/
+
+document
+.querySelectorAll('.premium-feature')
+
+.forEach(el=>{
+
+el.style.display='block';
+
+});
+
+/*
+MESSAGE
+*/
+
+const banner =
+document.getElementById('subscriptionBanner');
+
+if(banner){
+
+banner.style.display='none';
+
+}
+
+}
+
+/*
+====================================================
+MODE LIMITÉ GRATUIT
+====================================================
+*/
+
+function showLimitedDashboard(){
+
+console.log('Limited Free Mode');
+
+/*
+MASQUER FEATURES PREMIUM
+*/
+
+document
+.querySelectorAll('.premium-feature')
+
+.forEach(el=>{
+
+el.style.display='none';
+
+});
+
+/*
+AFFICHER BANNIÈRE
+*/
+
+const banner =
+document.getElementById('subscriptionBanner');
+
+if(banner){
+
+banner.style.display='block';
+
+banner.innerHTML = `
+
+<div style="
+background:rgba(255,76,97,0.12);
+border:1px solid rgba(255,76,97,0.2);
+padding:20px;
+border-radius:18px;
+margin-bottom:25px;
+">
+
+<h3 style="
+margin-bottom:10px;
+color:#ff4c61;
+">
+
+Votre abonnement a expiré
+
+</h3>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:20px;
+">
+
+Vous utilisez actuellement le mode gratuit limité.
+
+Les fonctionnalités suivantes sont désactivées :
+
+• IA énergétique
+• Rapports PDF
+• Multi-sites
+• Analytics avancés
+• Alertes intelligentes
+
+</p>
+
+<button
+
+onclick="window.location.href='pricing.html'"
+
+style="
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#00c896;
+color:#081120;
+font-weight:700;
+cursor:pointer;
+">
+
+Réactiver mon abonnement
+
+</button>
+
+</div>
+
+`;
+
+}
+
+}
+
+/*
+====================================================
+AUCUN ABONNEMENT
+====================================================
+*/
+
+function showUpgradePopup(){
+
+const banner =
+document.getElementById('subscriptionBanner');
+
+if(banner){
+
+banner.style.display='block';
+
+banner.innerHTML = `
+
+<div style="
+background:rgba(255,181,71,0.12);
+border:1px solid rgba(255,181,71,0.2);
+padding:20px;
+border-radius:18px;
+margin-bottom:25px;
+">
+
+<h3 style="
+margin-bottom:10px;
+color:#ffb547;
+">
+
+Aucun abonnement détecté
+
+</h3>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:20px;
+">
+
+Activez un abonnement Business Cloud
+pour débloquer toutes les fonctionnalités EnergyTrack.
+
+</p>
+
+<button
+
+onclick="window.location.href='pricing.html'"
+
+style="
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#00c896;
+color:#081120;
+font-weight:700;
+cursor:pointer;
+">
+
+Voir les offres
+
+</button>
+
+</div>
+
+`;
+
+}
+
+}
+
+/*
+====================================================
+LANCER VÉRIFICATION
+====================================================
+*/
+
+checkSubscriptionAccess();
 </body>
 
 </html>
