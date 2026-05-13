@@ -1,19 +1,39 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Capteurs IoT EnergyTrack</title>
+<title>Capteurs IoT - EnergyTrack</title>
 
 <link rel="stylesheet" href="css/style.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+
+<style>
+
+.sensor-card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:24px;
+margin-bottom:20px;
+}
+
+.sensor-status{
+padding:8px 14px;
+border-radius:999px;
+display:inline-block;
+margin-top:15px;
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -25,122 +45,107 @@ Energy<span>Track</span>
 </div>
 
 <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
-
 <a class="nav-item" href="consommation.html">⚡ Consommation</a>
-
 <a class="nav-item" href="alertes.html">🔔 Alertes</a>
-
 <a class="nav-item" href="rapports.html">📊 Rapports</a>
-
 <a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-
 <a class="nav-item active" href="capteurs.html">📡 Capteurs IoT</a>
-
 <a class="nav-item" href="ia.html">🤖 Analyse IA</a>
-
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
-
-<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
 
 </div>
 
-<div class="main" style="display:block;">
+<div class="main">
 
-<h1 style="margin-bottom:20px">
+<h1>
 Capteurs IoT
 </h1>
 
-<table class="table">
+<div id="sensorsContainer">
 
-<tr>
-
-<th>ID</th>
-
-<th>Tension</th>
-
-<th>Courant</th>
-
-<th>Statut</th>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-001</td>
-
-<td>221V</td>
-
-<td>12A</td>
-
-<td>
-<span class="status online">
-ONLINE
-</span>
-</td>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-002</td>
-
-<td>208V</td>
-
-<td>17A</td>
-
-<td>
-<span class="status online">
-ONLINE
-</span>
-</td>
-
-</tr>
-
-<tr>
-
-<td>ET-BJ-003</td>
-
-<td>0V</td>
-
-<td>0A</td>
-
-<td>
-<span class="status offline">
-OFFLINE
-</span>
-</td>
-
-</tr>
-
-</table>
+</div>
 
 </div>
 
 <script>
-window.onload = async function(){
+
+async function loadSensors(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
 
 if(!userData.user){
 
+window.location.href='auth.html';
+
 return;
 
 }
 
-console.log('Utilisateur connecté');
+const userId =
+userData.user.id;
+
+const { data:sites } =
+await supabaseClient
+
+.from('sites')
+
+.select('*')
+
+.eq('user_id',userId);
+
+const container =
+document.getElementById('sensorsContainer');
+
+container.innerHTML='';
+
+sites.forEach(site=>{
+
+container.innerHTML += `
+
+<div class="sensor-card">
+
+<h2>
+
+${site.name}
+
+</h2>
+
+<p style="
+margin-top:15px;
+color:#94a3b8;
+">
+
+📍 ${site.city}
+
+</p>
+
+<div class="sensor-status">
+
+EN LIGNE
+
+</div>
+
+<p style="
+margin-top:20px;
+line-height:1.8;
+">
+
+ESP32 connecté au cloud EnergyTrack.
+
+</p>
+
+</div>
+
+`;
+
+});
 
 }
 
-function logoutUser(){
-
-localStorage.clear();
-
-window.location.href='index.html';
-
-}
+loadSensors();
 
 </script>
 
 </body>
+
 </html>
