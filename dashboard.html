@@ -12,13 +12,70 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-<script src="js/supabase.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+
+<style>
+
+.status-badge{
+padding:10px 18px;
+border-radius:999px;
+font-size:13px;
+font-weight:600;
+display:inline-block;
+margin-top:10px;
+}
+
+.status-green{
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+.status-red{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.status-orange{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.live-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#00c896;
+display:inline-block;
+margin-right:8px;
+animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+
+0%{
+opacity:0.3;
+transform:scale(1);
+}
+
+50%{
+opacity:1;
+transform:scale(1.2);
+}
+
+100%{
+opacity:0.3;
+transform:scale(1);
+}
+
+}
+
+</style>
+
 </head>
 
 <body>
@@ -61,7 +118,8 @@ Energy<span>Track</span>
 ⚙️ Paramètres
 </a>
 
-<div class="nav-item" onclick="logoutUser()">
+<div class="nav-item"
+onclick="logoutUser()">
 🚪 Déconnexion
 </div>
 
@@ -77,8 +135,15 @@ Energy<span>Track</span>
 Dashboard Énergétique
 </h1>
 
-<p>
-Monitoring temps réel des installations électriques
+<p style="
+margin-top:10px;
+color:#94a3b8;
+">
+
+<span class="live-dot"></span>
+
+Surveillance énergétique temps réel active
+
 </p>
 
 </div>
@@ -90,35 +155,14 @@ Monitoring temps réel des installations électriques
 <div class="card">
 
 <div class="card-title">
-Facture estimée
+Puissance instantanée
 </div>
 
-<div class="card-value" id="facture">
-0 FCFA
-</div>
+<div class="card-value"
+id="powerValue">
 
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Économie estimée
-</div>
-
-<div class="card-value green" id="power">
 0 W
-</div>
 
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Groupe électrogène
-</div>
-
-<div class="card-value orange" id="voltage">
-0 V
 </div>
 
 </div>
@@ -126,11 +170,44 @@ Groupe électrogène
 <div class="card">
 
 <div class="card-title">
-État réseau SBEE
+Consommation totale
 </div>
 
-<div class="card-value" id="sourceStatus">
+<div class="card-value green"
+id="kwhValue">
+
+0 kWh
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Coût estimé
+</div>
+
+<div class="card-value orange"
+id="costValue">
+
+0 FCFA
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Source énergétique
+</div>
+
+<div class="card-value"
+id="sourceValue">
+
 SBEE
+
 </div>
 
 </div>
@@ -140,7 +217,22 @@ SBEE
 <div class="section">
 
 <h2>
-Consommation hebdomadaire
+État du réseau
+</h2>
+
+<div id="networkStatus"
+class="status-badge status-green">
+
+SBEE OK
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>
+Consommation temps réel
 </h2>
 
 <canvas id="chart"></canvas>
@@ -150,7 +242,18 @@ Consommation hebdomadaire
 </div>
 
 <script>
-async function loadTelemetry(){
+
+let chart;
+
+let chartLabels = [];
+
+let chartData = [];
+
+/*
+AUTH
+*/
+
+async function getUser(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -159,164 +262,52 @@ if(!userData.user){
 
 window.location.href='auth.html';
 
-return;
+return null;
 
 }
 
-const userId = userData.user.id;
-
-/*
-RÉCUPÉRATION DERNIÈRE DONNÉE
-*/
-
-const { data, error } =
-await supabaseClient
-
-.from('telemetry')
-
-.select('*')
-
-.eq('sensor_id',userId)
-
-.order('created_at',{ascending:false})
-
-.limit(1);
-
-if(error){
-
-console.log(error);
-
-return;
+return userData.user;
 
 }
 
-if(data.length > 0){
-
-const telemetry = data[0];
-
 /*
-PUISSANCE
+LOGOUT
 */
 
-document.getElementById('power').innerHTML =
-Math.round(telemetry.power_w)+' W';
+async function logoutUser(){
 
-/*
-TENSION
-*/
-
-document.getElementById('voltage').innerHTML =
-Math.round(telemetry.voltage)+' V';
-
-/*
-SOURCE
-*/
-
-document.getElementById('sourceStatus').innerHTML =
-telemetry.source;
-
-/*
-FACTURE
-*/
-
-const estimatedCost =
-Math.round(telemetry.kwh_total * 91);
-
-document.getElementById('facture').innerHTML =
-estimatedCost.toLocaleString()+' FCFA';
-
-}
-
-}
-  loadTelemetry();
-
-/*
-REALTIME
-*/
-
-supabaseClient
-
-.channel('telemetry-live')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'telemetry'
-
-},
-
-(payload)=>{
-
-console.log('Nouvelle donnée',payload);
-
-loadTelemetry();
-
-}
-
-)
-
-.subscribe();
-window.onload = async function(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
+await supabaseClient.auth.signOut();
 
 window.location.href='auth.html';
 
-return;
-
 }
 
-console.log('Utilisateur connecté');
+/*
+INIT CHART
+*/
 
-}
+function initChart(){
 
-function logoutUser(){
+const ctx =
+document.getElementById('chart');
 
-localStorage.removeItem('energytrackUser');
-
-localStorage.removeItem('paymentStatus');
-
-localStorage.removeItem('deliveryStatus');
-
-localStorage.removeItem('sensorConfigured');
-
-localStorage.removeItem('sensorCode');
-
-alert('Déconnexion effectuée.');
-
-window.location.href='index.html';
-
-}
-
-const ctx=document.getElementById('chart');
-
-new Chart(ctx,{
+chart = new Chart(ctx,{
 
 type:'line',
 
 data:{
 
-labels:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+labels:chartLabels,
 
 datasets:[{
 
-label:'Consommation kWh',
+label:'Puissance (W)',
 
-data:[12,19,15,22,18,14,25],
+data:chartData,
 
 borderColor:'#00c896',
 
-backgroundColor:'rgba(0,200,150,0.1)',
+backgroundColor:'rgba(0,200,150,0.12)',
 
 fill:true,
 
@@ -348,17 +339,25 @@ scales:{
 
 x:{
 
-ticks:{color:'white'},
+ticks:{
+color:'white'
+},
 
-grid:{color:'rgba(255,255,255,0.05)'}
+grid:{
+color:'rgba(255,255,255,0.05)'
+}
 
 },
 
 y:{
 
-ticks:{color:'white'},
+ticks:{
+color:'white'
+},
 
-grid:{color:'rgba(255,255,255,0.05)'}
+grid:{
+color:'rgba(255,255,255,0.05)'
+}
 
 }
 
@@ -368,7 +367,201 @@ grid:{color:'rgba(255,255,255,0.05)'}
 
 });
 
+}
+
+/*
+LOAD DASHBOARD
+*/
+
+async function loadDashboard(){
+
+const user =
+await getUser();
+
+if(!user){
+
+return;
+
+}
+
+/*
+LAST TELEMETRY
+*/
+
+const { data, error } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',user.id)
+
+.order('created_at',{ascending:false})
+
+.limit(12);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+if(data.length===0){
+
+return;
+
+}
+
+const latest = data[0];
+
+/*
+POWER
+*/
+
+document.getElementById('powerValue').innerHTML =
+Math.round(latest.power_w)+' W';
+
+/*
+KWH
+*/
+
+let totalKwh = 0;
+
+data.forEach(item=>{
+
+totalKwh += Number(item.kwh_total);
+
+});
+
+document.getElementById('kwhValue').innerHTML =
+totalKwh.toFixed(3)+' kWh';
+
+/*
+COST
+*/
+
+const cost =
+Math.round(totalKwh * 91);
+
+document.getElementById('costValue').innerHTML =
+cost.toLocaleString()+' FCFA';
+
+/*
+SOURCE
+*/
+
+document.getElementById('sourceValue').innerHTML =
+latest.source;
+
+/*
+NETWORK STATUS
+*/
+
+const status =
+document.getElementById('networkStatus');
+
+if(latest.source==='GROUPE'){
+
+status.className =
+'status-badge status-orange';
+
+status.innerHTML =
+'GROUPE ACTIF';
+
+}else if(latest.voltage < 50){
+
+status.className =
+'status-badge status-red';
+
+status.innerHTML =
+'COUPURE SBEE';
+
+}else{
+
+status.className =
+'status-badge status-green';
+
+status.innerHTML =
+'SBEE OK';
+
+}
+
+/*
+CHART
+*/
+
+chartLabels = [];
+chartData = [];
+
+data.reverse().forEach(item=>{
+
+chartLabels.push(
+
+new Date(item.created_at)
+.toLocaleTimeString()
+
+);
+
+chartData.push(item.power_w);
+
+});
+
+chart.data.labels = chartLabels;
+
+chart.data.datasets[0].data =
+chartData;
+
+chart.update();
+
+}
+
+/*
+INIT
+*/
+
+initChart();
+
+loadDashboard();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('dashboard-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadDashboard();
+
+}
+
+)
+
+.subscribe();
+
 </script>
 
 </body>
+
 </html>
