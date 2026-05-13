@@ -1,714 +1,155 @@
-<!DOCTYPE html>
-<html lang="fr">
+/* --- LOGIQUE DE VÉRIFICATION D'ABONNEMENT --- */
+async function getSubscriptionStatus(userId) {
+    try {
+        const { data, error } = await supabaseClient
+            .from('subscriptions')
+            .select('status')
+            .eq('user_id', userId)
+            .eq('status', 'active') // On cherche spécifiquement un abonnement actif
+            .maybeSingle(); // Retourne null proprement s'il n'y a rien
 
-<head>
+        if (error) throw error;
 
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Dashboard EnergyTrack</title>
-
-<link rel="stylesheet" href="css/style.css">
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="js/supabase.js"></script>
-
-<style>
-
-.site-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
-gap:25px;
-margin-top:30px;
+        // Si data existe et que le statut est 'active', on retourne true
+        return !!(data && data.status === 'active');
+    } catch (err) {
+        console.error("Erreur vérification abonnement:", err);
+        return false; // Par défaut, on considère comme non-premium en cas d'erreur
+    }
 }
 
-.site-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:25px;
-border-radius:26px;
-border:1px solid rgba(255,255,255,0.05);
-transition:0.3s;
+/* --- CHARGEMENT DU DASHBOARD --- */
+async function loadDashboard() {
+    const user = await getUser();
+    if (!user) return;
+
+    // Appel de la nouvelle logique
+    const isPremium = await getSubscriptionStatus(user.id);
+    
+    const container = document.getElementById('sitesContainer');
+    const headerPlaceholder = document.getElementById('premium-header-placeholder');
+
+    // 1. Gérer l'affichage de la bannière et le verrouillage du menu
+    if (!isPremium) {
+        headerPlaceholder.innerHTML = `
+            <div class="upgrade-banner">
+                <div>
+                    <strong>⚠️ Mode Gratuit Limité</strong><br>
+                    <span>Votre abonnement n'est plus actif. Accès restreint au site principal.</span>
+                </div>
+                <a href="upgrade.html" class="btn-upgrade">S'abonner maintenant</a>
+            </div>
+        `;
+        
+        // Verrouiller les liens marqués 'data-premium' dans le menu
+        document.querySelectorAll('.nav-item[data-premium="true"]').forEach(el => {
+            el.classList.add('locked');
+            if (!el.querySelector('.premium-badge')) {
+                el.innerHTML += ' <span class="premium-badge">PRO</span>';
+            }
+            el.href = "#";
+            el.onclick = (e) => {
+                e.preventDefault();
+                alert("🔒 Cette fonctionnalité nécessite un abonnement actif.");
+            };
+        });
+    }
+
+    // 2. Charger les sites (Bridage SQL si non-premium)
+    let query = supabaseClient.from('sites').select('*').eq('user_id', user.id);
+    
+    if (!isPremium) {
+        query = query.limit(1); // On ne récupère que 1 site pour le mode gratuit
+    }
+
+    const { data: sites, error: sitesError } = await query;
+    if (sitesError) return;
+
+    container.innerHTML = '';
+
+    // Boucle de rendu des sites
+    for (const site of sites) {
+        // Récupération télémétrie (12 derniers points)
+        const { data: telemetry } = await supabaseClient
+            .from('telemetry')
+            .select('*')
+            .eq('site_id', site.id)
+            .order('created_at', { ascending: false })
+            .limit(12);
+
+        if (!telemetry || telemetry.length === 0) {
+            container.innerHTML += `<div class="site-card"><h2>${site.name}</h2><p>Aucune donnée.</p></div>`;
+            continue;
+        }
+
+        const latest = telemetry[0];
+        const totalKwh = telemetry.reduce((acc, curr) => acc + Number(curr.kwh_total || 0), 0);
+
+        // Injection HTML de la carte
+        container.innerHTML += `
+            <div class="site-card">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                    <div>
+                        <h2 style="margin:0;">🏢 ${site.name}</h2>
+                        <small style="color:#94a3b8">${site.city}</small>
+                    </div>
+                    <div class="status-badge ${latest.voltage > 50 ? 'green' : 'red'}">
+                        ${latest.voltage > 50 ? 'SBEE OK' : 'COUPURE'}
+                    </div>
+                </div>
+                <div class="metrics-grid">
+                    <div class="metric-box">
+                        <div style="color:#94a3b8; font-size:12px;">Puissance</div>
+                        <div class="metric-value">${Math.round(latest.power_w)} W</div>
+                    </div>
+                    <div class="metric-box">
+                        <div style="color:#94a3b8; font-size:12px;">Conso. (session)</div>
+                        <div class="metric-value">${totalKwh.toFixed(2)} kWh</div>
+                    </div>
+                </div>
+                <div style="margin-top:20px;"><canvas id="chart-${site.id}"></canvas></div>
+            </div>
+        `;
+
+        // Initialisation différée du graphique
+        setTimeout(() => renderChart(site.id, telemetry), 100);
+    }
+
+    // 3. Ajouter un bouton d'appel à l'action si limité
+    if (!isPremium) {
+        container.innerHTML += `
+            <div class="site-card" style="border: 2px dashed rgba(255,181,71,0.3); display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center;">
+                <p style="color:#94a3b8">Vous avez d'autres sites ?</p>
+                <a href="upgrade.html" style="color:#ffb547; text-decoration:none; font-weight:600;">Débloquer le Multi-sites →</a>
+            </div>
+        `;
+    }
 }
 
-.site-card:hover{
-transform:translateY(-5px);
-box-shadow:0 20px 40px rgba(0,0,0,0.35);
+// Fonction utilitaire pour Chart.js
+function renderChart(siteId, data) {
+    const ctx = document.getElementById(`chart-${siteId}`);
+    if (!ctx) return;
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: data.map(d => new Date(d.created_at).toLocaleTimeString()).reverse(),
+            datasets: [{
+                data: data.map(d => d.power_w).reverse(),
+                borderColor: '#00c896',
+                backgroundColor: 'rgba(0, 200, 150, 0.05)',
+                fill: true,
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { display: false } },
+            scales: { x: { display: false }, y: { ticks: { color: '#64748b' } } }
+        }
+    });
 }
 
-.site-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-margin-bottom:25px;
-}
-
-.status-badge{
-padding:8px 14px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
-}
-
-.green{
-background:rgba(0,200,150,0.15);
-color:#00c896;
-}
-
-.orange{
-background:rgba(255,181,71,0.15);
-color:#ffb547;
-}
-
-.red{
-background:rgba(255,76,97,0.15);
-color:#ff4c61;
-}
-
-.metrics-grid{
-display:grid;
-grid-template-columns:repeat(2,1fr);
-gap:20px;
-margin-top:20px;
-}
-
-.metric-box{
-background:#0f1729;
-padding:18px;
-border-radius:18px;
-}
-
-.metric-title{
-font-size:13px;
-color:#94a3b8;
-}
-
-.metric-value{
-font-size:28px;
-margin-top:10px;
-font-weight:700;
-}
-
-.live-dot{
-width:10px;
-height:10px;
-border-radius:50%;
-background:#00c896;
-display:inline-block;
-margin-right:8px;
-animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-
-0%{
-opacity:0.3;
-transform:scale(1);
-}
-
-50%{
-opacity:1;
-transform:scale(1.2);
-}
-
-100%{
-opacity:0.3;
-transform:scale(1);
-}
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="sidebar">
-
-<div class="logo">
-Energy<span>Track</span>
-</div>
-
-<a class="nav-item active" href="dashboard.html">
-🏠 Dashboard
-</a>
-
-<a class="nav-item" href="consommation.html">
-⚡ Consommation
-</a>
-
-<a class="nav-item" href="alertes.html">
-🔔 Alertes
-</a>
-
-<a class="nav-item" href="rapports.html">
-📊 Rapports
-</a>
-
-<a class="nav-item" href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item" href="capteurs.html">
-📡 Capteurs IoT
-</a>
-
-<a class="nav-item" href="ia.html">
-🤖 Analyse IA
-</a>
-
-<a class="nav-item" href="parametres.html">
-⚙️ Paramètres
-</a>
-
-</div>
-
-<div class="main" style="display:block;">
-
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-margin-bottom:20px;
-">
-
-<div>
-
-<h1>
-Dashboard Multi-sites
-</h1>
-
-<p style="
-margin-top:10px;
-color:#94a3b8;
-">
-
-<span class="live-dot"></span>
-
-Supervision énergétique temps réel de tous les sites.
-
-</p>
-
-</div>
-
-</div>
-
-<div
-class="site-grid"
-id="sitesContainer">
-
-</div>
-
-</div>
-
-<script>
-
-const charts = {};
-
-/*
-GET USER
-*/
-
-async function getUser(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return null;
-
-}
-
-return userData.user;
-
-}
-
-/*
-LOAD DASHBOARD
-*/
-
-async function loadDashboard(){
-
-const user =
-await getUser();
-
-if(!user){
-
-return;
-
-}
-
-/*
-GET SITES
-*/
-
-const { data:sites, error } =
-await supabaseClient
-
-.from('sites')
-
-.select('*')
-
-.eq('user_id',user.id);
-
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-const container =
-document.getElementById('sitesContainer');
-
-container.innerHTML='';
-
-/*
-FOR EACH SITE
-*/
-
-for(const site of sites){
-
-/*
-GET TELEMETRY
-*/
-
-const { data:telemetry } =
-await supabaseClient
-
-.from('telemetry')
-
-.select('*')
-
-.eq('site_id',site.id)
-
-.order('created_at',{ascending:false})
-
-.limit(12);
-
-/*
-GET ALERTS
-*/
-
-const { data:alerts } =
-await supabaseClient
-
-.from('alerts')
-
-.select('*')
-
-.eq('site_id',site.id)
-
-.eq('status','ACTIVE');
-
-/*
-EMPTY
-*/
-
-if(telemetry.length===0){
-
-container.innerHTML += `
-
-<div class="site-card">
-
-<h2>
-
-${site.name}
-
-</h2>
-
-<p style="
-margin-top:20px;
-color:#94a3b8;
-">
-
-Aucune donnée disponible.
-
-</p>
-
-</div>
-
-`;
-
-continue;
-
-}
-
-const latest =
-telemetry[0];
-
-/*
-STATUS
-*/
-
-let statusText='SBEE OK';
-
-let statusClass='green';
-
-if(latest.source==='GROUPE'){
-
-statusText='GROUPE ACTIF';
-
-statusClass='orange';
-
-}
-
-if(latest.voltage < 50){
-
-statusText='COUPURE';
-
-statusClass='red';
-
-}
-
-/*
-TOTAL ENERGY
-*/
-
-let totalKwh=0;
-
-telemetry.forEach(item=>{
-
-totalKwh += Number(item.kwh_total);
-
-});
-
-const estimatedCost =
-Math.round(totalKwh*91);
-
-/*
-CARD
-*/
-
-container.innerHTML += `
-
-<div class="site-card">
-
-<div class="site-header">
-
-<div>
-
-<h2>
-
-🏢 ${site.name}
-
-</h2>
-
-<p style="
-margin-top:8px;
-color:#94a3b8;
-">
-
-📍 ${site.city}
-
-</p>
-
-</div>
-
-<div class="status-badge ${statusClass}">
-
-${statusText}
-
-</div>
-
-</div>
-
-<div class="metrics-grid">
-
-<div class="metric-box">
-
-<div class="metric-title">
-
-Puissance
-
-</div>
-
-<div class="metric-value">
-
-${Math.round(latest.power_w)} W
-
-</div>
-
-</div>
-
-<div class="metric-box">
-
-<div class="metric-title">
-
-Consommation
-
-</div>
-
-<div class="metric-value">
-
-${totalKwh.toFixed(3)} kWh
-
-</div>
-
-</div>
-
-<div class="metric-box">
-
-<div class="metric-title">
-
-Coût estimé
-
-</div>
-
-<div class="metric-value">
-
-${estimatedCost.toLocaleString()} FCFA
-
-</div>
-
-</div>
-
-<div class="metric-box">
-
-<div class="metric-title">
-
-Alertes actives
-
-</div>
-
-<div class="metric-value">
-
-${alerts.length}
-
-</div>
-
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<canvas id="chart-${site.id}"></canvas>
-
-</div>
-
-</div>
-
-`;
-
-}
-
-/*
-CHARTS
-*/
-
-for(const site of sites){
-
-const { data:telemetry } =
-await supabaseClient
-
-.from('telemetry')
-
-.select('*')
-
-.eq('site_id',site.id)
-
-.order('created_at',{ascending:false})
-
-.limit(12);
-
-if(telemetry.length===0){
-
-continue;
-
-}
-
-const ctx =
-document.getElementById(
-'chart-'+site.id
-);
-
-if(!ctx){
-
-continue;
-
-}
-
-const labels = [];
-
-const values = [];
-
-telemetry.reverse().forEach(item=>{
-
-labels.push(
-
-new Date(item.created_at)
-.toLocaleTimeString()
-
-);
-
-values.push(item.power_w);
-
-});
-
-if(charts[site.id]){
-
-charts[site.id].destroy();
-
-}
-
-charts[site.id] =
-new Chart(ctx,{
-
-type:'line',
-
-data:{
-
-labels:labels,
-
-datasets:[{
-
-label:'Puissance W',
-
-data:values,
-
-borderColor:'#00c896',
-
-backgroundColor:'rgba(0,200,150,0.12)',
-
-fill:true,
-
-tension:0.4
-
-}]
-
-},
-
-options:{
-
-responsive:true,
-
-plugins:{
-
-legend:{
-
-labels:{
-
-color:'white'
-
-}
-
-}
-
-},
-
-scales:{
-
-x:{
-
-ticks:{
-color:'white'
-},
-
-grid:{
-color:'rgba(255,255,255,0.05)'
-}
-
-},
-
-y:{
-
-ticks:{
-color:'white'
-},
-
-grid:{
-color:'rgba(255,255,255,0.05)'
-}
-
-}
-
-}
-
-}
-
-});
-
-}
-
-}
-
-/*
-INIT
-*/
-
+// Initialisation
 loadDashboard();
-
-/*
-REALTIME
-*/
-
-supabaseClient
-
-.channel('dashboard-live')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'telemetry'
-
-},
-
-()=>{
-
-loadDashboard();
-
-}
-
-)
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'alerts'
-
-},
-
-()=>{
-
-loadDashboard();
-
-}
-
-)
-
-.subscribe();
-
-</script>
-
-</body>
-
-</html>
