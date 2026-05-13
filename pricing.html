@@ -1,70 +1,680 @@
-<div class="saas-card">
+<!DOCTYPE html>
+<html lang="fr">
 
-<div style="
-display:inline-block;
-background:rgba(0,200,150,0.15);
-color:#00c896;
-padding:8px 16px;
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Tarifs EnergyTrack</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+background:#0b1220;
+font-family:'Poppins',sans-serif;
+color:white;
+overflow-x:hidden;
+}
+
+.hero{
+padding:100px 8% 60px;
+text-align:center;
+}
+
+.hero h1{
+font-family:'Orbitron',sans-serif;
+font-size:64px;
+line-height:1.2;
+margin-bottom:25px;
+}
+
+.hero p{
+max-width:850px;
+margin:auto;
+font-size:20px;
+line-height:1.8;
+color:#94a3b8;
+}
+
+.pricing-section{
+padding:60px 8% 100px;
+}
+
+.pricing-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:30px;
+margin-top:50px;
+}
+
+.pricing-card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:40px;
+border-radius:32px;
+position:relative;
+overflow:hidden;
+border:1px solid rgba(255,255,255,0.05);
+transition:0.4s;
+}
+
+.pricing-card:hover{
+transform:translateY(-10px);
+box-shadow:0 30px 60px rgba(0,0,0,0.4);
+}
+
+.popular{
+border:1px solid rgba(0,200,150,0.4);
+transform:scale(1.03);
+}
+
+.badge{
+position:absolute;
+top:20px;
+right:20px;
+background:#00c896;
+padding:10px 18px;
 border-radius:999px;
 font-size:12px;
 font-weight:700;
+}
+
+.plan-name{
+font-size:30px;
+font-weight:700;
+margin-bottom:15px;
+}
+
+.plan-description{
+color:#94a3b8;
+line-height:1.7;
+margin-bottom:25px;
+}
+
+.price{
+font-size:68px;
+font-family:'Orbitron',sans-serif;
+font-weight:800;
+margin-bottom:10px;
+}
+
+.price span{
+font-size:18px;
+font-family:'Poppins',sans-serif;
+color:#94a3b8;
+}
+
+.features{
+margin-top:35px;
+}
+
+.feature{
+margin-bottom:18px;
+display:flex;
+align-items:center;
+gap:12px;
+font-size:15px;
+}
+
+button{
+width:100%;
+padding:18px;
+border:none;
+border-radius:18px;
+margin-top:40px;
+font-size:16px;
+font-weight:700;
+cursor:pointer;
+transition:0.3s;
+}
+
+.btn-primary{
+background:linear-gradient(135deg,#00c896,#00aeef);
+color:white;
+}
+
+.btn-primary:hover{
+opacity:0.92;
+transform:translateY(-2px);
+}
+
+.btn-secondary{
+background:#1e293b;
+color:white;
+}
+
+.btn-secondary:hover{
+background:#263548;
+}
+
+.comparison{
+padding:100px 8%;
+}
+
+.comparison h2{
+font-size:42px;
+margin-bottom:40px;
+text-align:center;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+background:#182235;
+border-radius:25px;
+overflow:hidden;
+}
+
+th{
+background:#101826;
+padding:22px;
+text-align:left;
+font-size:15px;
+}
+
+td{
+padding:22px;
+border-top:1px solid rgba(255,255,255,0.05);
+color:#dbe4f0;
+}
+
+.faq{
+padding:100px 8%;
+}
+
+.faq h2{
+text-align:center;
+font-size:42px;
+margin-bottom:50px;
+}
+
+.faq-item{
+background:#182235;
+padding:28px;
+border-radius:22px;
 margin-bottom:20px;
-">
+}
 
-1 MOIS GRATUIT
+.faq-item h3{
+margin-bottom:15px;
+}
 
-</div>
-
-<h3>
-Starter SaaS
-</h3>
-
-<div class="price">
-
-0 FCFA
-
-<span>
-1er mois
-</span>
-
-</div>
-
-<p style="
+.faq-item p{
 color:#94a3b8;
 line-height:1.8;
+}
+
+.cta{
+padding:120px 8%;
+text-align:center;
+}
+
+.cta-box{
+background:linear-gradient(145deg,#182235,#101826);
+padding:70px;
+border-radius:36px;
+}
+
+.cta-box h2{
+font-size:48px;
 margin-bottom:25px;
-">
+}
 
-Découvrez la plateforme EnergyTrack gratuitement pendant 30 jours.
+.cta-box p{
+max-width:750px;
+margin:auto;
+color:#94a3b8;
+line-height:1.8;
+font-size:18px;
+}
 
+.cta-box button{
+max-width:320px;
+margin:auto;
+margin-top:40px;
+}
+
+@media(max-width:768px){
+
+.hero h1{
+font-size:42px;
+}
+
+.price{
+font-size:52px;
+}
+
+.cta-box{
+padding:40px;
+}
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<section class="hero">
+
+<h1>
+Les Tarifs EnergyTrack
+</h1>
+
+<p>
+Choisissez le plan idéal pour superviser vos installations énergétiques,
+analyser votre consommation et optimiser vos coûts en temps réel.
 </p>
 
-<div class="hardware-feature">
+</section>
+
+<section class="pricing-section">
+
+<div class="pricing-grid">
+
+<div class="pricing-card">
+
+<div class="plan-name">
+Starter
+</div>
+
+<div class="plan-description">
+Idéal pour petites entreprises et commerces.
+</div>
+
+<div class="price">
+5K
+<span>
+FCFA/mois
+</span>
+</div>
+
+<div class="features">
+
+<div class="feature">
+✅ 1 site énergétique
+</div>
+
+<div class="feature">
 ✅ Dashboard temps réel
 </div>
 
-<div class="hardware-feature">
+<div class="feature">
 ✅ Alertes basiques
 </div>
 
-<div class="hardware-feature">
-✅ Historique énergétique
+<div class="feature">
+✅ Rapports simples
 </div>
 
-<div class="hardware-feature">
-✅ Monitoring cloud
-</div>
-
-<div class="hardware-feature">
+<div class="feature">
 ✅ Support standard
 </div>
 
-<button
-class="btn-secondary"
-onclick="window.location.href='checkout.html'">
+</div>
 
-Commencer gratuitement
+<button class="btn-secondary"
+onclick="window.location.href='auth.html'">
+
+Commencer
 
 </button>
 
 </div>
+
+<div class="pricing-card popular">
+
+<div class="badge">
+POPULAIRE
+</div>
+
+<div class="plan-name">
+Business Pro
+</div>
+
+<div class="plan-description">
+Pour PME, hôtels, restaurants et entreprises multisites.
+</div>
+
+<div class="price">
+25K
+<span>
+FCFA/mois
+</span>
+</div>
+
+<div class="features">
+
+<div class="feature">
+✅ Jusqu’à 10 sites
+</div>
+
+<div class="feature">
+✅ Analytics avancés
+</div>
+
+<div class="feature">
+✅ IA énergétique
+</div>
+
+<div class="feature">
+✅ Rapports PDF
+</div>
+
+<div class="feature">
+✅ Alertes intelligentes
+</div>
+
+<div class="feature">
+✅ Multi-sites temps réel
+</div>
+
+<div class="feature">
+✅ Support prioritaire
+</div>
+
+</div>
+
+<button class="btn-primary"
+onclick="window.location.href='checkout.html'">
+
+Choisir ce plan
+
+</button>
+
+</div>
+
+<div class="pricing-card">
+
+<div class="plan-name">
+Enterprise
+</div>
+
+<div class="plan-description">
+Pour industries et infrastructures critiques.
+</div>
+
+<div class="price">
+Custom
+<span>
+sur devis
+</span>
+</div>
+
+<div class="features">
+
+<div class="feature">
+✅ Sites illimités
+</div>
+
+<div class="feature">
+✅ MQTT & ESP32
+</div>
+
+<div class="feature">
+✅ API complète
+</div>
+
+<div class="feature">
+✅ Smart Building
+</div>
+
+<div class="feature">
+✅ IA avancée
+</div>
+
+<div class="feature">
+✅ Support dédié 24/7
+</div>
+
+<div class="feature">
+✅ Intégration industrielle
+</div>
+
+</div>
+
+<button class="btn-secondary">
+
+Contacter l’équipe
+
+</button>
+
+</div>
+
+</div>
+
+</section>
+
+<section class="comparison">
+
+<h2>
+Comparaison des plans
+</h2>
+
+<table>
+
+<tr>
+
+<th>
+Fonctionnalités
+</th>
+
+<th>
+Starter
+</th>
+
+<th>
+Business
+</th>
+
+<th>
+Enterprise
+</th>
+
+</tr>
+
+<tr>
+
+<td>
+Nombre de sites
+</td>
+
+<td>
+1
+</td>
+
+<td>
+10
+</td>
+
+<td>
+Illimité
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Temps réel
+</td>
+
+<td>
+✅
+</td>
+
+<td>
+✅
+</td>
+
+<td>
+✅
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+IA énergétique
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+✅
+</td>
+
+<td>
+✅
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Rapports PDF
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+✅
+</td>
+
+<td>
+✅
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+API
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+✅
+</td>
+
+</tr>
+
+<tr>
+
+<td>
+Support dédié
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+❌
+</td>
+
+<td>
+✅
+</td>
+
+</tr>
+
+</table>
+
+</section>
+
+<section class="faq">
+
+<h2>
+Questions fréquentes
+</h2>
+
+<div class="faq-item">
+
+<h3>
+Puis-je changer de plan à tout moment ?
+</h3>
+
+<p>
+Oui, vous pouvez upgrader ou downgrader votre abonnement à tout moment.
+</p>
+
+</div>
+
+<div class="faq-item">
+
+<h3>
+EnergyTrack fonctionne-t-il avec des ESP32 ?
+</h3>
+
+<p>
+Oui, la plateforme est conçue pour fonctionner avec des capteurs IoT et ESP32.
+</p>
+
+</div>
+
+<div class="faq-item">
+
+<h3>
+Les rapports PDF sont-ils automatiques ?
+</h3>
+
+<p>
+Oui, les plans Business et Enterprise permettent la génération automatique de rapports.
+</p>
+
+</div>
+
+</section>
+
+<section class="cta">
+
+<div class="cta-box">
+
+<h2>
+Prêt à optimiser votre énergie ?
+</h2>
+
+<p>
+Rejoignez les entreprises qui utilisent EnergyTrack pour surveiller,
+analyser et réduire leurs coûts énergétiques grâce à l’IoT et l’intelligence artificielle.
+</p>
+
+<button class="btn-primary"
+onclick="window.location.href='auth.html'">
+
+Commencer maintenant
+
+</button>
+
+</div>
+
+</section>
+
+</body>
+
+</html>
