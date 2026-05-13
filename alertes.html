@@ -15,10 +15,23 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
 </head>
 
 <body>
+<div class="section">
 
+<h2>
+Alertes temps réel
+</h2>
+
+<div id="alertsContainer">
+
+</div>
+
+</div>
 <div class="sidebar">
 
 <div class="logo">
@@ -133,6 +146,203 @@ window.location.href='index.html';
 }
 
 </script>
+<script>
 
+async function loadAlerts(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId = userData.user.id;
+
+/*
+RÉCUP ALERTES
+*/
+
+const { data, error } =
+await supabaseClient
+
+.from('alerts')
+
+.select('*')
+
+.eq('sensor_id',userId)
+
+.order('created_at',{ascending:false});
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+const container =
+document.getElementById('alertsContainer');
+
+container.innerHTML='';
+
+/*
+AFFICHAGE
+*/
+
+data.forEach(alert=>{
+
+let color='#ffb547';
+
+if(alert.type==='SBEE_OUTAGE'){
+
+color='#ff4c61';
+
+}
+
+if(alert.type==='LOW_VOLTAGE'){
+
+color='#ffb547';
+
+}
+
+if(alert.type==='HIGH_VOLTAGE'){
+
+color='#00aeef';
+
+}
+
+if(alert.type==='OVERCONSUMPTION'){
+
+color='#ffd93d';
+
+}
+
+container.innerHTML += `
+
+<div style="
+background:#182235;
+padding:20px;
+border-radius:20px;
+margin-bottom:18px;
+border-left:6px solid ${color};
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:10px;
+flex-wrap:wrap;
+gap:10px;
+">
+
+<h3>
+
+${alert.type}
+
+</h3>
+
+<div style="
+background:${color};
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+">
+
+${alert.status}
+
+</div>
+
+</div>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+${alert.message}
+
+</p>
+
+<p style="
+margin-top:12px;
+font-size:14px;
+color:#94a3b8;
+">
+
+Valeur :
+${alert.value}
+
+| Seuil :
+${alert.threshold}
+
+</p>
+
+<p style="
+margin-top:10px;
+font-size:13px;
+color:#94a3b8;
+">
+
+${new Date(alert.created_at).toLocaleString()}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+/*
+LOAD INITIAL
+*/
+
+loadAlerts();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('alerts-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'alerts'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadAlerts();
+
+}
+
+)
+
+.subscribe();
+
+</script>
 </body>
 </html>
