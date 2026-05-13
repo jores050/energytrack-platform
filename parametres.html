@@ -83,11 +83,26 @@ Enregistrer
 
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
 <script>
 
-if(localStorage.getItem('sensorConfigured')!=='true'){
+window.onload = async function(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
 
 window.location.href='auth.html';
+
+return;
+
+}
+
+console.log('Utilisateur connecté');
 
 }
 
@@ -99,7 +114,9 @@ document.getElementById('saveMessage').innerHTML=
 
 }
 
-function logoutUser(){
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
 
 localStorage.clear();
 
