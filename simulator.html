@@ -1,541 +1,95 @@
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>EnergyTrack Simulator</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="js/supabase.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-body{
-background:#0b1220;
-color:white;
-font-family:'Poppins',sans-serif;
-padding:60px;
-}
-
-.card{
-background:#182235;
-padding:35px;
-border-radius:28px;
-max-width:700px;
-margin:auto;
-}
-
-h1{
-font-family:'Orbitron',sans-serif;
-margin-bottom:25px;
-}
-
-.value{
-font-size:42px;
-margin-top:10px;
-color:#00c896;
-}
-
-button{
-padding:18px 28px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:white;
-font-weight:600;
-cursor:pointer;
-margin-top:30px;
-transition:0.3s;
-}
-
-button:hover{
-transform:translateY(-2px);
-opacity:0.95;
-}
-
-.log{
-margin-top:25px;
-background:#0f1729;
-padding:20px;
-border-radius:18px;
-max-height:250px;
-overflow:auto;
-line-height:1.8;
-}
-
-select{
-width:100%;
-padding:16px;
-border:none;
-border-radius:16px;
-margin-top:20px;
-background:#101826;
-color:white;
-font-size:16px;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<h1>
-⚡ EnergyTrack Live Simulator
-</h1>
-
-<p>
-Simulation temps réel d’un capteur énergétique ESP32.
-</p>
-
-<select id="siteSelector">
-
-<option value="">
-Choisir un site
-</option>
-
-<option value="restaurant-cadjehoun">
-🍽️ Restaurant Cadjehoun
-</option>
-
-<option value="hotel-fidjrosse">
-🏨 Hôtel Fidjrossè
-</option>
-
-<option value="boutique-porto">
-🛍️ Boutique Porto-Novo
-</option>
-
-<option value="usine-akpakpa">
-🏭 Usine Akpakpa
-</option>
-
-<option value="supermarche-calavi">
-🛒 Supermarché Calavi
-</option>
-
-<option value="station-gbegamey">
-⛽ Station Gbégamey
-</option>
-
-<option value="hopital-cotonou">
-🏥 Clinique Cotonou
-</option>
-
-<option value="campus-abomey">
-🎓 Campus Abomey-Calavi
-</option>
-
-<option value="hotel-parakou">
-🏨 Hôtel Parakou
-</option>
-
-<option value="restaurant-ganhito">
-🍽️ Restaurant Ganhi
-</option>
-
-</select>
-
-<div style="margin-top:30px;">
-
-<p>
-Tension :
-</p>
-
-<div class="value" id="voltage">
-0 V
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<p>
-Puissance :
-</p>
-
-<div class="value" id="power">
-0 W
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<p>
-Source :
-</p>
-
-<div class="value" id="source">
-SBEE
-</div>
-
-</div>
-
-<button onclick="startSimulation()">
-
-Démarrer la simulation
-
-</button>
-
-<button onclick="stopSimulation()"
-style="
-background:#ff4c61;
-margin-left:15px;
-">
-
-Arrêter la simulation
-
-</button>
-
-<div class="log" id="log">
-
-Logs simulation...
-
-</div>
-
-</div>
-
 <script>
-
 let simulationRunning = false;
-
 let simulationInterval = null;
 
-/*
-LOAD SITES
-*/
+// Initialisation au chargement
+window.onload = function() {
+    checkUser();
+};
 
-async function loadSites(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return;
-
+async function checkUser() {
+    const { data: userData } = await supabaseClient.auth.getUser();
+    if (!userData.user) {
+        window.location.href = 'auth.html';
+    }
 }
 
-const userId =
-userData.user.id;
+async function startSimulation() {
+    if (simulationRunning) return;
 
-const { data:sites, error } =
-await supabaseClient
+    const selector = document.getElementById('siteSelector');
+    const selectedSiteValue = selector.value;
+    const selectedSiteName = selector.options[selector.selectedIndex].text;
 
-.from('sites')
+    if (selectedSiteValue === '') {
+        alert('Veuillez sélectionner un site.');
+        return;
+    }
 
-.select('*')
+    const { data: userData } = await supabaseClient.auth.getUser();
+    if (!userData.user) {
+        alert('Utilisateur non connecté');
+        return;
+    }
 
-.eq('user_id',userId);
+    const userId = userData.user.id;
+    simulationRunning = true;
 
-if(error){
+    simulationInterval = setInterval(async () => {
+        // VALEURS SIMULÉES
+        const voltage = Math.floor(Math.random() * 220) + 40;
+        const power = Math.floor(Math.random() * 5000);
+        const current = (power / voltage).toFixed(2);
+        const kwh = (power / 1000).toFixed(2);
+        const source = Math.random() > 0.8 ? 'GROUPE' : 'SBEE';
 
-console.log(error);
+        // ALERTES
+        if (voltage < 190 || power > 3000 || voltage < 50 || voltage > 250) {
+            let type = 'INFO';
+            let msg = 'RAS';
+            
+            if(voltage < 190) { type = 'LOW_VOLTAGE'; msg = 'Tension basse'; }
+            else if(power > 3000) { type = 'OVERCONSUMPTION'; msg = 'Surconsommation'; }
+            else if(voltage < 50) { type = 'SBEE_OUTAGE'; msg = 'Coupure SBEE'; }
+            
+            await supabaseClient.from('alerts').insert([{
+                sensor_id: userId,
+                site_id: selectedSiteValue,
+                site_name: selectedSiteName,
+                type: type,
+                message: msg,
+                value: (type === 'OVERCONSUMPTION' ? power : voltage)
+            }]);
+        }
 
-return;
+        // MISE À JOUR UI
+        document.getElementById('voltage').innerHTML = voltage + ' V';
+        document.getElementById('power').innerHTML = power + ' W';
+        document.getElementById('source').innerHTML = source;
 
+        // INSERT TELEMETRY
+        const { error } = await supabaseClient.from('telemetry').insert([{
+            sensor_id: userId,
+            site_id: selectedSiteValue,
+            voltage: voltage,
+            current: current,
+            power_w: power,
+            kwh_total: kwh,
+            source: source
+        }]);
+
+        if (error) console.error("Erreur Telemetry:", error);
+
+        // LOGS
+        const log = document.getElementById('log');
+        log.innerHTML = `✅ ${new Date().toLocaleTimeString()} → ${power}W | ${voltage}V | ${source}<br>🏢 Site : ${selectedSiteName}<br><br>${log.innerHTML}`;
+
+    }, 5000);
 }
 
-const selector =
-document.getElementById('siteSelector');
-
-sites.forEach(site=>{
-
-selector.innerHTML += `
-
-<option value="${site.id}">
-
-${site.name}
-
-</option>
-
-`;
-
-});
-
+function stopSimulation() {
+    clearInterval(simulationInterval);
+    simulationRunning = false;
+    document.getElementById('log').innerHTML = '⛔ Simulation arrêtée.<br><br>' + document.getElementById('log.innerHTML');
 }
-
-/*
-START SIMULATION
-*/
-
-async function startSimulation(){
-
-if(simulationRunning){
-
-return;
-
-}
-
-const selectedSite =
-document.getElementById('siteSelector').value;
-
-if(selectedSite===''){
-
-alert('Veuillez sélectionner un site.');
-
-return;
-
-}
-
-simulationRunning = true;
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-alert('Utilisateur non connecté');
-
-return;
-
-}
-
-const userId = userData.user.id;
-
-simulationInterval = setInterval(async()=>{
-
-/*
-VALEURS SIMULÉES
-*/
-
-const voltage =
-Math.floor(Math.random()*220)+40;
-
-const power =
-Math.floor(Math.random()*5000);
-
-const current =
-(power/voltage).toFixed(2);
-
-const kwh =
-(power/1000).toFixed(2);
-
-const source =
-Math.random()>0.8
-? 'GROUPE'
-: 'SBEE';
-
-/*
-ALERTES AUTOMATIQUES
-*/
-
-if(voltage < 190){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-site_name:document.getElementById('siteSelector').selectedOptions[0].text,
-
-type:'LOW_VOLTAGE',
-
-message:'Tension basse détectée',
-
-value:voltage,
-
-threshold:190
-
-}]);
-
-}
-
-if(power > 3000){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-type:'OVERCONSUMPTION',
-
-message:'Surconsommation détectée',
-
-value:power,
-
-threshold:3000
-
-}]);
-
-}
-
-if(voltage < 50){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-type:'SBEE_OUTAGE',
-
-message:'Coupure SBEE détectée',
-
-value:voltage,
-
-threshold:50
-
-}]);
-
-}
-
-if(voltage > 250){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-type:'HIGH_VOLTAGE',
-
-message:'Surtension détectée',
-
-value:voltage,
-
-threshold:250
-
-}]);
-
-}
-
-/*
-UI
-*/
-
-document.getElementById('voltage').innerHTML =
-voltage+' V';
-
-document.getElementById('power').innerHTML =
-power+' W';
-
-document.getElementById('source').innerHTML =
-source;
-
-/*
-INSERT TELEMETRY
-*/
-
-const { error } =
-await supabaseClient
-
-.from('telemetry')
-
-.insert([{
-
-sensor_id:userId,
-
-site_id:selectedSite,
-
-voltage:voltage,
-
-current:current,
-
-power_w:power,
-
-kwh_total:kwh,
-
-source:source
-
-}]);
-
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-/*
-LOGS
-*/
-
-const log =
-document.getElementById('log');
-
-log.innerHTML =
-
-'✅ '
-
-+new Date().toLocaleTimeString()
-
-+' → '
-
-+power+' W | '
-
-+voltage+' V | '
-
-+source
-
-+'<br>🏢 Site ID : '
-
-+selectedSite
-
-+'<br><br>'
-
-+log.innerHTML;
-
-},5000);
-
-}
-
-/*
-STOP
-*/
-
-function stopSimulation(){
-
-clearInterval(simulationInterval);
-
-simulationRunning=false;
-
-document.getElementById('log').innerHTML =
-
-'⛔ Simulation arrêtée.<br><br>'
-
-+document.getElementById('log').innerHTML;
-
-}
-
-/*
-INIT
-*/
-
-loadSites();
-
 </script>
-
-</body>
-
-</html>
