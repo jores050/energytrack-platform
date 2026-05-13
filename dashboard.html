@@ -3,235 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard EnergyTrack - Pro</title>
-    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <title>EnergyTrack - Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="js/supabase.js"></script>
     <style>
-        :root { --bg-dark: #0f172a; --card-grad: linear-gradient(145deg,#182235,#101826); --accent: #00c896; --warning: #ffb547; --danger: #ff4c61; }
+        :root { --bg: #0f172a; --card: #1e293b; --accent: #00c896; --warn: #ffb547; --danger: #ff4c61; }
+        body { background: var(--bg); color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; }
         
-        body { background: var(--bg-dark); color: white; font-family: 'Poppins', sans-serif; margin: 0; display: flex; overflow-x: hidden; }
-        
-        /* Sidebar & Navigation */
-        .sidebar { width: 260px; background: #0b1120; height: 100vh; padding: 25px; position: fixed; border-right: 1px solid rgba(255,255,255,0.05); z-index: 100; }
-        .logo { font-family: 'Orbitron'; font-size: 22px; margin-bottom: 40px; font-weight: 700; }
-        .logo span { color: var(--accent); }
-        .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 12px 15px; color: #94a3b8; text-decoration: none; border-radius: 12px; margin-bottom: 8px; transition: 0.3s; }
-        .nav-item:hover { background: rgba(255,255,255,0.05); color: white; }
-        .nav-item.active { background: rgba(0,200,150,0.1); color: var(--accent); font-weight: 600; }
-        
-        /* Premium Locking */
-        .nav-item.locked { opacity: 0.5; cursor: not-allowed; }
-        .premium-badge { background: var(--warning); color: #000; font-size: 9px; padding: 2px 6px; border-radius: 4px; font-weight: 800; text-transform: uppercase; }
+        /* Sidebar */
+        .sidebar { width: 260px; background: #0b1120; height: 100vh; padding: 25px; position: fixed; border-right: 1px solid rgba(255,255,255,0.05); }
+        .nav-item { display: flex; align-items: center; justify-content: space-between; padding: 12px; color: #94a3b8; text-decoration: none; border-radius: 10px; margin-bottom: 5px; }
+        .nav-item.active { background: rgba(0,200,150,0.1); color: var(--accent); }
+        .nav-item.locked { opacity: 0.4; cursor: not-allowed; }
+        .badge-pro { background: var(--warn); color: black; font-size: 10px; padding: 2px 6px; border-radius: 4px; font-weight: bold; }
 
         /* Main Content */
-        .main { margin-left: 310px; padding: 40px; width: calc(100% - 310px); }
-        
-        /* Banner Expiration */
-        .upgrade-banner { background: linear-gradient(90deg, #ff4c61, #f43f5e); color: white; padding: 20px 25px; border-radius: 16px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: center; animation: slideIn 0.5s ease; }
-        .btn-upgrade { background: white; color: #f43f5e; padding: 10px 20px; border-radius: 8px; text-decoration: none; font-weight: 700; font-size: 14px; }
+        .main { margin-left: 280px; padding: 40px; width: 100%; }
+        .upgrade-banner { background: linear-gradient(90deg, #ff4c61, #f43f5e); padding: 15px 25px; border-radius: 12px; margin-bottom: 25px; display: flex; justify-content: space-between; align-items: center; }
+        .btn-pay { background: white; color: #f43f5e; padding: 8px 15px; border-radius: 6px; text-decoration: none; font-weight: bold; }
 
-        /* Grid & Cards */
-        .site-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(420px, 1fr)); gap: 25px; }
-        .site-card { background: var(--card-grad); padding: 25px; border-radius: 26px; border: 1px solid rgba(255,255,255,0.05); position: relative; }
-        .status-badge { padding: 6px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
-        .bg-green { background: rgba(0,200,150,0.1); color: var(--accent); }
-        .bg-red { background: rgba(255,76,97,0.1); color: var(--danger); }
+        /* Site Cards */
+        .site-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 25px; }
+        .card { background: var(--card); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,0.05); }
+        .status { padding: 5px 12px; border-radius: 20px; font-size: 12px; }
+        .status.ok { background: rgba(0,200,150,0.1); color: var(--accent); }
+        .status.ko { background: rgba(255,76,97,0.1); color: var(--danger); }
         
-        .metrics-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0; }
-        .metric-box { background: rgba(0,0,0,0.2); padding: 15px; border-radius: 15px; }
-        .metric-val { font-size: 24px; font-weight: 700; display: block; margin-top: 5px; }
-        
-        .locked-card { border: 2px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; color: #64748b; min-height: 350px; }
-
-        @keyframes slideIn { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        .locked-slot { border: 2px dashed rgba(255,255,255,0.1); display: flex; flex-direction: column; align-items: center; justify-content: center; height: 300px; border-radius: 20px; color: #64748b; }
     </style>
 </head>
 <body>
 
 <div class="sidebar">
-    <div class="logo">Energy<span>Track</span></div>
-    <nav id="nav-menu">
+    <div style="font-family: 'Orbitron'; font-size: 22px; margin-bottom: 40px;">Energy<span style="color:var(--accent)">Track</span></div>
+    <nav>
         <a href="dashboard.html" class="nav-item active">🏠 Dashboard</a>
         <a href="consommation.html" class="nav-item">⚡ Consommation</a>
-        <a href="capteurs.html" class="nav-item">📡 Capteurs IoT</a>
-        
-        <div style="margin: 20px 0 10px 10px; font-size: 11px; color: #475569; letter-spacing: 1px; font-weight: 700;">PREMIUM</div>
         <a href="ia.html" class="nav-item" data-premium="true">🤖 Analyse IA</a>
         <a href="rapports.html" class="nav-item" data-premium="true">📊 Rapports PDF</a>
         <a href="sites.html" class="nav-item" data-premium="true">🏢 Multi-sites</a>
-        <a href="alertes.html" class="nav-item" data-premium="true">🔔 Alertes IA</a>
-        
-        <a href="parametres.html" class="nav-item" style="margin-top: 30px;">⚙️ Paramètres</a>
     </nav>
 </div>
 
 <div class="main">
-    <div id="status-area"></div>
-    
-    <header style="display:flex; justify-content:space-between; align-items:center; margin-bottom:30px;">
-        <div>
-            <h1 style="margin:0; font-size:28px;">Supervision Multi-sites</h1>
-            <p style="color:#64748b; margin:5px 0 0 0;">Données énergétiques synchronisées en temps réel.</p>
-        </div>
-    </header>
+    <div id="alert-zone"></div>
+    <h1 id="welcome-title">Chargement...</h1>
 
-    <div class="site-grid" id="sitesContainer">
-        </div>
+    <div class="site-grid" id="container"></div>
 </div>
 
 <script>
-const charts = {};
+/** 1. LOGIQUE DE VÉRIFICATION AVANCÉE **/
+async function checkSubscription() {
+    const { data: { user } } = await supabaseClient.auth.getUser();
+    if (!user) return { isPremium: false, user: null };
 
-/** 1. VÉRIFICATION ABONNEMENT (Table 'subscriptions') **/
-async function checkPremiumStatus(userId) {
-    try {
-        const { data, error } = await supabaseClient
-            .from('subscriptions')
-            .select('status')
-            .eq('user_id', userId)
-            .eq('status', 'active')
-            .maybeSingle();
+    const { data: sub } = await supabaseClient
+        .from('subscriptions')
+        .select('status, plan, expires_at')
+        .eq('user_id', user.id)
+        .single();
 
-        return !!(data && data.status === 'active');
-    } catch (e) {
-        return false;
-    }
+    if (!sub) return { isPremium: false, user };
+
+    const now = new Date();
+    const expiry = new Date(sub.expires_at);
+    
+    // CONDITIONS : Actif ET pas Starter ET pas encore expiré
+    const isPremium = (
+        sub.status === 'active' && 
+        sub.plan !== 'starter' && 
+        expiry > now
+    );
+
+    return { isPremium, user, plan: sub.plan };
 }
 
-/** 2. CHARGEMENT PRINCIPAL **/
-async function initDashboard() {
-    // Auth Check
-    const { data: { user } } = await supabaseClient.auth.getUser();
+/** 2. AFFICHAGE DU DASHBOARD **/
+async function load() {
+    const { isPremium, user, plan } = await checkSubscription();
     if (!user) { window.location.href = 'auth.html'; return; }
 
-    const isPremium = await checkPremiumStatus(user.id);
-    const container = document.getElementById('sitesContainer');
-    const statusArea = document.getElementById('status-area');
+    document.getElementById('welcome-title').innerText = `Dashboard (${plan || 'Starter'})`;
 
-    // UI LIMITÉE (Bannière + Menu)
+    // A. Blocage visuel du menu si non-premium
     if (!isPremium) {
-        statusArea.innerHTML = `
+        document.getElementById('alert-zone').innerHTML = `
             <div class="upgrade-banner">
-                <div>
-                    <strong style="font-size:18px;">⚠️ Abonnement Expiré</strong><br>
-                    <span>Vous utilisez le mode gratuit. Vos données sont limitées à 1 site.</span>
-                </div>
-                <a href="billing.html" class="btn-upgrade">RÉACTIVER LE CLOUD</a>
-            </div>
-        `;
+                <div><strong>Abonnement limité</strong><br><small>Passez au plan Business pour débloquer le multi-sites et l'IA.</small></div>
+                <a href="upgrade.html" class="btn-pay">Mettre à jour</a>
+            </div>`;
         
-        document.querySelectorAll('.nav-item[data-premium="true"]').forEach(item => {
-            item.classList.add('locked');
-            item.innerHTML += '<span class="premium-badge">PRO</span>';
-            item.onclick = (e) => {
-                e.preventDefault();
-                alert("🚀 Cette fonctionnalité nécessite un abonnement Business Cloud actif.");
-            };
+        document.querySelectorAll('.nav-item[data-premium="true"]').forEach(el => {
+            el.classList.add('locked');
+            el.innerHTML += '<span class="badge-pro">PRO</span>';
+            el.onclick = (e) => { e.preventDefault(); alert("🔒 Option réservée aux membres Premium."); };
         });
     }
 
-    // CHARGEMENT DES SITES (BRIDAGE SQL)
+    // B. Requête des sites (Bridage SQL)
     let query = supabaseClient.from('sites').select('*').eq('user_id', user.id);
-    if (!isPremium) query = query.limit(1);
+    if (!isPremium) query = query.limit(1); // Force 1 seul site
 
-    const { data: sites, error } = await query;
-    if (error) return;
-
+    const { data: sites } = await query;
+    const container = document.getElementById('container');
     container.innerHTML = '';
 
     for (const site of sites) {
-        // Get Telemetry
-        const { data: telemetry } = await supabaseClient
-            .from('telemetry')
-            .select('*')
-            .eq('site_id', site.id)
-            .order('created_at', { ascending: false })
-            .limit(15);
+        // Telemetry
+        const { data: tel } = await supabaseClient
+            .from('telemetry').select('*').eq('site_id', site.id)
+            .order('created_at', { ascending: false }).limit(10);
 
-        if (!telemetry || telemetry.length === 0) continue;
+        if (!tel || tel.length === 0) continue;
+        const last = tel[0];
 
-        const live = telemetry[0];
-        const totalKwh = telemetry.reduce((sum, row) => sum + Number(row.kwh_total || 0), 0);
-        
-        // HTML Card
         container.innerHTML += `
-            <div class="site-card">
-                <div style="display:flex; justify-content:space-between; align-items:start;">
-                    <div>
-                        <h2 style="margin:0; font-size:20px;">🏢 ${site.name}</h2>
-                        <span style="color:#64748b; font-size:13px;">📍 ${site.city}</span>
+            <div class="card">
+                <div style="display:flex; justify-content:space-between; align-items:center;">
+                    <h3>🏢 ${site.name}</h3>
+                    <span class="status ${last.voltage > 50 ? 'ok' : 'ko'}">${last.voltage > 50 ? '● SBEE' : '● COUPURE'}</span>
+                </div>
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin: 15px 0;">
+                    <div style="background:#0f172a; padding:15px; border-radius:12px;">
+                        <small>Puissance</small><br><b style="font-size:20px;">${Math.round(last.power_w)} W</b>
                     </div>
-                    <div class="status-badge ${live.voltage > 50 ? 'bg-green' : 'bg-red'}">
-                        ${live.voltage > 50 ? '● SBEE OK' : '● COUPURE'}
+                    <div style="background:#0f172a; padding:15px; border-radius:12px;">
+                        <small>Tension</small><br><b style="font-size:20px;">${last.voltage} V</b>
                     </div>
                 </div>
-
-                <div class="metrics-grid">
-                    <div class="metric-box">
-                        <small style="color:#64748b">Puissance Actuelle</small>
-                        <span class="metric-val">${Math.round(live.power_w)} W</span>
-                    </div>
-                    <div class="metric-box">
-                        <small style="color:#64748b">Consommation</small>
-                        <span class="metric-val">${totalKwh.toFixed(2)} kWh</span>
-                    </div>
-                </div>
-
-                <canvas id="chart-${site.id}" height="150"></canvas>
-            </div>
-        `;
-
-        // Render Graphique
-        setTimeout(() => renderSiteChart(site.id, telemetry), 100);
+                <canvas id="chart-${site.id}"></canvas>
+            </div>`;
+        
+        setTimeout(() => draw(site.id, tel), 100);
     }
 
-    // AJOUTER LE SLOT "BLOQUÉ" SI GRATUIT
+    // C. Slot "Verrouillé"
     if (!isPremium) {
         container.innerHTML += `
-            <div class="site-card locked-card">
-                <div style="font-size:40px; margin-bottom:15px;">🔒</div>
-                <h3 style="margin:0; color:white;">Multi-sites désactivé</h3>
-                <p style="padding:0 20px; font-size:13px;">Passez à la version Pro pour surveiller tous vos bâtiments en temps réel.</p>
-                <a href="billing.html" style="color:var(--warning); text-decoration:none; font-weight:700; margin-top:10px;">En savoir plus →</a>
-            </div>
-        `;
+            <div class="locked-slot">
+                <p>🔒 Multi-sites verrouillé</p>
+                <a href="upgrade.html" style="color:var(--warn); font-size:12px;">Débloquer mes autres bâtiments</a>
+            </div>`;
     }
 }
 
-function renderSiteChart(id, rawData) {
-    const ctx = document.getElementById(`chart-${id}`).getContext('2d');
-    const data = [...rawData].reverse();
-    
+/** 3. GRAPHIQUE **/
+function draw(id, data) {
+    const ctx = document.getElementById('chart-' + id);
     new Chart(ctx, {
         type: 'line',
         data: {
-            labels: data.map(d => new Date(d.created_at).toLocaleTimeString([], {hour: '2-刻', minute:'2-digit'})),
+            labels: data.map(d => new Date(d.created_at).toLocaleTimeString()).reverse(),
             datasets: [{
-                label: 'Watts',
-                data: data.map(d => d.power_w),
+                data: data.map(d => d.power_w).reverse(),
                 borderColor: '#00c896',
-                borderWidth: 2,
-                pointRadius: 0,
                 tension: 0.4,
+                pointRadius: 0,
                 fill: true,
                 backgroundColor: 'rgba(0, 200, 150, 0.05)'
             }]
         },
-        options: {
-            responsive: true,
-            plugins: { legend: { display: false } },
-            scales: { 
-                x: { display: false },
-                y: { grid: { color: 'rgba(255,255,255,0.05)' }, ticks: { color: '#475569', size: 10 } }
-            }
-        }
+        options: { plugins: { legend: { display: false } }, scales: { x: { display: false } } }
     });
 }
 
-// Lancement
-initDashboard();
+load();
 </script>
 
 </body>
