@@ -4,255 +4,123 @@
 <head>
 
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard - EnergyTrack</title>
+<title>Dashboard EnergyTrack</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
 <script src="js/supabase.js"></script>
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
-
-body{
-background:#081120;
-color:white;
-font-family:'Poppins',sans-serif;
-display:flex;
-min-height:100vh;
-overflow-x:hidden;
-}
-
-.sidebar{
-width:260px;
-background:#0d1728;
-border-right:1px solid rgba(255,255,255,0.05);
-padding:30px 20px;
-position:fixed;
-top:0;
-left:0;
-bottom:0;
-}
-
-.logo{
-font-family:'Orbitron',sans-serif;
-font-size:28px;
-font-weight:700;
-margin-bottom:50px;
-}
-
-.logo span{
-color:#00c896;
-}
-
-.menu{
-display:flex;
-flex-direction:column;
-gap:12px;
-}
-
-.menu a{
-padding:15px 18px;
-border-radius:14px;
-color:#94a3b8;
-text-decoration:none;
-transition:0.3s;
-font-weight:500;
-}
-
-.menu a:hover,
-.menu a.active{
-background:rgba(0,200,150,0.15);
-color:white;
-}
-
-.main{
-margin-left:260px;
-width:calc(100% - 260px);
-padding:40px;
-}
-
-.topbar{
-display:flex;
-justify-content:space-between;
-align-items:center;
-margin-bottom:35px;
-flex-wrap:wrap;
-gap:20px;
-}
-
-.topbar h1{
-font-size:42px;
-font-family:'Orbitron',sans-serif;
-}
-
-.user-box{
-background:#182235;
-padding:14px 20px;
-border-radius:14px;
-}
-
-.banner{
-margin-bottom:30px;
-}
-
-.cards{
+.site-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
-gap:20px;
-margin-bottom:35px;
-}
-
-.card{
-background:#182235;
-padding:25px;
-border-radius:24px;
-border:1px solid rgba(255,255,255,0.05);
-}
-
-.card p{
-color:#94a3b8;
-margin-bottom:12px;
-}
-
-.card h2{
-font-size:34px;
-}
-
-.grid{
-display:grid;
-grid-template-columns:2fr 1fr;
+grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
 gap:25px;
-margin-bottom:30px;
-}
-
-.panel{
-background:#182235;
-padding:30px;
-border-radius:24px;
-border:1px solid rgba(255,255,255,0.05);
-}
-
-.panel h3{
-margin-bottom:20px;
-font-size:24px;
+margin-top:30px;
 }
 
 .site-card{
-background:#0f1729;
-padding:22px;
-border-radius:18px;
-margin-bottom:18px;
+background:linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:26px;
+border:1px solid rgba(255,255,255,0.05);
+transition:0.3s;
 }
 
-.site-card h4{
-font-size:22px;
-margin-bottom:10px;
+.site-card:hover{
+transform:translateY(-5px);
+box-shadow:0 20px 40px rgba(0,0,0,0.35);
 }
 
-.site-card p{
-color:#94a3b8;
-margin-bottom:8px;
+.site-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
 }
 
-.status{
-display:inline-block;
+.status-badge{
 padding:8px 14px;
 border-radius:999px;
+font-size:12px;
+font-weight:600;
+}
+
+.green{
 background:rgba(0,200,150,0.15);
 color:#00c896;
-font-size:12px;
-font-weight:700;
-margin-top:10px;
 }
 
-.analytics{
+.orange{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.red{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.metrics-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+grid-template-columns:repeat(2,1fr);
 gap:20px;
+margin-top:20px;
 }
 
-.analytics-card{
+.metric-box{
 background:#0f1729;
-padding:22px;
+padding:18px;
 border-radius:18px;
 }
 
-.analytics-card h4{
-margin-bottom:10px;
-}
-
-.analytics-card p{
+.metric-title{
+font-size:13px;
 color:#94a3b8;
 }
 
-.btn{
-padding:14px 22px;
-border:none;
-border-radius:14px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:white;
+.metric-value{
+font-size:28px;
+margin-top:10px;
 font-weight:700;
-cursor:pointer;
-margin-top:18px;
 }
 
-.premium-badge{
+.live-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#00c896;
 display:inline-block;
-padding:8px 14px;
-border-radius:999px;
-background:rgba(255,181,71,0.15);
-color:#ffb547;
-font-size:12px;
-font-weight:700;
-margin-left:10px;
+margin-right:8px;
+animation:pulse 1s infinite;
 }
 
-.logout-btn{
-background:#ff4c61;
-padding:12px 18px;
-border:none;
-border-radius:12px;
-color:white;
-cursor:pointer;
-font-weight:700;
+@keyframes pulse{
+
+0%{
+opacity:0.3;
+transform:scale(1);
 }
 
-@media(max-width:1000px){
-
-.grid{
-grid-template-columns:1fr;
+50%{
+opacity:1;
+transform:scale(1.2);
 }
 
-}
-
-@media(max-width:768px){
-
-.sidebar{
-position:relative;
-width:100%;
-height:auto;
-}
-
-.main{
-margin-left:0;
-width:100%;
-padding:25px;
-}
-
-body{
-flex-direction:column;
-}
-
-.topbar h1{
-font-size:30px;
+100%{
+opacity:0.3;
+transform:scale(1);
 }
 
 }
@@ -269,195 +137,75 @@ font-size:30px;
 Energy<span>Track</span>
 </div>
 
-<div class="menu">
-
-<a href="dashboard.html" class="active">
+<a class="nav-item active" href="dashboard.html">
 🏠 Dashboard
 </a>
 
-<a href="consommation.html">
+<a class="nav-item" href="consommation.html">
 ⚡ Consommation
 </a>
 
-<a href="alertes.html">
-🚨 Alertes
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
 </a>
 
-<a href="capteurs.html">
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item" href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item" href="capteurs.html">
 📡 Capteurs IoT
 </a>
 
-<a href="rapports.html" class="premium-feature">
-📄 Rapports PDF
-</a>
-
-<a href="ia.html" class="premium-feature">
+<a class="nav-item" href="ia.html">
 🤖 Analyse IA
 </a>
 
-<a href="billing.html">
-💳 Facturation
-</a>
-
-<a href="parametres.html">
+<a class="nav-item" href="parametres.html">
 ⚙️ Paramètres
 </a>
 
 </div>
 
-</div>
+<div class="main" style="display:block;">
 
-<div class="main">
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:20px;
+">
 
-<div id="subscriptionBanner" class="banner"></div>
-
-<div class="topbar">
+<div>
 
 <h1>
-Dashboard
+Dashboard Multi-sites
 </h1>
 
-<div style="display:flex;align-items:center;gap:15px;">
+<p style="
+margin-top:10px;
+color:#94a3b8;
+">
 
-<div class="user-box" id="userEmail">
-Chargement...
-</div>
+<span class="live-dot"></span>
 
-<button class="logout-btn" onclick="logout()">
-Déconnexion
-</button>
+Supervision énergétique temps réel de tous les sites.
 
-</div>
-
-</div>
-
-<div class="cards">
-
-<div class="card">
-
-<p>
-Puissance instantanée
-</p>
-
-<h2 id="livePower">
-0 W
-</h2>
-
-</div>
-
-<div class="card">
-
-<p>
-Tension
-</p>
-
-<h2 id="liveVoltage">
-0 V
-</h2>
-
-</div>
-
-<div class="card">
-
-<p>
-Courant
-</p>
-
-<h2 id="liveCurrent">
-0 A
-</h2>
-
-</div>
-
-<div class="card">
-
-<p>
-Consommation totale
-</p>
-
-<h2 id="liveKwh">
-0 kWh
-</h2>
-
-</div>
-
-</div>
-
-<div class="grid">
-
-<div class="panel">
-
-<h3>
-📍 Sites surveillés
-</h3>
-
-<div id="sitesContainer">
-
-<p style="color:#94a3b8;">
-Chargement des sites...
 </p>
 
 </div>
 
 </div>
 
-<div class="panel">
-
-<h3>
-📈 Résumé énergétique
-</h3>
-
-<div class="analytics">
-
-<div class="analytics-card">
-
-<h4>
-Consommation jour
-</h4>
-
-<p id="dailyConsumption">
-0 kWh
-</p>
-
-</div>
-
-<div class="analytics-card premium-feature">
-
-<h4>
-IA Énergétique
-<span class="premium-badge">
-PREMIUM
-</span>
-</h4>
-
-<p>
-Votre consommation semble stable aujourd’hui.
-</p>
-
-</div>
-
-<div class="analytics-card premium-feature">
-
-<h4>
-Rapports intelligents
-<span class="premium-badge">
-PREMIUM
-</span>
-</h4>
-
-<p>
-Téléchargez vos rapports PDF automatiques.
-</p>
-
-<button class="btn">
-Télécharger
-</button>
-
-</div>
-
-</div>
-
-</div>
+<div
+class="site-grid"
+id="sitesContainer">
 
 </div>
 
@@ -465,21 +213,13 @@ Télécharger
 
 <script>
 
-async function logout(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
-}
+const charts = {};
 
 /*
-=========================================
-CHECK USER
-=========================================
+GET USER
 */
 
-async function checkUser(){
+async function getUser(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
@@ -492,20 +232,28 @@ return null;
 
 }
 
-document.getElementById('userEmail').innerHTML =
-userData.user.email;
-
 return userData.user;
 
 }
 
 /*
-=========================================
-LOAD SITES
-=========================================
+LOAD DASHBOARD
 */
 
-async function loadSites(userId){
+async function loadDashboard(){
+
+const user =
+await getUser();
+
+if(!user){
+
+return;
+
+}
+
+/*
+GET SITES
+*/
 
 const { data:sites, error } =
 await supabaseClient
@@ -514,352 +262,450 @@ await supabaseClient
 
 .select('*')
 
-.eq('user_id',userId);
+.eq('user_id',user.id);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
 
 const container =
 document.getElementById('sitesContainer');
 
-if(error){
-
-container.innerHTML =
-'Erreur chargement sites';
-
-return;
-
-}
-
-if(!sites || sites.length===0){
-
-container.innerHTML =
-
-`
-<p style="color:#94a3b8;">
-Aucun site configuré.
-</p>
-
-<button
-class="btn"
-onclick="window.location.href='setup.html'">
-
-Configurer mon premier capteur
-
-</button>
-`;
-
-return;
-
-}
-
 container.innerHTML='';
 
-sites.forEach(site=>{
-
-container.innerHTML +=
-
-`
-<div class="site-card">
-
-<h4>
-${site.name}
-</h4>
-
-<p>
-📍 ${site.location || 'Non défini'}
-</p>
-
-<p>
-Créé le :
-${new Date(site.created_at).toLocaleDateString()}
-</p>
-
-<div class="status">
-ACTIF
-</div>
-
-</div>
-`;
-
-});
-
-}
-
 /*
-=========================================
-LOAD LIVE TELEMETRY
-=========================================
+FOR EACH SITE
 */
 
-async function loadTelemetry(){
+for(const site of sites){
 
-const { data, error } =
+/*
+GET TELEMETRY
+*/
+
+const { data:telemetry } =
 await supabaseClient
 
 .from('telemetry')
 
 .select('*')
 
+.eq('site_id',site.id)
+
 .order('created_at',{ascending:false})
 
-.limit(1)
-
-.single();
-
-if(error || !data){
-
-return;
-
-}
-
-document.getElementById('livePower').innerHTML =
-`${data.power_w || 0} W`;
-
-document.getElementById('liveVoltage').innerHTML =
-`${data.voltage || 0} V`;
-
-document.getElementById('liveCurrent').innerHTML =
-`${data.current || 0} A`;
-
-document.getElementById('liveKwh').innerHTML =
-`${data.kwh_total || 0} kWh`;
-
-document.getElementById('dailyConsumption').innerHTML =
-`${data.kwh_total || 0} kWh`;
-
-}
+.limit(12);
 
 /*
-=========================================
-SUBSCRIPTION SYSTEM
-=========================================
+GET ALERTS
 */
 
-async function checkSubscriptionAccess(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-return;
-
-}
-
-const userId = userData.user.id;
-
-const { data:subscription } =
+const { data:alerts } =
 await supabaseClient
 
-.from('subscriptions')
+.from('alerts')
 
 .select('*')
 
-.eq('user_id',userId)
+.eq('site_id',site.id)
 
-.single();
-
-if(!subscription){
-
-showUpgradePopup();
-
-return;
-
-}
-
-const now = new Date();
-
-const expiresAt =
-new Date(subscription.expires_at);
-
-if(
-
-subscription.status !== 'active'
-
-||
-
-expiresAt < now
-
-){
-
-showLimitedDashboard();
-
-return;
-
-}
-
-showFullDashboard();
-
-}
+.eq('status','ACTIVE');
 
 /*
-=========================================
-FULL DASHBOARD
-=========================================
+EMPTY
 */
 
-function showFullDashboard(){
+if(telemetry.length===0){
 
-document
-.querySelectorAll('.premium-feature')
+container.innerHTML += `
 
-.forEach(el=>{
+<div class="site-card">
 
-el.style.display='block';
+<h2>
 
-});
+${site.name}
 
-document.getElementById('subscriptionBanner').style.display='none';
-
-}
-
-/*
-=========================================
-LIMITED DASHBOARD
-=========================================
-*/
-
-function showLimitedDashboard(){
-
-document
-.querySelectorAll('.premium-feature')
-
-.forEach(el=>{
-
-el.style.display='none';
-
-});
-
-document.getElementById('subscriptionBanner').innerHTML =
-
-`
-<div style="
-background:rgba(255,76,97,0.12);
-border:1px solid rgba(255,76,97,0.2);
-padding:22px;
-border-radius:20px;
-">
-
-<h3 style="
-margin-bottom:12px;
-color:#ff4c61;
-">
-
-Votre abonnement a expiré
-
-</h3>
+</h2>
 
 <p style="
+margin-top:20px;
 color:#94a3b8;
-line-height:1.8;
-margin-bottom:20px;
 ">
 
-Vous utilisez actuellement le mode gratuit limité.
-
-Fonctionnalités désactivées :
-
-• IA énergétique
-• Rapports PDF
-• Analytics avancés
-• Multi-sites
-• Alertes intelligentes
+Aucune donnée disponible.
 
 </p>
 
-<button
+</div>
 
-class="btn"
+`;
 
-onclick="window.location.href='pricing.html'">
+continue;
 
-Réactiver mon abonnement
+}
 
-</button>
+const latest =
+telemetry[0];
+
+/*
+STATUS
+*/
+
+let statusText='SBEE OK';
+
+let statusClass='green';
+
+if(latest.source==='GROUPE'){
+
+statusText='GROUPE ACTIF';
+
+statusClass='orange';
+
+}
+
+if(latest.voltage < 50){
+
+statusText='COUPURE';
+
+statusClass='red';
+
+}
+
+/*
+TOTAL ENERGY
+*/
+
+let totalKwh=0;
+
+telemetry.forEach(item=>{
+
+totalKwh += Number(item.kwh_total);
+
+});
+
+const estimatedCost =
+Math.round(totalKwh*91);
+
+/*
+CARD
+*/
+
+container.innerHTML += `
+
+<div class="site-card">
+
+<div class="site-header">
+
+<div>
+
+<h2>
+
+🏢 ${site.name}
+
+</h2>
+
+<p style="
+margin-top:8px;
+color:#94a3b8;
+">
+
+📍 ${site.city}
+
+</p>
 
 </div>
+
+<div class="status-badge ${statusClass}">
+
+${statusText}
+
+</div>
+
+</div>
+
+<div class="metrics-grid">
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+Puissance
+
+</div>
+
+<div class="metric-value">
+
+${Math.round(latest.power_w)} W
+
+</div>
+
+</div>
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+Consommation
+
+</div>
+
+<div class="metric-value">
+
+${totalKwh.toFixed(3)} kWh
+
+</div>
+
+</div>
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+Coût estimé
+
+</div>
+
+<div class="metric-value">
+
+${estimatedCost.toLocaleString()} FCFA
+
+</div>
+
+</div>
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+Alertes actives
+
+</div>
+
+<div class="metric-value">
+
+${alerts.length}
+
+</div>
+
+</div>
+
+</div>
+
+<div style="margin-top:25px;">
+
+<canvas id="chart-${site.id}"></canvas>
+
+</div>
+
+</div>
+
 `;
 
 }
 
 /*
-=========================================
-NO SUBSCRIPTION
-=========================================
+CHARTS
 */
 
-function showUpgradePopup(){
+for(const site of sites){
 
-document.getElementById('subscriptionBanner').innerHTML =
+const { data:telemetry } =
+await supabaseClient
 
-`
-<div style="
-background:rgba(255,181,71,0.12);
-border:1px solid rgba(255,181,71,0.2);
-padding:22px;
-border-radius:20px;
-">
+.from('telemetry')
 
-<h3 style="
-margin-bottom:12px;
-color:#ffb547;
-">
+.select('*')
 
-Aucun abonnement détecté
+.eq('site_id',site.id)
 
-</h3>
+.order('created_at',{ascending:false})
 
-<p style="
-color:#94a3b8;
-line-height:1.8;
-margin-bottom:20px;
-">
+.limit(12);
 
-Activez un abonnement Business Cloud
-pour débloquer toutes les fonctionnalités.
+if(telemetry.length===0){
 
-</p>
+continue;
 
-<button
+}
 
-class="btn"
+const ctx =
+document.getElementById(
+'chart-'+site.id
+);
 
-onclick="window.location.href='pricing.html'">
+if(!ctx){
 
-Voir les offres
+continue;
 
-</button>
+}
 
-</div>
-`;
+const labels = [];
+
+const values = [];
+
+telemetry.reverse().forEach(item=>{
+
+labels.push(
+
+new Date(item.created_at)
+.toLocaleTimeString()
+
+);
+
+values.push(item.power_w);
+
+});
+
+if(charts[site.id]){
+
+charts[site.id].destroy();
+
+}
+
+charts[site.id] =
+new Chart(ctx,{
+
+type:'line',
+
+data:{
+
+labels:labels,
+
+datasets:[{
+
+label:'Puissance W',
+
+data:values,
+
+borderColor:'#00c896',
+
+backgroundColor:'rgba(0,200,150,0.12)',
+
+fill:true,
+
+tension:0.4
+
+}]
+
+},
+
+options:{
+
+responsive:true,
+
+plugins:{
+
+legend:{
+
+labels:{
+
+color:'white'
+
+}
+
+}
+
+},
+
+scales:{
+
+x:{
+
+ticks:{
+color:'white'
+},
+
+grid:{
+color:'rgba(255,255,255,0.05)'
+}
+
+},
+
+y:{
+
+ticks:{
+color:'white'
+},
+
+grid:{
+color:'rgba(255,255,255,0.05)'
+}
+
+}
+
+}
+
+}
+
+});
+
+}
 
 }
 
 /*
-=========================================
-INIT DASHBOARD
-=========================================
+INIT
 */
 
-async function initDashboard(){
+loadDashboard();
 
-const user = await checkUser();
+/*
+REALTIME
+*/
 
-if(!user){
+supabaseClient
 
-return;
+.channel('dashboard-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+()=>{
+
+loadDashboard();
 
 }
 
-await loadSites(user.id);
+)
 
-await loadTelemetry();
+.on(
 
-await checkSubscriptionAccess();
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'alerts'
+
+},
+
+()=>{
+
+loadDashboard();
 
 }
 
-initDashboard();
+)
 
-setInterval(loadTelemetry,5000);
+.subscribe();
 
 </script>
 
