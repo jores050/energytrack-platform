@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 
 <meta charset="UTF-8">
@@ -11,9 +12,58 @@
 <link rel="stylesheet" href="css/style.css">
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+
+<style>
+
+.site-card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:24px;
+border:1px solid rgba(255,255,255,0.05);
+transition:0.3s;
+}
+
+.site-card:hover{
+transform:translateY(-5px);
+box-shadow:0 20px 50px rgba(0,0,0,0.35);
+}
+
+.site-status{
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+display:inline-block;
+}
+
+.status-online{
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+.status-warning{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.status-danger{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.site-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
+margin-top:25px;
+}
+
+</style>
+
 </head>
 
 <body>
@@ -24,108 +74,531 @@
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
 
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
 
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
+</a>
 
-<a class="nav-item" href="rapports.html">📊 Rapports</a>
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
 
-<a class="nav-item active" href="sites.html">🏢 Multi-sites</a>
+<a class="nav-item active" href="sites.html">
+🏢 Multi-sites
+</a>
 
-<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
 
-<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+<a class="nav-item" href="ia.html">
+🤖 Analyse IA
+</a>
 
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
 
-<div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
+<div class="nav-item" onclick="logoutUser()">
+🚪 Déconnexion
+</div>
 
 </div>
 
 <div class="main" style="display:block;">
 
-<h1 style="margin-bottom:20px">
-Gestion Multi-sites
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
+">
+
+<div>
+
+<h1>
+Supervision Multi-sites
 </h1>
 
-<div class="site-card">
+<p style="
+color:#94a3b8;
+margin-top:10px;
+">
 
-<h3>
-Restaurant Akpakpa
-</h3>
+Monitoring centralisé de tous les sites EnergyTrack.
 
-<p>
-Puissance : 3.2 kW
-</p>
-
-<p>
-Statut : ONLINE
 </p>
 
 </div>
 
-<div class="site-card">
-
-<h3>
-Hôtel Fidjrossè
-</h3>
-
-<p>
-Puissance : 4.8 kW
-</p>
-
-<p>
-Statut : ONLINE
-</p>
+<button onclick="createDemoSites()">
+Créer des sites démo
+</button>
 
 </div>
 
-<div class="site-card">
+<div class="card-grid">
 
-<h3>
-Boutique Ganhi
-</h3>
+<div class="card">
 
-<p>
-Puissance : 0 kW
-</p>
+<div class="card-title">
+Sites actifs
+</div>
 
-<p>
-Statut : OFFLINE
-</p>
+<div class="card-value"
+id="totalSites">
+
+0
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Puissance totale
+</div>
+
+<div class="card-value green"
+id="totalPower">
+
+0 W
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Alertes actives
+</div>
+
+<div class="card-value orange"
+id="totalAlerts">
+
+0
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Sites critiques
+</div>
+
+<div class="card-value red"
+id="criticalSites">
+
+0
+
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>
+Sites surveillés
+</h2>
+
+<div class="site-grid"
+id="sitesContainer">
+
+</div>
 
 </div>
 
 </div>
 
 <script>
-window.onload = async function(){
+
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
+
+window.location.href='auth.html';
+
+}
+
+async function loadSites(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
 
 if(!userData.user){
 
+window.location.href='auth.html';
 
 return;
 
 }
 
-console.log('Utilisateur connecté');
+const userId =
+userData.user.id;
+
+/*
+RÉCUP SITES
+*/
+
+const { data:sites, error } =
+await supabaseClient
+
+.from('sites')
+
+.select('*')
+
+.eq('user_id',userId);
+
+if(error){
+
+console.log(error);
+
+return;
 
 }
 
-function logoutUser(){
+/*
+RÉCUP ALERTES
+*/
 
-localStorage.clear();
+const { data:alerts } =
+await supabaseClient
 
-window.location.href='index.html';
+.from('alerts')
+
+.select('*')
+
+.eq('sensor_id',userId);
+
+/*
+RÉCUP TÉLÉMÉTRIE
+*/
+
+const { data:telemetry } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('*')
+
+.eq('sensor_id',userId);
+
+/*
+STATS
+*/
+
+document.getElementById('totalSites').innerHTML =
+sites.length;
+
+let totalPower=0;
+
+telemetry.forEach(item=>{
+
+totalPower += Number(item.power_w);
+
+});
+
+document.getElementById('totalPower').innerHTML =
+Math.round(totalPower)+' W';
+
+document.getElementById('totalAlerts').innerHTML =
+alerts.length;
+
+/*
+SITES CRITIQUES
+*/
+
+const critical =
+alerts.filter(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+||
+
+alert.type==='OVERCONSUMPTION'
+
+).length;
+
+document.getElementById('criticalSites').innerHTML =
+critical;
+
+/*
+AFFICHAGE SITES
+*/
+
+const container =
+document.getElementById('sitesContainer');
+
+container.innerHTML='';
+
+sites.forEach(site=>{
+
+/*
+DONNÉES SITE
+*/
+
+const siteTelemetry =
+telemetry.filter(item=>
+
+item.site_id===site.id
+
+);
+
+const siteAlerts =
+alerts.filter(alert=>
+
+alert.site_id===site.id
+
+);
+
+let sitePower=0;
+
+siteTelemetry.forEach(item=>{
+
+sitePower += Number(item.power_w);
+
+});
+
+/*
+STATUS
+*/
+
+let status='ONLINE';
+
+let statusClass='status-online';
+
+if(siteAlerts.some(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+)){
+
+status='COUPURE';
+
+statusClass='status-danger';
+
+}else if(siteAlerts.length > 0){
+
+status='ALERTE';
+
+statusClass='status-warning';
 
 }
+
+/*
+AFFICHAGE
+*/
+
+container.innerHTML += `
+
+<div class="site-card">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:10px;
+">
+
+<h2>
+
+${site.name}
+
+</h2>
+
+<div class="site-status ${statusClass}">
+
+${status}
+
+</div>
+
+</div>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+📍 ${site.city}
+
+<br>
+
+${site.address}
+
+</p>
+
+<div style="
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+">
+
+<div>
+
+<p style="color:#94a3b8;">
+Puissance
+</p>
+
+<h3 style="margin-top:8px;">
+
+${Math.round(sitePower)} W
+
+</h3>
+
+</div>
+
+<div>
+
+<p style="color:#94a3b8;">
+Alertes
+</p>
+
+<h3 style="margin-top:8px;">
+
+${siteAlerts.length}
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
+
+}
+
+/*
+SITES DÉMO
+*/
+
+async function createDemoSites(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+return;
+
+}
+
+const userId =
+userData.user.id;
+
+await supabaseClient
+
+.from('sites')
+
+.insert([
+
+{
+
+user_id:userId,
+
+name:'Restaurant Cadjehoun',
+
+city:'Cotonou',
+
+address:'Cadjehoun, Rue 230'
+
+},
+
+{
+
+user_id:userId,
+
+name:'Hôtel Fidjrossè',
+
+city:'Cotonou',
+
+address:'Fidjrossè Plage'
+
+},
+
+{
+
+user_id:userId,
+
+name:'Boutique Porto-Novo',
+
+city:'Porto-Novo',
+
+address:'Centre-ville'
+
+}
+
+]);
+
+alert('Sites démo créés.');
+
+loadSites();
+
+}
+
+/*
+LOAD INITIAL
+*/
+
+loadSites();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('sites-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadSites();
+
+}
+
+)
+
+.subscribe();
 
 </script>
 
 </body>
+
 </html>
