@@ -1,134 +1,3 @@
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-
-<meta charset="UTF-8">
-
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>EnergyTrack Simulator</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-<script src="js/supabase.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
-<style>
-
-body{
-background:#0b1220;
-color:white;
-font-family:'Poppins',sans-serif;
-padding:60px;
-}
-
-.card{
-background:#182235;
-padding:35px;
-border-radius:28px;
-max-width:700px;
-margin:auto;
-}
-
-h1{
-font-family:'Orbitron',sans-serif;
-margin-bottom:25px;
-}
-
-.value{
-font-size:42px;
-margin-top:10px;
-color:#00c896;
-}
-
-button{
-padding:18px 28px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:white;
-font-weight:600;
-cursor:pointer;
-margin-top:30px;
-}
-
-.log{
-margin-top:25px;
-background:#0f1729;
-padding:20px;
-border-radius:18px;
-max-height:250px;
-overflow:auto;
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<h1>
-⚡ EnergyTrack Live Simulator
-</h1>
-
-<p>
-Simulation temps réel d’un capteur énergétique ESP32.
-</p>
-
-<div style="margin-top:30px;">
-
-<p>
-Tension :
-</p>
-
-<div class="value" id="voltage">
-0 V
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<p>
-Puissance :
-</p>
-
-<div class="value" id="power">
-0 W
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<p>
-Source :
-</p>
-
-<div class="value" id="source">
-SBEE
-</div>
-
-</div>
-
-<button onclick="startSimulation()">
-
-Démarrer la simulation
-
-</button>
-
-<div class="log" id="log">
-
-Logs simulation...
-
-</div>
-
-</div>
-
 <script>
 
 let simulationRunning=false;
@@ -174,7 +43,12 @@ const current =
 const kwh =
 (power/1000).toFixed(2);
 
-const source = /*
+const source =
+Math.random()>0.8
+? 'GROUPE'
+: 'SBEE';
+
+/*
 ALERTES
 */
 
@@ -265,9 +139,6 @@ threshold:50
 }]);
 
 }
-Math.random()>0.8
-? 'GROUPE'
-: 'SBEE';
 
 /*
 UI
@@ -343,6 +214,3 @@ log.innerHTML =
 }
 
 </script>
-
-</body>
-</html>
