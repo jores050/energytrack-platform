@@ -19,7 +19,6 @@
 </head>
 
 <body>
-</div>
 <div class="sidebar">
 
 <div class="logo">
@@ -79,33 +78,18 @@ Alertes temps réel
 
 </div>
 
-<div id="newAlert"></div>
 
 </div>
 
 <script>
 
-}
-
-console.log('Utilisateur connecté');
-
-}
-function generateAlert(){
-
-
-const random=alerts[Math.floor(Math.random()*alerts.length)];
-
-document.getElementById('newAlert').innerHTML=
-
-'<div class=\"alert alert-warning\">'+random+'</div>';
-
-}
-
 async function logoutUser(){
 
 await supabaseClient.auth.signOut();
 
+window.location.href='auth.html';
 
+}
 
 </script>
 <script>
