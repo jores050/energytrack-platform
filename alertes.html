@@ -79,35 +79,11 @@ Alertes temps réel
 
 </div>
 
-<div class="alert alert-danger">
-⚠️ Surconsommation détectée dans le bâtiment principal.
-</div>
-
-<div class="alert alert-warning">
-⚡ Coupure SBEE détectée depuis 14h22.
-</div>
-
-<div class="alert alert-success">
-✅ Réduction possible de 12 000 FCFA/mois.
-</div>
-
-<button onclick="generateAlert()">
-Générer une nouvelle alerte
-</button>
-
 <div id="newAlert"></div>
 
 </div>
 
 <script>
-window.onload = async function(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-return;
 
 }
 
@@ -116,15 +92,6 @@ console.log('Utilisateur connecté');
 }
 function generateAlert(){
 
-const alerts=[
-
-'⚠️ Nouvelle surtension détectée sur ET-BJ-002.',
-
-'⚡ Consommation anormale détectée cette nuit.',
-
-'🔋 Groupe électrogène actif depuis 5h.'
-
-];
 
 const random=alerts[Math.floor(Math.random()*alerts.length)];
 
