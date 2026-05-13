@@ -70,6 +70,17 @@ overflow:auto;
 line-height:1.8;
 }
 
+select{
+width:100%;
+padding:16px;
+border:none;
+border-radius:16px;
+margin-top:20px;
+background:#101826;
+color:white;
+font-size:16px;
+}
+
 </style>
 
 </head>
@@ -85,6 +96,14 @@ line-height:1.8;
 <p>
 Simulation temps réel d’un capteur énergétique ESP32.
 </p>
+
+<select id="siteSelector">
+
+<option value="">
+Choisir un site
+</option>
+
+</select>
 
 <div style="margin-top:30px;">
 
@@ -152,9 +171,80 @@ let simulationRunning = false;
 
 let simulationInterval = null;
 
+/*
+LOAD SITES
+*/
+
+async function loadSites(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId =
+userData.user.id;
+
+const { data:sites, error } =
+await supabaseClient
+
+.from('sites')
+
+.select('*')
+
+.eq('user_id',userId);
+
+if(error){
+
+console.log(error);
+
+return;
+
+}
+
+const selector =
+document.getElementById('siteSelector');
+
+sites.forEach(site=>{
+
+selector.innerHTML += `
+
+<option value="${site.id}">
+
+${site.name}
+
+</option>
+
+`;
+
+});
+
+}
+
+/*
+START SIMULATION
+*/
+
 async function startSimulation(){
 
 if(simulationRunning){
+
+return;
+
+}
+
+const selectedSite =
+document.getElementById('siteSelector').value;
+
+if(selectedSite===''){
+
+alert('Veuillez sélectionner un site.');
 
 return;
 
@@ -212,6 +302,8 @@ await supabaseClient
 
 sensor_id:userId,
 
+site_id:selectedSite,
+
 type:'LOW_VOLTAGE',
 
 message:'Tension basse détectée',
@@ -233,6 +325,8 @@ await supabaseClient
 .insert([{
 
 sensor_id:userId,
+
+site_id:selectedSite,
 
 type:'OVERCONSUMPTION',
 
@@ -256,6 +350,8 @@ await supabaseClient
 
 sensor_id:userId,
 
+site_id:selectedSite,
+
 type:'SBEE_OUTAGE',
 
 message:'Coupure SBEE détectée',
@@ -277,6 +373,8 @@ await supabaseClient
 .insert([{
 
 sensor_id:userId,
+
+site_id:selectedSite,
 
 type:'HIGH_VOLTAGE',
 
@@ -316,6 +414,8 @@ await supabaseClient
 
 sensor_id:userId,
 
+site_id:selectedSite,
+
 voltage:voltage,
 
 current:current,
@@ -346,6 +446,7 @@ document.getElementById('log');
 log.innerHTML =
 
 '✅ '
+
 +new Date().toLocaleTimeString()
 
 +' → '
@@ -356,6 +457,10 @@ log.innerHTML =
 
 +source
 
++'<br>🏢 Site ID : '
+
++selectedSite
+
 +'<br><br>'
 
 +log.innerHTML;
@@ -363,6 +468,10 @@ log.innerHTML =
 },5000);
 
 }
+
+/*
+STOP
+*/
 
 function stopSimulation(){
 
@@ -378,7 +487,14 @@ document.getElementById('log').innerHTML =
 
 }
 
+/*
+INIT
+*/
+
+loadSites();
+
 </script>
 
 </body>
+
 </html>
