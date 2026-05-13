@@ -7,485 +7,283 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EnergyTrack — Plateforme IoT Énergétique</title>
+<title>EnergyTrack Platform</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<script src="js/app.js"></script>
 
 <style>
-
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-scroll-behavior:smooth;
-}
-
-body{
-background:#0b1220;
-font-family:'Poppins',sans-serif;
-color:white;
-overflow-x:hidden;
-}
-
-a{
-text-decoration:none;
-}
-
-header{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-padding:22px 8%;
-display:flex;
-justify-content:space-between;
-align-items:center;
-background:rgba(11,18,32,0.9);
-backdrop-filter:blur(10px);
-z-index:1000;
-border-bottom:1px solid rgba(255,255,255,0.05);
-}
-
-.logo{
-font-family:'Orbitron',sans-serif;
-font-size:28px;
-font-weight:700;
-}
-
-.logo span{
-color:#00c896;
-}
-
-nav{
-display:flex;
-gap:30px;
-align-items:center;
-}
-
-nav a{
-color:#dbe4f0;
-font-size:15px;
-transition:0.3s;
-}
-
-nav a:hover{
-color:#00c896;
-}
-
-.hero{
-padding:180px 8% 120px;
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:60px;
-align-items:center;
-}
-
-.hero h1{
-font-family:'Orbitron',sans-serif;
-font-size:68px;
-line-height:1.2;
-margin-bottom:25px;
-}
-
-.hero p{
-font-size:18px;
-line-height:1.9;
-color:#94a3b8;
-margin-bottom:35px;
-max-width:700px;
-}
-
-.hero-buttons{
-display:flex;
-gap:20px;
-flex-wrap:wrap;
-}
-
-.btn-primary{
-padding:18px 28px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-border:none;
-border-radius:14px;
-color:white;
-font-weight:700;
-cursor:pointer;
-transition:0.3s;
-}
-
-.btn-primary:hover{
-transform:translateY(-3px);
-opacity:0.92;
-}
-
-.btn-secondary{
-padding:18px 28px;
-background:#182235;
-border:none;
-border-radius:14px;
-color:white;
-font-weight:700;
-cursor:pointer;
-transition:0.3s;
-}
-
-.btn-secondary:hover{
-background:#22314d;
-}
-
-.hero-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:35px;
-border-radius:30px;
-border:1px solid rgba(255,255,255,0.05);
-}
-
-.live-badge{
-display:inline-flex;
-align-items:center;
-gap:10px;
-background:rgba(0,200,150,0.15);
-padding:10px 18px;
-border-radius:999px;
-font-size:13px;
-margin-bottom:25px;
-color:#00c896;
-}
-
-.dot{
-width:10px;
-height:10px;
-border-radius:50%;
-background:#00c896;
-animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-
-0%{
-opacity:0.4;
-transform:scale(1);
-}
-
-50%{
-opacity:1;
-transform:scale(1.2);
-}
-
-100%{
-opacity:0.4;
-transform:scale(1);
-}
-
-}
-
-.metric{
-margin-top:25px;
-padding:20px;
-background:#0f1729;
-border-radius:20px;
-}
-
-.metric h3{
-font-size:14px;
-color:#94a3b8;
-}
-
-.metric h1{
-font-size:42px;
-margin-top:10px;
-}
-
-.section{
-padding:110px 8%;
-}
-
-.section-title{
-text-align:center;
-margin-bottom:70px;
-}
-
-.section-title h2{
-font-size:52px;
-margin-bottom:20px;
-}
-
-.section-title p{
-max-width:850px;
-margin:auto;
-line-height:1.9;
-color:#94a3b8;
-}
-
-.features-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
-gap:25px;
-}
-
-.feature-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:35px;
-border-radius:28px;
-transition:0.3s;
-border:1px solid rgba(255,255,255,0.05);
-}
-
-.feature-card:hover{
-transform:translateY(-6px);
-box-shadow:0 25px 50px rgba(0,0,0,0.35);
-}
-
-.feature-card h3{
-margin:20px 0;
-font-size:24px;
-}
-
-.feature-card p{
-color:#94a3b8;
-line-height:1.8;
-}
-
-.hardware-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:30px;
-margin-top:50px;
-}
-
-.hardware-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:40px;
-border-radius:30px;
-transition:0.3s;
-border:1px solid rgba(255,255,255,0.05);
-}
-
-.hardware-card:hover{
-transform:translateY(-8px);
-}
-
-.price{
-font-size:58px;
-font-family:'Orbitron',sans-serif;
-margin:25px 0;
-}
-
-.price span{
-font-size:18px;
-color:#94a3b8;
-font-family:'Poppins',sans-serif;
-}
-
-.hardware-feature{
-margin-bottom:18px;
-display:flex;
-align-items:center;
-gap:10px;
-}
-
-.saas-section{
-background:#101826;
-}
-
-.saas-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:30px;
-margin-top:50px;
-}
-
-.saas-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:40px;
-border-radius:30px;
-border:1px solid rgba(255,255,255,0.05);
-transition:0.3s;
-}
-
-.saas-card:hover{
-transform:translateY(-8px);
-}
-
-.popular{
-border:1px solid rgba(0,200,150,0.4);
-transform:scale(1.03);
-}
-
-footer{
-padding:60px 8%;
-background:#101826;
-border-top:1px solid rgba(255,255,255,0.05);
-margin-top:60px;
-}
-
-.footer-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:40px;
-}
-
-.footer-grid h3{
-margin-bottom:20px;
-}
-
-.footer-grid p,
-.footer-grid a{
-color:#94a3b8;
-line-height:2;
-display:block;
-}
-
-@media(max-width:768px){
-
-.hero{
-padding-top:150px;
-}
-
-.hero h1{
-font-size:46px;
-}
-
-.section-title h2{
-font-size:38px;
-}
-
-.price{
-font-size:44px;
-}
-
-nav{
-display:none;
-}
-
-}
-
+  /* Ajout d'un scroll fluide pour les liens internes */
+  html {
+    scroll-behavior: smooth;
+  }
+  
+  /* Style pour l'effet de survol des boutons de navigation */
+  .nav-link:hover {
+    color: #00c896 !important;
+  }
 </style>
 
 </head>
 
-<body>
+<body style="margin:0; background:#0f1729; color:white; font-family:'Poppins', sans-serif;">
 
-<header>
-
-<div class="logo">
-Energy<span>Track</span>
-</div>
-
-<nav>
-
-<a href="#">
-Accueil
-</a>
-
-<a href="#features">
-Fonctionnalités
-</a>
-
-<a href="#hardware">
-Capteurs IoT
-</a>
-
-<a href="#saas">
-Plateforme SaaS
-</a>
-
-<a href="pricing.html">
-Tarifs
-</a>
-
-<a href="auth.html">
-Connexion
-</a>
-
+<nav style="
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding: 20px 8%;
+  display: flex;
+  justify-content: flex-end; /* Aligne les boutons à droite */
+  align-items: center;
+  gap: 30px;
+  background: rgba(15, 23, 41, 0.9);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+">
+  <a href="#features" class="nav-link" style="color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.3s;">Fonctionnalités</a>
+  <a href="#pricing" class="nav-link" style="color: #94a3b8; text-decoration: none; font-weight: 500; transition: 0.3s;">Tarifs</a>
+  <a href="#pricing" style="
+    background: #00c896;
+    color: #101826;
+    padding: 10px 22px;
+    border-radius: 8px;
+    text-decoration: none;
+    font-weight: 700;
+    transition: 0.3s;
+  " onmouseover="this.style.opacity='0.8'" onmouseout="this.style.opacity='1'">
+    Acheter
+  </a>
 </nav>
 
-</header>
+<section style="min-height:100vh;padding:80px 8%;display:flex;align-items:center;justify-content:center;">
 
-<section class="hero">
+<div style="width:100%;max-width:1400px;display:flex;gap:50px;align-items:center;flex-wrap:wrap;">
+
+<div style="flex:1;min-width:320px;">
+
+<div style="
+display:inline-block;
+padding:10px 18px;
+background:rgba(0,200,150,0.12);
+border:1px solid rgba(0,200,150,0.25);
+border-radius:999px;
+margin-bottom:25px;
+color:#00c896;
+font-weight:600;
+">
+
+Plateforme intelligente de monitoring énergétique
+
+</div>
+
+<h1 style="
+font-size:72px;
+line-height:1.05;
+margin-bottom:25px;
+font-family:'Orbitron',sans-serif;
+">
+
+Réduisez vos coûts électriques grâce à
+
+<span style="color:#00c896;">
+EnergyTrack
+</span>
+
+</h1>
+
+<p style="
+font-size:20px;
+line-height:1.9;
+color:#94a3b8;
+margin-bottom:35px;
+max-width:760px;
+">
+
+Surveillez votre consommation énergétique en temps réel,
+détectez les anomalies avant les pannes,
+recevez des recommandations intelligentes
+et optimisez automatiquement vos dépenses électriques.
+
+</p>
+
+<div style="display:flex;gap:15px;flex-wrap:wrap;">
+
+<button onclick="document.getElementById('pricing').scrollIntoView()"
+style="padding:18px 30px;font-size:16px; background:#00c896; color:#101826; border:none; border-radius:10px; font-weight:600; cursor:pointer;">
+
+Acheter un capteur
+
+</button>
+
+<button onclick="window.location.href='auth.html'"
+style="
+padding:18px 30px;
+font-size:16px;
+background:#182235;
+color:white;
+border:1px solid rgba(255,255,255,0.1);
+border-radius:10px;
+cursor:pointer;
+">
+
+Connexion Client
+
+</button>
+
+</div>
+
+<div style="
+display:flex;
+gap:40px;
+margin-top:40px;
+flex-wrap:wrap;
+">
 
 <div>
 
-<h1>
+<h2 style="
+font-size:34px;
+color:#00c896;
+">
 
-La plateforme IoT intelligente pour surveiller votre énergie.
+24+
 
-</h1>
+</h2>
 
-<p>
-
-EnergyTrack aide les entreprises, hôtels, commerces et industries
-à suivre leur consommation énergétique en temps réel,
-détecter les anomalies,
-réduire les coûts
-et optimiser leurs installations grâce à l’intelligence artificielle.
-
+<p style="color:#94a3b8;">
+Capteurs actifs
 </p>
 
-<div class="hero-buttons">
+</div>
 
-<button
-class="btn-primary"
-onclick="window.location.href='pricing.html'">
+<div>
 
-Découvrir la plateforme
+<h2 style="
+font-size:34px;
+color:#00c896;
+">
 
-</button>
+12M+
 
-<button
-class="btn-secondary"
-onclick="window.location.href='hardware.html'">
+</h2>
 
-Voir les capteurs
+<p style="color:#94a3b8;">
+kWh analysés
+</p>
 
-</button>
+</div>
+
+<div>
+
+<h2 style="
+font-size:34px;
+color:#00c896;
+">
+
+98%
+
+</h2>
+
+<p style="color:#94a3b8;">
+Précision IA
+</p>
 
 </div>
 
 </div>
 
-<div class="hero-card">
-
-<div class="live-badge">
-
-<div class="dot"></div>
-
-Temps réel actif
-
 </div>
 
-<div class="metric">
+<div style="flex:1;min-width:320px;">
+<div style="
+background:linear-gradient(145deg,#182235,#101826);
+padding:35px;
+border-radius:30px;
+border:1px solid rgba(255,255,255,0.05);
+box-shadow:0 20px 60px rgba(0,0,0,0.4);
+">
 
-<h3>
-Puissance instantanée
+<h2 style="margin-bottom:25px;font-size:28px;">
+
+Aperçu Dashboard
+
+</h2>
+
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:15px;">
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+Facture estimée
+</p>
+
+<h3 style="margin-top:10px">
+47 200 FCFA
 </h3>
 
-<h1>
-2 480 W
-</h1>
+</div>
+
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
+
+<p style="color:#94a3b8">
+Économie
+</p>
+
+<h3 style="margin-top:10px;color:#00c896;">
+12 400 FCFA
+</h3>
 
 </div>
 
-<div class="metric">
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
 
-<h3>
-Coût mensuel estimé
+<p style="color:#94a3b8">
+Capteurs actifs
+</p>
+
+<h3 style="margin-top:10px">
+24
 </h3>
-
-<h1>
-84 000 FCFA
-</h1>
 
 </div>
 
-<div class="metric">
+<div style="
+background:#0f1729;
+padding:20px;
+border-radius:18px;
+">
 
-<h3>
-Source énergétique
+<p style="color:#94a3b8">
+État réseau
+</p>
+
+<h3 style="margin-top:10px;color:#ffb547;">
+Stable
 </h3>
 
-<h1>
-SBEE
-</h1>
+</div>
+
+</div>
+
+</div>
 
 </div>
 
@@ -493,121 +291,93 @@ SBEE
 
 </section>
 
-<section
-class="section"
-id="features">
+<section id="features" style="
+padding:100px 8%;
+">
 
-<div class="section-title">
+<div style="
+text-align:center;
+margin-bottom:60px;
+">
 
-<h2>
-Pourquoi choisir EnergyTrack ?
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
+
+Pourquoi les entreprises perdent de l’argent ?
+
 </h2>
 
-<p>
+<p style="
+color:#94a3b8;
+max-width:850px;
+margin:auto;
+line-height:1.9;
+">
 
-Une plateforme IoT énergétique moderne
-conçue pour le monitoring temps réel,
-l’analyse énergétique,
-la supervision multi-sites
-et les smart buildings.
-
-</p>
-
-</div>
-
-<div class="features-grid">
-
-<div class="feature-card">
-
-<h3>
-⚡ Monitoring temps réel
-</h3>
-
-<p>
-
-Visualisez instantanément votre consommation énergétique
-depuis votre dashboard cloud.
+Les coupures électriques,
+les anomalies invisibles,
+les groupes électrogènes mal optimisés
+et l’absence de monitoring énergétique
+augmentent énormément les coûts.
 
 </p>
 
 </div>
 
-<div class="feature-card">
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+gap:25px;
+">
+
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
 
 <h3>
-🔔 Alertes intelligentes
+⚠️ Surconsommation invisible
 </h3>
 
-<p>
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
 
-Détection automatique des surtensions,
-coupures,
-surconsommations
-et anomalies électriques.
+Détectez les équipements énergivores automatiquement.
 
 </p>
 
 </div>
 
-<div class="feature-card">
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
 
 <h3>
-📊 Analytics énergétiques
+🔌 Coupures réseau
 </h3>
 
-<p>
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
 
-Analyse des pics de puissance,
-coûts,
-consommation horaire
-et performances énergétiques.
+Analyse intelligente des interruptions SBEE.
 
 </p>
 
 </div>
 
-<div class="feature-card">
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
 
 <h3>
-🤖 Intelligence artificielle
+⛽ Coût carburant
 </h3>
 
-<p>
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
 
-Recommandations automatiques
-pour réduire les coûts
-et optimiser vos équipements.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<h3>
-🏢 Multi-sites
-</h3>
-
-<p>
-
-Supervision de plusieurs bâtiments,
-hôtels,
-restaurants ou installations.
-
-</p>
-
-</div>
-
-<div class="feature-card">
-
-<h3>
-📡 IoT & ESP32
-</h3>
-
-<p>
-
-Compatible avec des capteurs intelligents
-et infrastructures IoT industrielles.
+Optimisez l’usage des groupes électrogènes.
 
 </p>
 
@@ -617,147 +387,167 @@ et infrastructures IoT industrielles.
 
 </section>
 
-<section
-class="section"
-id="hardware">
+<section id="pricing" style="padding:80px 8%;">
 
-<div class="section-title">
+<div style="text-align:center;margin-bottom:60px;">
 
-<h2>
-Capteurs & Kits IoT
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
+
+Nos capteurs intelligents
+
 </h2>
 
-<p>
+<p style="
+color:#94a3b8;
+max-width:700px;
+margin:auto;
+line-height:1.8;
+">
 
-Des kits intelligents pour connecter vos installations électriques
-à la plateforme EnergyTrack.
+Choisissez le kit EnergyTrack adapté à votre maison,
+entreprise ou industrie.
 
 </p>
 
 </div>
 
-<div class="hardware-grid">
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(300px,1fr));
+gap:25px;
+">
 
-<div class="hardware-card">
+<div style="
+background:#182235;
+padding:35px;
+border-radius:28px;
+">
 
-<h3>
+<h3 style="margin-bottom:15px;">
 Starter Home
 </h3>
 
-<div class="price">
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
 
-49K
+49 000 FCFA
 
-<span>
-FCFA
-</span>
+</h1>
 
-</div>
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:25px;
+">
 
-<div class="hardware-feature">
-✅ Monitoring résidentiel
-</div>
+Monitoring maison,
+alertes basiques,
+dashboard mobile.
 
-<div class="hardware-feature">
-✅ ESP32 intégré
-</div>
+</p>
 
-<div class="hardware-feature">
-✅ Dashboard cloud
-</div>
+<button onclick="buySensor('Starter Home')"
+style="width:100%; padding:15px; background:#00c896; border:none; border-radius:10px; font-weight:700; cursor:pointer;">
 
-<div class="hardware-feature">
-✅ Alertes basiques
-</div>
-
-<button
-class="btn-primary"
-onclick="window.location.href='hardware.html'">
-
-Acheter le kit
+Acheter
 
 </button>
 
 </div>
 
-<div class="hardware-card">
+<div style="
+background:linear-gradient(145deg,#00c896,#00aeef);
+padding:35px;
+border-radius:28px;
+color:#fff;
+transform:scale(1.03);
+">
 
-<h3>
+<h3 style="margin-bottom:15px;">
 Starter PME
 </h3>
 
-<div class="price">
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
 
-85K
+129 000 FCFA
 
-<span>
-FCFA
-</span>
+</h1>
 
-</div>
+<p style="
+line-height:1.8;
+margin-bottom:25px;
+">
 
-<div class="hardware-feature">
-✅ PME & commerces
-</div>
+IA énergétique,
+monitoring avancé,
+rapports automatiques,
+multi-sites.
 
-<div class="hardware-feature">
-✅ Temps réel
-</div>
+</p>
 
-<div class="hardware-feature">
-✅ Analytics avancés
-</div>
+<button onclick="buySensor('Starter PME')"
+style="
+width:100%;
+background:#fff;
+color:#101826;
+padding:15px;
+border:none;
+border-radius:10px;
+font-weight:700;
+cursor:pointer;
+">
 
-<div class="hardware-feature">
-✅ Alertes intelligentes
-</div>
-
-<button
-class="btn-primary"
-onclick="window.location.href='hardware.html'">
-
-Voir le matériel
+Acheter
 
 </button>
 
 </div>
 
-<div class="hardware-card">
+<div style="
+background:#182235;
+padding:35px;
+border-radius:28px;
+">
 
-<h3>
+<h3 style="margin-bottom:15px;">
 Industrial Pro
 </h3>
 
-<div class="price">
+<h1 style="
+font-size:42px;
+margin-bottom:20px;
+">
 
-Custom
+Sur devis
 
-<span>
-sur devis
-</span>
+</h1>
 
-</div>
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:25px;
+">
 
-<div class="hardware-feature">
-✅ Industries
-</div>
+IoT industriel,
+monitoring usine,
+API,
+IA prédictive,
+support dédié.
 
-<div class="hardware-feature">
-✅ Multi-sites
-</div>
+</p>
 
-<div class="hardware-feature">
-✅ MQTT & API
-</div>
+<button onclick="buySensor('Industrial Pro')"
+style="width:100%; padding:15px; background:#00c896; border:none; border-radius:10px; font-weight:700; cursor:pointer;">
 
-<div class="hardware-feature">
-✅ Smart building
-</div>
-
-<button
-class="btn-secondary">
-
-Contacter l’équipe
+Contacter
 
 </button>
 
@@ -767,178 +557,352 @@ Contacter l’équipe
 
 </section>
 
-<section
-class="section saas-section"
-id="saas">
+<section style="
+padding:80px 8%;
+text-align:center;
+">
 
-<div class="section-title">
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
 
-<h2>
-Plateforme Cloud EnergyTrack
+Pourquoi EnergyTrack ?
+
 </h2>
 
-<p>
+<p style="
+color:#94a3b8;
+max-width:800px;
+margin:auto;
+line-height:1.9;
+margin-bottom:60px;
+">
 
-Abonnements SaaS pour accéder à votre dashboard énergétique,
-vos analytics,
-vos alertes intelligentes
-et votre supervision cloud.
+Réduisez vos coûts électriques,
+détectez les anomalies avant les pannes
+et pilotez votre énergie grâce à l’intelligence artificielle.
 
+</p>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+gap:25px;
+">
+
+<div class="card" style="background:#182235; padding:30px; border-radius:20px; text-align:left;">
+
+<h3 style="margin-bottom:15px;">
+⚡ Monitoring temps réel
+</h3>
+
+<p style="color:#94a3b8;line-height:1.8;">
+Surveillance instantanée de votre consommation.
 </p>
 
 </div>
 
-<div class="saas-grid">
+<div class="card" style="background:#182235; padding:30px; border-radius:20px; text-align:left;">
 
-<div class="saas-card">
-
-<h3>
-Starter SaaS
+<h3 style="margin-bottom:15px;">
+🤖 Analyse prédictive IA
 </h3>
 
-<div class="price">
-
-5K
-
-<span>
-FCFA / mois
-</span>
+<p style="color:#94a3b8;line-height:1.8;">
+Analyse intelligente et recommandations automatiques.
+</p>
 
 </div>
 
-<div class="hardware-feature">
-✅ Dashboard temps réel
-</div>
+<div class="card" style="background:#182235; padding:30px; border-radius:20px; text-align:left;">
 
-<div class="hardware-feature">
-✅ Alertes basiques
-</div>
-
-<div class="hardware-feature">
-✅ Historique énergétique
-</div>
-
-<div class="hardware-feature">
-✅ Monitoring cloud
-</div>
-
-<button
-class="btn-secondary"
-onclick="window.location.href='pricing.html'">
-
-Voir les abonnements
-
-</button>
-
-</div>
-
-<div class="saas-card popular">
-
-<h3>
-Business Pro
+<h3 style="margin-bottom:15px;">
+📡 Infrastructure IoT cloud
 </h3>
 
-<div class="price">
-
-25K
-
-<span>
-FCFA / mois
-</span>
-
-</div>
-
-<div class="hardware-feature">
-✅ Analytics avancés
-</div>
-
-<div class="hardware-feature">
-✅ IA énergétique
-</div>
-
-<div class="hardware-feature">
-✅ Multi-sites
-</div>
-
-<div class="hardware-feature">
-✅ Rapports PDF
-</div>
-
-<div class="hardware-feature">
-✅ Alertes intelligentes
-</div>
-
-<button
-class="btn-primary"
-onclick="window.location.href='pricing.html'">
-
-Découvrir le SaaS
-
-</button>
-
-</div>
-
-<div class="saas-card">
-
-<h3>
-Enterprise Cloud
-</h3>
-
-<div class="price">
-
-Custom
-
-<span>
-sur devis
-</span>
-
-</div>
-
-<div class="hardware-feature">
-✅ Sites illimités
-</div>
-
-<div class="hardware-feature">
-✅ API complète
-</div>
-
-<div class="hardware-feature">
-✅ MQTT industriel
-</div>
-
-<div class="hardware-feature">
-✅ Support dédié
-</div>
-
-<button
-class="btn-secondary">
-
-Contacter l’équipe
-
-</button>
+<p style="color:#94a3b8;line-height:1.8;">
+Capteurs ESP32 synchronisés cloud et MQTT.
+</p>
 
 </div>
 
 </div>
 
 </section>
+<section style="
+padding:100px 8%;
+">
 
-<footer>
+<div style="
+text-align:center;
+margin-bottom:70px;
+">
 
-<div class="footer-grid">
+<h2 style="
+font-size:48px;
+margin-bottom:20px;
+">
+
+Ils optimisent déjà leur énergie avec EnergyTrack
+
+</h2>
+
+<p style="
+color:#94a3b8;
+max-width:800px;
+margin:auto;
+line-height:1.9;
+">
+
+Des entreprises, commerces et particuliers utilisent déjà
+EnergyTrack pour réduire leurs coûts énergétiques
+et surveiller leurs installations en temps réel.
+
+</p>
+
+</div>
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:25px;
+">
+
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+">
+
+<div style="
+width:55px;
+height:55px;
+border-radius:50%;
+background:linear-gradient(135deg,#00c896,#00aeef);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+font-size:20px;
+">
+
+A
+
+</div>
 
 <div>
 
-<div class="logo">
-Energy<span>Track</span>
+<h3>
+Aurel Tech
+</h3>
+
+<p style="color:#94a3b8;">
+Restaurant • Cotonou
+</p>
+
 </div>
 
-<p style="margin-top:20px;">
+</div>
 
-Plateforme IoT énergétique intelligente
-pour entreprises,
-industries
-et smart buildings.
+<p style="
+color:#94a3b8;
+line-height:1.9;
+">
+
+“Depuis l’installation de EnergyTrack,
+nous avons réduit notre facture électrique
+de près de 22% en seulement 2 mois.”
+
+</p>
+
+</div>
+
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+">
+
+<div style="
+width:55px;
+height:55px;
+border-radius:50%;
+background:linear-gradient(135deg,#00c896,#00aeef);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+font-size:20px;
+">
+
+M
+
+</div>
+
+<div>
+
+<h3>
+Mireille Group
+</h3>
+
+<p style="color:#94a3b8;">
+PME • Porto-Novo
+</p>
+
+</div>
+
+</div>
+
+<p style="
+color:#94a3b8;
+line-height:1.9;
+">
+
+“Les alertes intelligentes nous permettent
+de détecter immédiatement les anomalies électriques
+avant les coupures.”
+
+</p>
+
+</div>
+
+<div class="card" style="background:#182235; padding:30px; border-radius:20px;">
+
+<div style="
+display:flex;
+align-items:center;
+gap:15px;
+margin-bottom:20px;
+">
+
+<div style="
+width:55px;
+height:55px;
+border-radius:50%;
+background:linear-gradient(135deg,#00c896,#00aeef);
+display:flex;
+align-items:center;
+justify-content:center;
+font-weight:700;
+font-size:20px;
+">
+
+S
+
+</div>
+
+<div>
+
+<h3>
+Sun Logistics
+</h3>
+
+<p style="color:#94a3b8;">
+Industrie • Parakou
+</p>
+
+</div>
+
+</div>
+
+<p style="
+color:#94a3b8;
+line-height:1.9;
+">
+
+“Le monitoring temps réel et les rapports IA
+nous aident énormément dans la gestion énergétique
+de nos installations industrielles.”
+
+</p>
+
+</div>
+
+</div>
+
+</section>
+  <section id="faq" style="padding: 100px 8%; background: #0f1729;">
+    <div style="text-align: center; margin-bottom: 60px;">
+        <h2 style="font-size: 48px; margin-bottom: 20px; font-family: 'Orbitron', sans-serif;">Questions Fréquentes</h2>
+        <p style="color: #94a3b8; max-width: 700px; margin: auto;">
+            Tout ce que vous devez savoir sur l'installation et l'utilisation de nos solutions de monitoring.
+        </p>
+    </div>
+
+    <div style="max-width: 900px; margin: auto;">
+        <details style="background: #182235; padding: 20px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);">
+            <summary style="font-weight: 600; font-size: 18px; color: #00c896; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                Comment s'installe le capteur EnergyTrack ?
+                <span style="font-size: 24px;">+</span>
+            </summary>
+            <p style="color: #94a3b8; margin-top: 15px; line-height: 1.8;">
+                L'installation est non-intrusive. Nos techniciens (ou vous-même pour le kit Home) fixent un transformateur de courant (pince ampèremétrique) autour du câble principal de votre tableau électrique sans couper le courant.
+            </p>
+        </details>
+
+        <details style="background: #182235; padding: 20px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);">
+            <summary style="font-weight: 600; font-size: 18px; color: #00c896; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                La plateforme fonctionne-t-elle sans internet ?
+                <span style="font-size: 24px;">+</span>
+            </summary>
+            <p style="color: #94a3b8; margin-top: 15px; line-height: 1.8;">
+                Le capteur nécessite une connexion Wi-Fi pour envoyer les données au Cloud. En cas de coupure internet, le module ESP32 stocke localement les données et les synchronise dès que la connexion est rétablie.
+            </p>
+        </details>
+
+        <details style="background: #182235; padding: 20px; border-radius: 15px; margin-bottom: 15px; cursor: pointer; border: 1px solid rgba(255,255,255,0.05);">
+            <summary style="font-weight: 600; font-size: 18px; color: #00c896; list-style: none; display: flex; justify-content: space-between; align-items: center;">
+                Quels sont les frais d'abonnement ?
+                <span style="font-size: 24px;">+</span>
+            </summary>
+            <p style="color: #94a3b8; margin-top: 15px; line-height: 1.8;">
+                L'achat du capteur inclut l'accès à vie au dashboard basique. Pour les fonctionnalités IA avancées et les rapports d'audit automatiques (PME/Industrial), un abonnement mensuel est appliqué selon le nombre de points de mesure.
+            </p>
+        </details>
+    </div>
+</section>
+<footer style="
+padding:70px 8%;
+border-top:1px solid rgba(255,255,255,0.05);
+background:#101826;
+">
+
+<div style="
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+gap:50px;
+margin-bottom:50px;
+">
+
+<div>
+
+<h2 style="
+font-family:'Orbitron',sans-serif;
+margin-bottom:20px;
+">
+
+Energy<span style="color:#00c896;">
+Track
+</span>
+
+</h2>
+
+<p style="
+color:#94a3b8;
+line-height:1.9;
+">
+
+Plateforme intelligente de monitoring énergétique
+pour particuliers,
+PME
+et industries africaines.
 
 </p>
 
@@ -946,72 +910,133 @@ et smart buildings.
 
 <div>
 
-<h3>
+<h3 style="margin-bottom:20px;">
 Navigation
 </h3>
 
-<a href="#">
-Accueil
-</a>
+<div style="
+display:flex;
+flex-direction:column;
+gap:14px;
+">
 
-<a href="#features">
+<a href="#features"
+style="color:#94a3b8;text-decoration:none;">
+
 Fonctionnalités
+
 </a>
 
-<a href="#hardware">
-Capteurs
+<a href="#pricing"
+style="color:#94a3b8;text-decoration:none;">
+
+Tarifs
+
 </a>
 
-<a href="#saas">
-Plateforme
+<a href="#testimonials"
+style="color:#94a3b8;text-decoration:none;">
+
+Témoignages
+
 </a>
+
+<a href="#faq"
+style="color:#94a3b8;text-decoration:none;">
+
+FAQ
+
+</a>
+
+<a href="#about"
+style="color:#94a3b8;text-decoration:none;">
+
+À propos
+
+</a>
+
+</div>
 
 </div>
 
 <div>
 
-<h3>
-Solutions
-</h3>
-
-<a href="hardware.html">
-Kits IoT
-</a>
-
-<a href="pricing.html">
-Tarifs SaaS
-</a>
-
-<a href="auth.html">
-Connexion
-</a>
-
-</div>
-
-<div>
-
-<h3>
+<h3 style="margin-bottom:20px;">
 Contacts
 </h3>
 
-<p>
-📍 Bénin
+<p style="color:#94a3b8;margin-bottom:12px;">
+📧 support@energytrack.africa
 </p>
 
-<p>
+<p style="color:#94a3b8;margin-bottom:12px;">
 📞 +229 XX XX XX XX
 </p>
 
-<p>
-✉️ contact@energytrack.africa
+<p style="color:#94a3b8;">
+📍 Cotonou, Bénin
 </p>
 
 </div>
+
+<div>
+
+<h3 style="margin-bottom:20px;">
+Réseaux sociaux
+</h3>
+
+<div style="
+display:flex;
+flex-direction:column;
+gap:14px;
+">
+
+<a href="#"
+style="color:#94a3b8;text-decoration:none;">
+
+LinkedIn
+
+</a>
+
+<a href="#"
+style="color:#94a3b8;text-decoration:none;">
+
+Facebook
+
+</a>
+
+<a href="#"
+style="color:#94a3b8;text-decoration:none;">
+
+Instagram
+
+</a>
+
+<a href="#"
+style="color:#94a3b8;text-decoration:none;">
+
+X / Twitter
+
+</a>
+
+</div>
+
+</div>
+
+</div>
+
+<div style="
+border-top:1px solid rgba(255,255,255,0.05);
+padding-top:25px;
+text-align:center;
+color:#94a3b8;
+">
+
+© 2026 EnergyTrack — Tous droits réservés.
 
 </div>
 
 </footer>
 
 </body>
-
 </html>
