@@ -7,67 +7,59 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EnergyTrack Simulator</title>
+<title>Multi-sites EnergyTrack</title>
+
+<link rel="stylesheet" href="css/style.css">
+
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <style>
 
-body{
-background:#0b1220;
-color:white;
-font-family:'Poppins',sans-serif;
-padding:60px;
-}
-
-.card{
-background:#182235;
-padding:35px;
-border-radius:28px;
-max-width:700px;
-margin:auto;
-}
-
-h1{
-font-family:'Orbitron',sans-serif;
-margin-bottom:25px;
-}
-
-.value{
-font-size:42px;
-margin-top:10px;
-color:#00c896;
-}
-
-button{
-padding:18px 28px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:white;
-font-weight:600;
-cursor:pointer;
-margin-top:30px;
+.site-card{
+background:linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:24px;
+border:1px solid rgba(255,255,255,0.05);
 transition:0.3s;
 }
 
-button:hover{
-transform:translateY(-2px);
-opacity:0.95;
+.site-card:hover{
+transform:translateY(-5px);
+box-shadow:0 20px 50px rgba(0,0,0,0.35);
 }
 
-.log{
+.site-status{
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+display:inline-block;
+}
+
+.status-online{
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+.status-warning{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.status-danger{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.site-grid{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+gap:20px;
 margin-top:25px;
-background:#0f1729;
-padding:20px;
-border-radius:18px;
-max-height:250px;
-overflow:auto;
-line-height:1.8;
 }
 
 </style>
@@ -76,71 +68,158 @@ line-height:1.8;
 
 <body>
 
-<div class="card">
+<div class="sidebar">
 
-<h1>
-⚡ EnergyTrack Live Simulator
-</h1>
+<div class="logo">
+Energy<span>Track</span>
+</div>
 
-<p>
-Simulation temps réel d’un capteur énergétique ESP32.
-</p>
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
 
-<div style="margin-top:30px;">
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
 
-<p>
-Tension :
-</p>
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
+</a>
 
-<div class="value" id="voltage">
-0 V
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item active" href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
+
+<a class="nav-item" href="ia.html">
+🤖 Analyse IA
+</a>
+
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
+
+<div class="nav-item" onclick="logoutUser()">
+🚪 Déconnexion
 </div>
 
 </div>
 
-<div style="margin-top:25px;">
+<div class="main" style="display:block;">
 
-<p>
-Puissance :
-</p>
-
-<div class="value" id="power">
-0 W
-</div>
-
-</div>
-
-<div style="margin-top:25px;">
-
-<p>
-Source :
-</p>
-
-<div class="value" id="source">
-SBEE
-</div>
-
-</div>
-
-<button onclick="startSimulation()">
-
-Démarrer la simulation
-
-</button>
-
-<button onclick="stopSimulation()"
-style="
-background:#ff4c61;
-margin-left:15px;
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
 ">
 
-Arrêter la simulation
+<div>
 
+<h1>
+Supervision Multi-sites
+</h1>
+
+<p style="
+color:#94a3b8;
+margin-top:10px;
+">
+
+Monitoring centralisé de tous les sites EnergyTrack.
+
+</p>
+
+</div>
+
+<button onclick="createDemoSites()">
+Créer des sites démo
 </button>
 
-<div class="log" id="log">
+</div>
 
-Logs simulation...
+<div class="card-grid">
+
+<div class="card">
+
+<div class="card-title">
+Sites actifs
+</div>
+
+<div class="card-value"
+id="totalSites">
+
+0
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Puissance totale
+</div>
+
+<div class="card-value green"
+id="totalPower">
+
+0 W
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Alertes actives
+</div>
+
+<div class="card-value orange"
+id="totalAlerts">
+
+0
+
+</div>
+
+</div>
+
+<div class="card">
+
+<div class="card-title">
+Sites critiques
+</div>
+
+<div class="card-value red"
+id="criticalSites">
+
+0
+
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>
+Sites surveillés
+</h2>
+
+<div class="site-grid"
+id="sitesContainer">
+
+</div>
 
 </div>
 
@@ -148,185 +227,42 @@ Logs simulation...
 
 <script>
 
-let simulationRunning = false;
+async function logoutUser(){
 
-let simulationInterval = null;
+await supabaseClient.auth.signOut();
 
-async function startSimulation(){
-
-if(simulationRunning){
-
-return;
+window.location.href='auth.html';
 
 }
 
-simulationRunning = true;
+async function loadSites(){
 
 const { data:userData } =
 await supabaseClient.auth.getUser();
 
 if(!userData.user){
 
-alert('Utilisateur non connecté');
+window.location.href='auth.html';
 
 return;
 
 }
 
-const userId = userData.user.id;
-
-simulationInterval = setInterval(async()=>{
-
-/*
-VALEURS SIMULÉES
-*/
-
-const voltage =
-Math.floor(Math.random()*220)+40;
-
-const power =
-Math.floor(Math.random()*5000);
-
-const current =
-(power/voltage).toFixed(2);
-
-const kwh =
-(power/1000).toFixed(2);
-
-const source =
-Math.random()>0.8
-? 'GROUPE'
-: 'SBEE';
+const userId =
+userData.user.id;
 
 /*
-ALERTES AUTOMATIQUES
+RÉCUP SITES
 */
 
-if(voltage < 190){
-
+const { data:sites, error } =
 await supabaseClient
 
-.from('alerts')
+.from('sites')
 
-.insert([{
+.select('*')
 
-sensor_id:userId,
-
-type:'LOW_VOLTAGE',
-
-message:'Tension basse détectée',
-
-value:voltage,
-
-threshold:190
-
-}]);
-
-}
-
-if(power > 3000){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-type:'OVERCONSUMPTION',
-
-message:'Surconsommation détectée',
-
-value:power,
-
-threshold:3000
-
-}]);
-
-}
-
-if(voltage < 50){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-type:'SBEE_OUTAGE',
-
-message:'Coupure SBEE détectée',
-
-value:voltage,
-
-threshold:50
-
-}]);
-
-}
-
-if(voltage > 250){
-
-await supabaseClient
-
-.from('alerts')
-
-.insert([{
-
-sensor_id:userId,
-
-type:'HIGH_VOLTAGE',
-
-message:'Surtension détectée',
-
-value:voltage,
-
-threshold:250
-
-}]);
-
-}
-
-/*
-UI
-*/
-
-document.getElementById('voltage').innerHTML =
-voltage+' V';
-
-document.getElementById('power').innerHTML =
-power+' W';
-
-document.getElementById('source').innerHTML =
-source;
-
-/*
-INSERT TELEMETRY
-*/
-
-const { error } =
-await supabaseClient
-
-.from('telemetry')
-
-.insert([{
-
-sensor_id:userId,
-
-voltage:voltage,
-
-current:current,
-
-power_w:power,
-
-kwh_total:kwh,
-
-source:source
-
-}]);
+.eq('user_id',userId);
 
 if(error){
 
@@ -337,48 +273,332 @@ return;
 }
 
 /*
-LOGS
+RÉCUP ALERTES
 */
 
-const log =
-document.getElementById('log');
+const { data:alerts } =
+await supabaseClient
 
-log.innerHTML =
+.from('alerts')
 
-'✅ '
-+new Date().toLocaleTimeString()
+.select('*')
 
-+' → '
+.eq('sensor_id',userId);
 
-+power+' W | '
+/*
+RÉCUP TÉLÉMÉTRIE
+*/
 
-+voltage+' V | '
+const { data:telemetry } =
+await supabaseClient
 
-+source
+.from('telemetry')
 
-+'<br><br>'
+.select('*')
 
-+log.innerHTML;
+.eq('sensor_id',userId);
 
-},5000);
+/*
+STATS
+*/
+
+document.getElementById('totalSites').innerHTML =
+sites.length;
+
+let totalPower=0;
+
+telemetry.forEach(item=>{
+
+totalPower += Number(item.power_w);
+
+});
+
+document.getElementById('totalPower').innerHTML =
+Math.round(totalPower)+' W';
+
+document.getElementById('totalAlerts').innerHTML =
+alerts.length;
+
+/*
+SITES CRITIQUES
+*/
+
+const critical =
+alerts.filter(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+||
+
+alert.type==='OVERCONSUMPTION'
+
+).length;
+
+document.getElementById('criticalSites').innerHTML =
+critical;
+
+/*
+AFFICHAGE SITES
+*/
+
+const container =
+document.getElementById('sitesContainer');
+
+container.innerHTML='';
+
+sites.forEach(site=>{
+
+/*
+DONNÉES SITE
+*/
+
+const siteTelemetry =
+telemetry.filter(item=>
+
+item.site_id===site.id
+
+);
+
+const siteAlerts =
+alerts.filter(alert=>
+
+alert.site_id===site.id
+
+);
+
+let sitePower=0;
+
+siteTelemetry.forEach(item=>{
+
+sitePower += Number(item.power_w);
+
+});
+
+/*
+STATUS
+*/
+
+let status='ONLINE';
+
+let statusClass='status-online';
+
+if(siteAlerts.some(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+)){
+
+status='COUPURE';
+
+statusClass='status-danger';
+
+}else if(siteAlerts.length > 0){
+
+status='ALERTE';
+
+statusClass='status-warning';
 
 }
 
-function stopSimulation(){
+/*
+AFFICHAGE
+*/
 
-clearInterval(simulationInterval);
+container.innerHTML += `
 
-simulationRunning=false;
+<div class="site-card">
 
-document.getElementById('log').innerHTML =
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+margin-bottom:20px;
+flex-wrap:wrap;
+gap:10px;
+">
 
-'⛔ Simulation arrêtée.<br><br>'
+<h2>
 
-+document.getElementById('log').innerHTML;
+${site.name}
+
+</h2>
+
+<div class="site-status ${statusClass}">
+
+${status}
+
+</div>
+
+</div>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+📍 ${site.city}
+
+<br>
+
+${site.address}
+
+</p>
+
+<div style="
+margin-top:20px;
+display:grid;
+grid-template-columns:1fr 1fr;
+gap:15px;
+">
+
+<div>
+
+<p style="color:#94a3b8;">
+Puissance
+</p>
+
+<h3 style="margin-top:8px;">
+
+${Math.round(sitePower)} W
+
+</h3>
+
+</div>
+
+<div>
+
+<p style="color:#94a3b8;">
+Alertes
+</p>
+
+<h3 style="margin-top:8px;">
+
+${siteAlerts.length}
+
+</h3>
+
+</div>
+
+</div>
+
+</div>
+
+`;
+
+});
 
 }
+
+/*
+SITES DÉMO
+*/
+
+async function createDemoSites(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+return;
+
+}
+
+const userId =
+userData.user.id;
+
+await supabaseClient
+
+.from('sites')
+
+.insert([
+
+{
+
+user_id:userId,
+
+name:'Restaurant Cadjehoun',
+
+city:'Cotonou',
+
+address:'Cadjehoun, Rue 230'
+
+},
+
+{
+
+user_id:userId,
+
+name:'Hôtel Fidjrossè',
+
+city:'Cotonou',
+
+address:'Fidjrossè Plage'
+
+},
+
+{
+
+user_id:userId,
+
+name:'Boutique Porto-Novo',
+
+city:'Porto-Novo',
+
+address:'Centre-ville'
+
+}
+
+]);
+
+alert('Sites démo créés.');
+
+loadSites();
+
+}
+
+/*
+LOAD INITIAL
+*/
+
+loadSites();
+
+/*
+REALTIME
+*/
+
+supabaseClient
+
+.channel('sites-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadSites();
+
+}
+
+)
+
+.subscribe();
 
 </script>
 
 </body>
+
 </html>
