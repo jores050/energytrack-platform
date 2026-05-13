@@ -192,6 +192,26 @@ return;
 const selector =
 document.getElementById('siteSelector');
 
+if(sites.length===0){
+
+selector.innerHTML += `
+
+<option value="site-demo-1">
+Restaurant Cadjehoun
+</option>
+
+<option value="site-demo-2">
+Hôtel Fidjrossè
+</option>
+
+<option value="site-demo-3">
+Boutique Porto-Novo
+</option>
+
+`;
+
+}else{
+
 sites.forEach(site=>{
 
 selector.innerHTML += `
@@ -205,6 +225,8 @@ ${site.name}
 `;
 
 });
+
+}
 
 }
 
