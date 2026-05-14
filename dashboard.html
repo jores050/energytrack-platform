@@ -1483,8 +1483,71 @@ return;
 /*
 EXPIRED
 */
+console.log('LIMITED MODE');
+function showLimitedDashboard(){
 
-showLimitedDashboard();
+document.getElementById(
+'subscriptionBanner'
+).style.display='block';
+
+document.getElementById(
+'subscriptionBanner'
+).innerHTML = `
+
+<div style="
+background:rgba(255,76,97,0.12);
+border:1px solid rgba(255,76,97,0.2);
+padding:22px;
+border-radius:20px;
+margin-bottom:25px;
+">
+
+<h3 style="
+margin-bottom:12px;
+color:#ff4c61;
+">
+
+Votre abonnement a expiré
+
+</h3>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:20px;
+">
+
+Vous utilisez actuellement
+le mode gratuit limité.
+
+Certaines fonctionnalités Premium
+nécessitent un abonnement actif.
+
+</p>
+
+<button
+
+style="
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#00c896;
+color:#081120;
+font-weight:700;
+cursor:pointer;
+"
+
+onclick="window.location.href='pricing.html'">
+
+Réactiver mon abonnement
+
+</button>
+
+</div>
+
+`;
+
+}
 
 }
 
