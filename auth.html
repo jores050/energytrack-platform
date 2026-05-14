@@ -294,11 +294,17 @@ box.innerHTML=message;
 
 async function completeSignup(){
 
-const name=document.getElementById('signupName').value;
+const name =
+document.getElementById('signupName').value;
 
-const email=document.getElementById('signupEmail').value;
+const email =
+document.getElementById('signupEmail').value;
 
-const password=document.getElementById('signupPassword').value;
+const password =
+document.getElementById('signupPassword').value;
+
+const company =
+document.getElementById('signupCompany').value;
 
 if(name==='' || email==='' || password===''){
 
@@ -310,6 +316,12 @@ showMessage(
 return;
 
 }
+
+/*
+=========================================
+CREATE AUTH USER
+=========================================
+*/
 
 const { data, error } =
 await supabaseClient.auth.signUp({
@@ -327,10 +339,26 @@ return;
 
 }
 
+const user = data.user;
+
+if(!user){
+
+showMessage(
+'Erreur création utilisateur.',
+'error'
+);
+
+return;
+
+}
+
 /*
-Création profil SaaS
+=========================================
+CREATE PROFILE
+=========================================
 */
 
+const { error:profileError } =
 await supabaseClient
 
 .from('profiles')
@@ -341,11 +369,82 @@ id:user.id,
 
 full_name:name,
 
-email:email
+email:email,
+
+company:company
 
 }]);
 
-localStorage.setItem('energytrackUser',
+if(profileError){
+
+console.log(profileError);
+
+showMessage(
+profileError.message,
+'error'
+);
+
+return;
+
+}
+
+/*
+=========================================
+GET ESSENTIAL PLAN
+=========================================
+*/
+
+const { data:plan } =
+await supabaseClient
+
+.from('plans')
+
+.select('*')
+
+.eq('name','Essential')
+
+.single();
+
+/*
+=========================================
+CREATE SUBSCRIPTION
+=========================================
+*/
+
+if(plan){
+
+await supabaseClient
+
+.from('subscriptions')
+
+.insert([{
+
+user_id:user.id,
+
+plan_id:plan.id,
+
+status:'active',
+
+started_at:new Date(),
+
+expires_at:
+new Date(
+Date.now() + 30*24*60*60*1000
+)
+
+}]);
+
+}
+
+/*
+=========================================
+LOCAL STORAGE
+=========================================
+*/
+
+localStorage.setItem(
+
+'energytrackUser',
 
 JSON.stringify({
 
@@ -355,6 +454,12 @@ email:email
 })
 
 );
+
+/*
+=========================================
+SUCCESS
+=========================================
+*/
 
 showMessage(
 'Compte créé avec succès.',
@@ -368,7 +473,6 @@ window.location.href='payment.html';
 },1500);
 
 }
-
 async function loginUser(){
 
 const email =
