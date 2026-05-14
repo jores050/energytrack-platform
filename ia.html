@@ -180,7 +180,212 @@ recommendation;
 }
 
 loadAI();
+/*
+=========================================
+PREMIUM ACCESS SYSTEM
+=========================================
+*/
 
+async function checkPremiumAccess(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const userId =
+userData.user.id;
+
+const { data:subscription, error } =
+await supabaseClient
+
+.from('subscriptions')
+
+.select('*')
+
+.eq('user_id',userId)
+
+.maybeSingle();
+
+/*
+NO SUBSCRIPTION
+*/
+
+if(error || !subscription){
+
+lockPremiumPage();
+
+return;
+
+}
+
+const now = new Date();
+
+const expiresAt =
+new Date(subscription.expires_at);
+
+/*
+ACTIVE
+*/
+
+if(
+
+subscription.status === 'active'
+
+&&
+
+expiresAt > now
+
+){
+
+unlockPremiumPage();
+
+return;
+
+}
+
+/*
+EXPIRED
+*/
+
+lockPremiumPage();
+
+}
+
+/*
+=========================================
+UNLOCK
+=========================================
+*/
+
+function unlockPremiumPage(){
+
+document.getElementById(
+'premiumBlock'
+).style.display='none';
+
+document.getElementById(
+'premiumContent'
+).style.display='block';
+
+}
+
+/*
+=========================================
+LOCK
+=========================================
+*/
+
+function lockPremiumPage(){
+
+document.getElementById(
+'premiumContent'
+).style.display='none';
+
+document.getElementById(
+'premiumBlock'
+).style.display='block';
+
+document.getElementById(
+'premiumBlock'
+).innerHTML = `
+
+<div style="
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+padding:40px;
+background:#081120;
+">
+
+<div style="
+max-width:520px;
+width:100%;
+background:#101826;
+padding:40px;
+border-radius:30px;
+border:1px solid rgba(255,255,255,0.05);
+text-align:center;
+">
+
+<div style="
+font-size:70px;
+margin-bottom:20px;
+">
+
+🔒
+
+</div>
+
+<h1 style="
+margin-bottom:20px;
+">
+
+Fonctionnalité Premium
+
+</h1>
+
+<p style="
+color:#94a3b8;
+line-height:1.9;
+margin-bottom:30px;
+">
+
+Votre abonnement actuel
+ne permet pas d’accéder
+à cette fonctionnalité.
+
+Passez à Business Cloud
+pour débloquer :
+
+• Analyse IA
+• Rapports PDF
+• Multi-sites
+• Analytics avancés
+
+</p>
+
+<button
+
+style="
+padding:16px 28px;
+border:none;
+border-radius:16px;
+background:#00c896;
+color:#081120;
+font-weight:700;
+font-size:16px;
+cursor:pointer;
+"
+
+onclick="window.location.href='pricing.html'">
+
+Réactiver mon abonnement
+
+</button>
+
+</div>
+
+</div>
+
+`;
+
+}
+
+/*
+=========================================
+START
+=========================================
+*/
+
+checkPremiumAccess();
 </script>
 </div>
 </body>
