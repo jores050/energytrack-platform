@@ -174,8 +174,23 @@ placeholder="Ville">
 id="siteAddress"
 placeholder="Adresse complète">
 
-<button onclick="createSite()">
+<button
+
+onclick="showPremiumNotification()"
+
+style="
+padding:16px 28px;
+border:none;
+border-radius:16px;
+background:linear-gradient(90deg,#00c896,#00b4ff);
+color:white;
+font-weight:700;
+font-size:16px;
+cursor:pointer;
+">
+
 Ajouter le site
+
 </button>
 
 </div>
@@ -518,7 +533,19 @@ loadSites();
 )
 
 .subscribe();
+/*
+=========================================
+PREMIUM NOTIFICATION
+=========================================
+*/
 
+function showPremiumNotification(){
+
+alert(
+'La fonctionnalité Multi-sites est disponible uniquement avec un abonnement Premium Business Cloud.'
+);
+
+}
 </script>
 
 </body>
