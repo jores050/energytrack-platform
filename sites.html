@@ -192,6 +192,7 @@ cursor:pointer;
 Ajouter le site
 
 </button>
+
 </div>
 
 <div class="section">
@@ -212,7 +213,9 @@ id="sitesContainer">
 <script>
 
 /*
+=========================================
 AUTH CHECK
+=========================================
 */
 
 async function checkAuth(){
@@ -233,7 +236,9 @@ return userData.user;
 }
 
 /*
+=========================================
 LOGOUT
+=========================================
 */
 
 async function logoutUser(){
@@ -245,7 +250,65 @@ window.location.href='auth.html';
 }
 
 /*
+=========================================
+HANDLE ADD SITE
+=========================================
+*/
+
+async function handleAddSite(){
+
+const user =
+await checkAuth();
+
+if(!user){
+
+return;
+
+}
+
+const { data:subscription } =
+await supabaseClient
+
+.from('subscriptions')
+
+.select('*')
+
+.eq('user_id',user.id)
+
+.maybeSingle();
+
+const now = new Date();
+
+if(
+
+subscription
+
+&&
+
+subscription.status === 'active'
+
+&&
+
+new Date(subscription.expires_at) > now
+
+){
+
+createSite();
+
+return;
+
+}
+
+alert(
+'La fonctionnalité Multi-sites est disponible uniquement avec un abonnement Premium Business Cloud.'
+);
+
+}
+
+/*
+=========================================
 CREATE SITE
+=========================================
 */
 
 async function createSite(){
@@ -326,7 +389,9 @@ loadSites();
 }
 
 /*
+=========================================
 DELETE SITE
+=========================================
 */
 
 async function deleteSite(siteId){
@@ -362,7 +427,9 @@ loadSites();
 }
 
 /*
+=========================================
 LOAD SITES
+=========================================
 */
 
 async function loadSites(){
@@ -494,13 +561,17 @@ Supprimer
 }
 
 /*
+=========================================
 INIT
+=========================================
 */
 
 loadSites();
 
 /*
+=========================================
 REALTIME
+=========================================
 */
 
 supabaseClient
@@ -532,19 +603,7 @@ loadSites();
 )
 
 .subscribe();
-/*
-=========================================
-PREMIUM NOTIFICATION
-=========================================
-*/
 
-function showPremiumNotification(){
-
-alert(
-'La fonctionnalité Multi-sites est disponible uniquement avec un abonnement Premium Business Cloud.'
-);
-
-}
 </script>
 
 </body>
