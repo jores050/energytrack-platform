@@ -629,6 +629,24 @@ START
 checkPremiumAccess();
 
 </script>
+<script src="js/subscription.js"></script>
 
+<script>
+
+(async ()=>{
+
+const access =
+await hasBusinessAccess();
+
+if(!access){
+
+window.location.href =
+'pricing.html';
+
+}
+
+})();
+
+</script>
 </body>
 </html>
