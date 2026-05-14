@@ -693,16 +693,12 @@ userData.user;
 /*
 GET SUBSCRIPTION
 */
-
 const { data:subscription } =
 await supabaseClient
 
 .from('subscriptions')
 
-.select(`
-*,
-plans(*)
-`)
+.select('*')
 
 .eq('user_id',user.id)
 
@@ -719,6 +715,24 @@ setupGuestButtons();
 return;
 
 }
+  /*
+=========================================
+GET PLAN MANUALLY
+=========================================
+*/
+
+const { data:plan } =
+await supabaseClient
+
+.from('plans')
+
+.select('*')
+
+.eq('id',subscription.plan_id)
+
+.single();
+
+subscription.plans = plan;
 /*
 =========================================
 NO PLAN LINKED
