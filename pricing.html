@@ -719,7 +719,67 @@ setupGuestButtons();
 return;
 
 }
+/*
+=========================================
+NO PLAN LINKED
+=========================================
+*/
 
+if(!subscription.plans){
+
+document.getElementById(
+'essentialButton'
+).innerHTML =
+'Plan Essential';
+
+document.getElementById(
+'businessButton'
+).innerHTML =
+'Passer Premium';
+
+document.getElementById(
+'businessButton'
+).onclick =
+activateBusiness;
+
+const statusBox =
+document.getElementById(
+'subscriptionStatus'
+);
+
+statusBox.style.display='block';
+
+statusBox.innerHTML = `
+
+<h2 style="
+margin-bottom:12px;
+">
+
+Abonnement détecté
+
+</h2>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+Votre abonnement n’est pas encore lié
+à un plan dans la base de données.
+
+Veuillez vérifier le champ :
+
+plan_id
+
+dans subscriptions.
+
+</p>
+
+`;
+
+return;
+
+}
 const now = new Date();
 
 const isActive =
