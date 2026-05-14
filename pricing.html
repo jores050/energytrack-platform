@@ -283,7 +283,7 @@ padding:40px;
 </style>
 
 </head>
-
+<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
 <body>
 
 <section class="hero">
@@ -1002,17 +1002,6 @@ ACTIVATE BUSINESS
 
 async function activateBusiness(){
 
-const confirmUpgrade =
-confirm(
-'Activer Business Cloud pour 30 jours ?'
-);
-
-if(!confirmUpgrade){
-
-return;
-
-}
-
 const { data:userData } =
 await supabaseClient.auth.getUser();
 
@@ -1029,7 +1018,40 @@ userData.user;
 
 /*
 =========================================
-GET BUSINESS PLAN
+FEDA PAY
+=========================================
+*/
+
+FedaPay.init({
+
+public_key: 'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
+
+transaction: {
+
+amount: 5000,
+
+description:
+'Business Cloud - 30 jours',
+
+currency: {
+iso: 'XOF'
+}
+
+},
+
+customer: {
+
+email: user.email
+
+},
+
+onComplete: async function(response){
+
+console.log(response);
+
+/*
+=========================================
+PAYMENT SUCCESS
 =========================================
 */
 
@@ -1084,8 +1106,6 @@ Date.now() + 30*24*60*60*1000
 
 if(error){
 
-console.log(error);
-
 alert(error.message);
 
 return;
@@ -1094,9 +1114,49 @@ return;
 
 /*
 =========================================
-SUCCESS
+GET SUBSCRIPTION
 =========================================
 */
+
+const { data:subscription } =
+await supabaseClient
+
+.from('subscriptions')
+
+.select('*')
+
+.eq('user_id',user.id)
+
+.single();
+
+/*
+=========================================
+SAVE PAYMENT
+=========================================
+*/
+
+await supabaseClient
+
+.from('payments')
+
+.insert([{
+
+user_id:user.id,
+
+subscription_id:subscription.id,
+
+amount:5000,
+
+currency:'XOF',
+
+payment_method:'FedaPay',
+
+transaction_id:
+response.transaction.id,
+
+status:'paid'
+
+}]);
 
 alert(
 'Business Cloud activé avec succès.'
@@ -1104,6 +1164,9 @@ alert(
 
 location.reload();
 
+}
+
+});
 
 }
 
