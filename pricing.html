@@ -721,7 +721,12 @@ GET PLAN MANUALLY
 =========================================
 */
 
-const { data:plan } =
+const {
+
+data:plan,
+error:planError
+
+} =
 await supabaseClient
 
 .from('plans')
@@ -730,7 +735,13 @@ await supabaseClient
 
 .eq('id',subscription.plan_id)
 
-.single();
+.maybeSingle();
+
+if(planError){
+
+console.log(planError);
+
+}
 
 subscription.plans = plan;
 /*
@@ -904,8 +915,9 @@ statusBox.innerHTML = `
 margin-bottom:12px;
 ">
 
-Business Cloud actif
-
+${isActive
+? 'Business Cloud actif'
+: 'Abonnement expiré'}
 </h2>
 
 <p style="
@@ -913,7 +925,9 @@ color:#94a3b8;
 line-height:1.8;
 ">
 
-Votre abonnement expire le :
+${isActive
+? 'Votre abonnement expire le :'
+: 'Votre abonnement a expiré le :'}
 
 ${new Date(
 subscription.expires_at
