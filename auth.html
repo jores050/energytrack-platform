@@ -332,10 +332,15 @@ Création profil SaaS
 */
 
 await supabaseClient
+
 .from('profiles')
+
 .insert([{
 
-id:data.user.id,
+id:user.id,
+
+full_name:name,
+
 email:email
 
 }]);
