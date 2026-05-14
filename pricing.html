@@ -11,6 +11,10 @@
 
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
 <style>
 
 *{
@@ -155,13 +159,6 @@ transform:translateY(-2px);
 .btn-secondary{
 background:#1e293b;
 color:#ffffff;
-display:flex;
-justify-content:center;
-align-items:center;
-text-align:center;
-font-size:16px;
-font-weight:700;
-min-height:58px;
 }
 
 .btn-secondary:hover{
@@ -255,6 +252,18 @@ margin:auto;
 margin-top:40px;
 }
 
+#subscriptionStatus{
+margin-top:40px;
+padding:25px;
+background:rgba(0,200,150,0.12);
+border:1px solid rgba(0,200,150,0.2);
+border-radius:22px;
+max-width:750px;
+margin-left:auto;
+margin-right:auto;
+display:none;
+}
+
 @media(max-width:768px){
 
 .hero h1{
@@ -288,11 +297,16 @@ Choisissez le plan idéal pour superviser vos installations énergétiques,
 analyser votre consommation et optimiser vos coûts en temps réel.
 </p>
 
+<div id="subscriptionStatus"></div>
+
 </section>
 
 <section class="pricing-section">
 
 <div class="pricing-grid">
+
+<!-- ESSENTIAL -->
+
 <div class="pricing-card">
 
 <div style="
@@ -306,20 +320,20 @@ font-weight:700;
 margin-bottom:20px;
 ">
 
-1 MOIS GRATUIT
+GRATUIT
 
 </div>
 
 <div class="plan-name">
-Starter
+Essential
 </div>
 
 <div class="plan-description">
-Découvrez EnergyTrack gratuitement pendant 30 jours.
+Parfait pour découvrir EnergyTrack et superviser une installation.
 </div>
 
 <div class="price">
-5000
+0
 <span>
 FCFA / mois
 </span>
@@ -332,6 +346,10 @@ FCFA / mois
 </div>
 
 <div class="feature">
+✅ 1 capteur IoT
+</div>
+
+<div class="feature">
 ✅ Dashboard temps réel
 </div>
 
@@ -340,7 +358,7 @@ FCFA / mois
 </div>
 
 <div class="feature">
-✅ Rapports simples
+✅ Monitoring énergétique
 </div>
 
 <div class="feature">
@@ -349,14 +367,19 @@ FCFA / mois
 
 </div>
 
-<button class="btn-secondary"
-onclick="window.location.href='auth.html'">
+<button
 
-Commencer gratuitement
+id="essentialButton"
+
+class="btn-secondary">
+
+Chargement...
 
 </button>
 
 </div>
+
+<!-- BUSINESS CLOUD -->
 
 <div class="pricing-card popular">
 
@@ -365,32 +388,28 @@ POPULAIRE
 </div>
 
 <div class="plan-name">
-Business Pro
+Business Cloud
 </div>
 
 <div class="plan-description">
-Pour PME, hôtels, restaurants et entreprises multisites.
+Débloquez toute la puissance SaaS d’EnergyTrack.
 </div>
 
 <div class="price">
-25000
+5000
 <span>
-FCFA/mois
+FCFA / mois
 </span>
 </div>
 
 <div class="features">
 
 <div class="feature">
-✅ Jusqu’à 10 sites
+✅ Multi-sites
 </div>
 
 <div class="feature">
-✅ Analytics avancés
-</div>
-
-<div class="feature">
-✅ IA énergétique
+✅ Analyse IA
 </div>
 
 <div class="feature">
@@ -398,80 +417,34 @@ FCFA/mois
 </div>
 
 <div class="feature">
+✅ Analytics avancés
+</div>
+
+<div class="feature">
 ✅ Alertes intelligentes
 </div>
 
 <div class="feature">
-✅ Multi-sites temps réel
+✅ Maintenance prédictive
 </div>
 
 <div class="feature">
-✅ Support prioritaire
-</div>
-
-</div>
-
-<button class="btn-primary"
-onclick="window.location.href='checkout.html'">
-
-Choisir ce plan
-
-</button>
-
-</div>
-
-<div class="pricing-card">
-
-<div class="plan-name">
-Enterprise
-</div>
-
-<div class="plan-description">
-Pour industries et infrastructures critiques.
-</div>
-
-<div class="price">
-Custom
-<span>
-sur devis
-</span>
-</div>
-
-<div class="features">
-
-<div class="feature">
-✅ Sites illimités
+✅ Historique étendu
 </div>
 
 <div class="feature">
-✅ MQTT & ESP32
-</div>
-
-<div class="feature">
-✅ API complète
-</div>
-
-<div class="feature">
-✅ Smart Building
-</div>
-
-<div class="feature">
-✅ IA avancée
-</div>
-
-<div class="feature">
-✅ Support dédié 24/7
-</div>
-
-<div class="feature">
-✅ Intégration industrielle
+✅ Priorité support
 </div>
 
 </div>
 
-<button class="btn-secondary">
+<button
 
-Contacter l’équipe
+id="businessButton"
+
+class="btn-primary">
+
+Chargement...
 
 </button>
 
@@ -496,15 +469,11 @@ Fonctionnalités
 </th>
 
 <th>
-Starter
+Essential
 </th>
 
 <th>
-Business
-</th>
-
-<th>
-Enterprise
+Business Cloud
 </th>
 
 </tr>
@@ -517,10 +486,6 @@ Nombre de sites
 
 <td>
 1
-</td>
-
-<td>
-10
 </td>
 
 <td>
@@ -543,24 +508,16 @@ Temps réel
 ✅
 </td>
 
-<td>
-✅
-</td>
-
 </tr>
 
 <tr>
 
 <td>
-IA énergétique
+Analyse IA
 </td>
 
 <td>
 ❌
-</td>
-
-<td>
-✅
 </td>
 
 <td>
@@ -583,6 +540,18 @@ Rapports PDF
 ✅
 </td>
 
+</tr>
+
+<tr>
+
+<td>
+Multi-sites
+</td>
+
+<td>
+❌
+</td>
+
 <td>
 ✅
 </td>
@@ -592,11 +561,7 @@ Rapports PDF
 <tr>
 
 <td>
-API
-</td>
-
-<td>
-❌
+Analytics avancés
 </td>
 
 <td>
@@ -612,11 +577,7 @@ API
 <tr>
 
 <td>
-Support dédié
-</td>
-
-<td>
-❌
+Maintenance prédictive
 </td>
 
 <td>
@@ -646,7 +607,7 @@ Puis-je changer de plan à tout moment ?
 </h3>
 
 <p>
-Oui, vous pouvez upgrader ou downgrader votre abonnement à tout moment.
+Oui, vous pouvez upgrader ou renouveler votre abonnement à tout moment.
 </p>
 
 </div>
@@ -670,7 +631,7 @@ Les rapports PDF sont-ils automatiques ?
 </h3>
 
 <p>
-Oui, les plans Business et Enterprise permettent la génération automatique de rapports.
+Oui, Business Cloud permet la génération automatique de rapports PDF.
 </p>
 
 </div>
@@ -686,8 +647,8 @@ Prêt à optimiser votre énergie ?
 </h2>
 
 <p>
-Rejoignez les entreprises qui utilisent EnergyTrack pour surveiller,
-analyser et réduire leurs coûts énergétiques grâce à l’IoT et l’intelligence artificielle.
+Rejoignez les utilisateurs qui utilisent EnergyTrack
+pour surveiller et optimiser leur consommation énergétique.
 </p>
 
 <button class="btn-primary"
@@ -701,6 +662,279 @@ Commencer maintenant
 
 </section>
 
-</body>
+<script>
 
+/*
+=========================================
+LOAD SUBSCRIPTION
+=========================================
+*/
+
+async function loadSubscription(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+/*
+NOT CONNECTED
+*/
+
+if(!userData.user){
+
+setupGuestButtons();
+
+return;
+
+}
+
+const user =
+userData.user;
+
+/*
+GET SUBSCRIPTION
+*/
+
+const { data:subscription } =
+await supabaseClient
+
+.from('subscriptions')
+
+.select(`
+*,
+plans(*)
+`)
+
+.eq('user_id',user.id)
+
+.maybeSingle();
+
+/*
+NO SUBSCRIPTION
+*/
+
+if(!subscription){
+
+setupGuestButtons();
+
+return;
+
+}
+
+const now = new Date();
+
+const isActive =
+
+subscription.status === 'active'
+
+&&
+
+new Date(subscription.expires_at) > now;
+
+const statusBox =
+document.getElementById(
+'subscriptionStatus'
+);
+
+statusBox.style.display='block';
+
+/*
+=========================================
+ESSENTIAL
+=========================================
+*/
+
+if(
+
+subscription.plans.name === 'Essential'
+
+){
+
+statusBox.innerHTML = `
+
+<h2 style="
+margin-bottom:12px;
+">
+
+Plan actuel : Essential
+
+</h2>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+Vous utilisez actuellement
+la version gratuite d’EnergyTrack.
+
+Passez à Business Cloud
+pour débloquer :
+
+<br><br>
+
+• Analyse IA  
+• Rapports PDF  
+• Multi-sites  
+• Analytics avancés
+
+</p>
+
+`;
+
+document.getElementById(
+'essentialButton'
+).innerHTML =
+'Plan actuel';
+
+document.getElementById(
+'essentialButton'
+).disabled=true;
+
+document.getElementById(
+'businessButton'
+).innerHTML =
+'Passer Premium';
+
+document.getElementById(
+'businessButton'
+).onclick =
+activateBusiness;
+
+return;
+
+}
+
+/*
+=========================================
+BUSINESS CLOUD
+=========================================
+*/
+
+if(
+
+subscription.plans.name === 'Business Cloud'
+
+){
+
+statusBox.innerHTML = `
+
+<h2 style="
+margin-bottom:12px;
+">
+
+Business Cloud actif
+
+</h2>
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+">
+
+Votre abonnement expire le :
+
+${new Date(
+subscription.expires_at
+).toLocaleDateString()}
+
+</p>
+
+`;
+
+document.getElementById(
+'essentialButton'
+).innerHTML =
+'Plan gratuit';
+
+document.getElementById(
+'businessButton'
+).innerHTML =
+isActive
+? 'Renouveler'
+: 'Réactiver';
+
+document.getElementById(
+'businessButton'
+).onclick =
+renewSubscription;
+
+}
+
+}
+
+/*
+=========================================
+GUEST BUTTONS
+=========================================
+*/
+
+function setupGuestButtons(){
+
+document.getElementById(
+'essentialButton'
+).innerHTML =
+'Créer un compte';
+
+document.getElementById(
+'essentialButton'
+).onclick = ()=>{
+
+window.location.href='auth.html';
+
+};
+
+document.getElementById(
+'businessButton'
+).innerHTML =
+'Choisir Business Cloud';
+
+document.getElementById(
+'businessButton'
+).onclick = ()=>{
+
+window.location.href='auth.html';
+
+};
+
+}
+
+/*
+=========================================
+ACTIVATE BUSINESS
+=========================================
+*/
+
+async function activateBusiness(){
+
+alert(
+'Intégration paiement prochaine étape.'
+);
+
+}
+
+/*
+=========================================
+RENEW
+=========================================
+*/
+
+async function renewSubscription(){
+
+alert(
+'Renouvellement abonnement bientôt disponible.'
+);
+
+}
+
+/*
+=========================================
+START
+=========================================
+*/
+
+loadSubscription();
+
+</script>
+
+</body>
 </html>
