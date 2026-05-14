@@ -1005,16 +1005,16 @@ GET BUSINESS PLAN
 =========================================
 */
 
-const { data:plan } =
+const { data:plans } =
 await supabaseClient
 
 .from('plans')
 
 .select('*')
 
-.eq('name','Business Cloud')
+.ilike('name','Business Cloud');
 
-.single();
+const plan = plans?.[0];
 
 if(!plan){
 
