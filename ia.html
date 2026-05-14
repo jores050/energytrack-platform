@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="fr">
+
 <head>
 
 <meta charset="UTF-8">
@@ -21,12 +22,14 @@ background:linear-gradient(145deg,#182235,#101826);
 padding:25px;
 border-radius:24px;
 margin-bottom:20px;
+border:1px solid rgba(255,255,255,0.05);
 }
 
 .ai-score{
 font-size:64px;
 color:#00c896;
 margin-top:20px;
+font-weight:700;
 }
 
 </style>
@@ -34,23 +37,56 @@ margin-top:20px;
 </head>
 
 <body>
+
+<!-- =========================================
+PREMIUM BLOCK
+========================================= -->
+
 <div id="premiumBlock"></div>
 
+<!-- =========================================
+PREMIUM CONTENT
+========================================= -->
+
 <div id="premiumContent">
+
 <div class="sidebar">
 
 <div class="logo">
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
-<a class="nav-item" href="rapports.html">📊 Rapports</a>
-<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-<a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
-<a class="nav-item active" href="ia.html">🤖 Analyse IA</a>
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+<a class="nav-item" href="dashboard.html">
+🏠 Dashboard
+</a>
+
+<a class="nav-item" href="consommation.html">
+⚡ Consommation
+</a>
+
+<a class="nav-item" href="alertes.html">
+🔔 Alertes
+</a>
+
+<a class="nav-item" href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item" href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item" href="capteurs.html">
+📡 Capteurs IoT
+</a>
+
+<a class="nav-item active" href="ia.html">
+🤖 Analyse IA
+</a>
+
+<a class="nav-item" href="parametres.html">
+⚙️ Paramètres
+</a>
 
 </div>
 
@@ -82,6 +118,7 @@ Recommandation IA
 style="
 margin-top:20px;
 line-height:1.8;
+color:#94a3b8;
 ">
 
 Analyse en cours...
@@ -92,7 +129,15 @@ Analyse en cours...
 
 </div>
 
+</div>
+
 <script>
+
+/*
+=========================================
+LOAD AI
+=========================================
+*/
 
 async function loadAI(){
 
@@ -110,7 +155,7 @@ return;
 const userId =
 userData.user.id;
 
-const { data:telemetry } =
+const { data:telemetry, error } =
 await supabaseClient
 
 .from('telemetry')
@@ -118,6 +163,17 @@ await supabaseClient
 .select('*')
 
 .eq('sensor_id',userId);
+
+if(error || !telemetry || telemetry.length===0){
+
+document.getElementById(
+'recommendation'
+).innerHTML =
+'Aucune donnée énergétique disponible.';
+
+return;
+
+}
 
 let totalPower=0;
 
@@ -152,7 +208,9 @@ score-=15;
 
 }
 
-document.getElementById('energyScore').innerHTML =
+document.getElementById(
+'energyScore'
+).innerHTML =
 score+'/100';
 
 let recommendation='';
@@ -174,12 +232,13 @@ recommendation =
 
 }
 
-document.getElementById('recommendation').innerHTML =
+document.getElementById(
+'recommendation'
+).innerHTML =
 recommendation;
 
 }
 
-loadAI();
 /*
 =========================================
 PREMIUM ACCESS SYSTEM
@@ -260,7 +319,7 @@ lockPremiumPage();
 
 /*
 =========================================
-UNLOCK
+UNLOCK PREMIUM
 =========================================
 */
 
@@ -274,11 +333,13 @@ document.getElementById(
 'premiumContent'
 ).style.display='block';
 
+loadAI();
+
 }
 
 /*
 =========================================
-LOCK
+LOCK PREMIUM
 =========================================
 */
 
@@ -302,6 +363,8 @@ min-height:100vh;
 background:#081120;
 font-family:Poppins,sans-serif;
 ">
+
+<!-- SIDEBAR -->
 
 <div style="
 width:280px;
@@ -394,6 +457,8 @@ gap:12px;
 
 </div>
 
+<!-- MAIN -->
+
 <div style="
 flex:1;
 display:flex;
@@ -482,3 +547,16 @@ Réactiver mon abonnement
 `;
 
 }
+
+/*
+=========================================
+START
+=========================================
+*/
+
+checkPremiumAccess();
+
+</script>
+
+</body>
+</html>
