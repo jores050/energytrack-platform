@@ -974,9 +974,109 @@ ACTIVATE BUSINESS
 
 async function activateBusiness(){
 
-alert(
-'Intégration paiement prochaine étape.'
+const confirmUpgrade =
+confirm(
+'Activer Business Cloud pour 30 jours ?'
 );
+
+if(!confirmUpgrade){
+
+return;
+
+}
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return;
+
+}
+
+const user =
+userData.user;
+
+/*
+=========================================
+GET BUSINESS PLAN
+=========================================
+*/
+
+const { data:plan } =
+await supabaseClient
+
+.from('plans')
+
+.select('*')
+
+.eq('name','Business Cloud')
+
+.single();
+
+if(!plan){
+
+alert(
+'Plan Business Cloud introuvable.'
+);
+
+return;
+
+}
+
+/*
+=========================================
+UPDATE SUBSCRIPTION
+=========================================
+*/
+
+const { error } =
+await supabaseClient
+
+.from('subscriptions')
+
+.update({
+
+plan_id:plan.id,
+
+status:'active',
+
+started_at:new Date(),
+
+expires_at:
+new Date(
+Date.now() + 30*24*60*60*1000
+)
+
+})
+
+.eq('user_id',user.id);
+
+if(error){
+
+console.log(error);
+
+alert(error.message);
+
+return;
+
+}
+
+/*
+=========================================
+SUCCESS
+=========================================
+*/
+
+alert(
+'Business Cloud activé avec succès.'
+);
+
+location.reload();
+
+}
 
 }
 
