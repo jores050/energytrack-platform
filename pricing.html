@@ -546,7 +546,7 @@ return;
 
 const user = userData.user;
 
-FedaPayCheckout.button({
+FedaPayCheckout.open({
 
 public_key:
 'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
@@ -565,7 +565,9 @@ iso: 'XOF'
 },
 
 customer: {
+
 email:user.email
+
 },
 
 callback: async function(response){
@@ -584,8 +586,13 @@ await supabaseClient
 const plan = plans?.[0];
 
 if(!plan){
-alert('Plan Business Cloud introuvable.');
+
+alert(
+'Plan Business Cloud introuvable.'
+);
+
 return;
+
 }
 
 const { error } =
@@ -611,8 +618,11 @@ Date.now() + 30*24*60*60*1000
 .eq('user_id',user.id);
 
 if(error){
+
 alert(error.message);
+
 return;
+
 }
 
 const { data:subscription } =
@@ -657,7 +667,7 @@ location.reload();
 
 }
 
-}).open();
+});
 
 }
 
@@ -687,4 +697,3 @@ loadSubscription();
 
 </body>
 </html>
-```
