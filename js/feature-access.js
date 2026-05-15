@@ -174,3 +174,26 @@ async function canUseMultiSite(){
 return await hasFeature('multisite');
 
 }
+async function canUseAI(){
+
+return await hasFeature(
+'ai'
+);
+
+}
+
+async function canUsePDF(){
+
+return await hasFeature(
+'pdf'
+);
+
+}
+
+async function canUseMultisite(){
+
+return await hasFeature(
+'multisite'
+);
+
+}
