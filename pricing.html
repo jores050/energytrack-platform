@@ -545,30 +545,23 @@ userData.user;
 FedaPay.init({
 
 public_key:
-
-'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
+'pk_sandbox_...',
 
 transaction:{
 
 amount:5000,
 
 description:
-
 'Business Cloud',
 
 currency:{
-
 iso:'XOF'
-
 }
 
 },
 
 customer:{
-
-email:
-user.email
-
+email:user.email
 },
 
 callback:
@@ -579,102 +572,13 @@ alert(
 );
 
 console.log(
-"Callback exécuté",
 response
 );
 
-try{
-
-
-const {
-
-data,
-error
-
 }
 
-=
+});
 
-await supabaseClient
-
-.functions
-
-.invoke(
-
-'verify-fedapay-payment',
-
-{
-
-body:{
-
-transaction_id:
-
-response.transaction.id,
-
-user_id:
-
-user.id
-
-}
-
-}
-
-);
-
-console.log(
-data,
-error
-);
-
-if(
-
-error
-
-||
-
-!data
-
-||
-
-data.success===false
-
-){
-
-alert(
-
-data?.message
-
-||
-
-'Erreur'
-
-);
-
-return;
-
-}
-
-alert(
-
-'Business activé'
-
-);
-
-location.reload();
-
-}
-
-catch(error){
-
-console.log(
-error
-);
-
-}
-
-}
-
-}).open();
 
 }
 
