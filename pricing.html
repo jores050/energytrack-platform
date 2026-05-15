@@ -567,16 +567,120 @@ customer:{
 email:user.email
 },
 
+
 onComplete:
-function(response){
+
+async function(response){
+
+try{
 
 alert(
-"onComplete exécuté"
+"Paiement réussi"
+);
+
+const {
+
+data:userData
+
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+const user =
+userData.user;
+
+const {
+
+data,
+error
+
+}
+
+=
+
+await supabaseClient
+
+.functions
+
+.invoke(
+
+'verify-fedapay-payment',
+
+{
+
+body:{
+
+transaction_id:
+
+response.transaction.id,
+
+user_id:
+
+user.id
+
+}
+
+}
+
 );
 
 console.log(
-response
+"Edge:",
+data
 );
+
+console.log(
+"Erreur:",
+error
+);
+
+if(
+
+error
+
+||
+
+!data
+
+||
+
+data.success===false
+
+){
+
+alert(
+'Erreur activation'
+);
+
+return;
+
+}
+
+alert(
+'Business activé'
+);
+
+location.reload();
+
+}
+
+catch(error){
+
+console.log(
+error
+);
+
+alert(
+'Erreur inattendue'
+);
+
+}
 
 }
 
