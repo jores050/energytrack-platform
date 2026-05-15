@@ -572,98 +572,16 @@ user.email
 },
 
 callback:
-
 async function(response){
 
-try{
-
-const {
-
-data,
-error
-
-}
-
-=
-
-await supabaseClient
-
-.functions
-
-.invoke(
-
-'verify-fedapay-payment',
-
-{
-
-body:{
-
-transaction_id:
-
-response.transaction.id,
-
-user_id:
-
-user.id
-
-}
-
-}
-
+alert(
+"Callback exécuté"
 );
 
 console.log(
-data,
-error
+"Callback exécuté",
+response
 );
-
-if(
-
-error
-
-||
-
-!data
-
-||
-
-data.success===false
-
-){
-
-alert(
-
-data?.message
-
-||
-
-'Erreur'
-
-);
-
-return;
-
-}
-
-alert(
-
-'Business activé'
-
-);
-
-location.reload();
-
-}
-
-catch(error){
-
-console.log(
-error
-);
-
-}
-
-}
 
 }).open();
 
