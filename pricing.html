@@ -288,14 +288,8 @@ Chargement...
 </div>
 
 </section>
-
+```html
 <script>
-
-/*
-=========================================
-LOAD SUBSCRIPTION
-=========================================
-*/
 
 async function loadSubscription(){
 
@@ -310,13 +304,17 @@ return;
 
 }
 
-const user = userData.user;
+const user =
+userData.user;
 
-/*
-GET SUBSCRIPTION
-*/
+const {
 
-const { data:subscription } =
+data:subscription
+
+}
+
+=
+
 await supabaseClient
 
 .from('subscriptions')
@@ -335,16 +333,14 @@ return;
 
 }
 
-/*
-GET PLAN
-*/
-
 const {
 
-data:plan,
-error:planError
+data:plan
 
-} =
+}
+
+=
+
 await supabaseClient
 
 .from('plans')
@@ -353,227 +349,181 @@ await supabaseClient
 
 .eq('id',subscription.plan_id)
 
-.maybeSingle();
+.single();
 
-if(planError){
-console.log(planError);
-}
-
-subscription.plans = plan;
-
-if(!subscription.plans){
-
-setupGuestButtons();
-
-return;
-
-}
-
-const now = new Date();
+const now =
+new Date();
 
 const isActive =
-subscription.status === 'active'
+
+subscription.status==='active'
+
 &&
-new Date(subscription.expires_at) > now;
+
+new Date(
+subscription.expires_at
+)
+
+>
+
+now;
 
 const statusBox =
 document.getElementById(
 'subscriptionStatus'
 );
 
-statusBox.style.display='block';
-
-/*
-ESSENTIAL
-*/
-
-if(
-subscription.plans.name
-.trim()
-.toLowerCase()
-===
-'essential'
-){
-
-statusBox.innerHTML = `
-
-<h2 style="margin-bottom:12px;">
-Plan actuel : Essential
-</h2>
-
-<p style="
-color:#94a3b8;
-line-height:1.8;
-">
-Vous utilisez actuellement
-la version gratuite d’EnergyTrack.
-</p>
-
-`;
+statusBox.style.display=
+'block';
 
 const essentialBtn =
 document.getElementById(
 'essentialButton'
 );
+
+const businessBtn =
+document.getElementById(
+'businessButton'
+);
+
+if(
+
+plan.name
+.toLowerCase()
+
+===
+
+'essential'
+
+){
+
+statusBox.innerHTML =
+
+`
+<h2>
+Plan actuel :
+Essential
+</h2>
+
+<p>
+
+Version gratuite active
+
+</p>
+`;
 
 essentialBtn.innerHTML =
 'Plan actuel';
 
-essentialBtn.disabled = true;
-
-const businessBtn =
-document.getElementById(
-'businessButton'
-);
+essentialBtn.disabled =
+true;
 
 businessBtn.innerHTML =
 'Passer Premium';
 
-businessBtn.addEventListener(
-'click',
-activateBusiness
-);
+businessBtn.onclick =
+activateBusiness;
 
 return;
 
 }
 
-/*
-BUSINESS CLOUD
-*/
-
 if(
-subscription.plans.name
-.trim()
+
+plan.name
 .toLowerCase()
+
 ===
+
 'business cloud'
+
 ){
 
-statusBox.innerHTML = `
+statusBox.innerHTML =
 
-<h2 style="margin-bottom:12px;">
+`
+<h2>
+
 ${isActive
-? 'Business Cloud actif'
-: 'Abonnement expiré'}
+
+?
+
+'Business actif'
+
+:
+
+'Expiré'
+
+}
+
 </h2>
 
-<p style="
-color:#94a3b8;
-line-height:1.8;
-">
+<p>
 
-${isActive
-? 'Votre abonnement expire le :'
-: 'Votre abonnement a expiré le :'}
+Expire :
 
 ${new Date(
+
 subscription.expires_at
+
 ).toLocaleDateString()}
 
 </p>
-
 `;
 
-const businessBtn =
-document.getElementById(
-'businessButton'
-);
+essentialBtn.innerHTML =
+'Essential';
 
 businessBtn.innerHTML =
+
 isActive
-? 'Renouveler'
-: 'Réactiver';
 
-businessBtn.addEventListener(
-'click',
-renewSubscription
-);
+?
+
+'Actuel'
+
+:
+
+'Réactiver';
+
+businessBtn.onclick =
+renewSubscription;
 
 }
 
 }
-
-/*
-=========================================
-GUEST BUTTONS
-=========================================
-*/
 
 function setupGuestButtons(){
 
-const essentialBtn =
-document.getElementById(
+document
+
+.getElementById(
 'essentialButton'
-);
+)
 
-essentialBtn.innerHTML =
-'Créer un compte';
+.onclick=()=>{
 
-essentialBtn.onclick = ()=>{
-window.location.href='auth.html';
+window.location.href=
+'auth.html';
+
 };
 
-const businessBtn =
-document.getElementById(
+document
+
+.getElementById(
 'businessButton'
-);
+)
 
-businessBtn.innerHTML =
-'Choisir Business Cloud';
+.onclick=()=>{
 
-businessBtn.onclick = ()=>{
-window.location.href='auth.html';
+window.location.href=
+'auth.html';
+
 };
 
 }
-
-/*
-=========================================
-ACTIVATE BUSINESS
-=========================================
-*/
 
 async function activateBusiness(){
-alert('activateBusiness lancé');
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-window.location.href='auth.html';
-return;
-}
-
-const user = userData.user;
-
-FedaPay.init({
-
-public_key:
-'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
-
-transaction: {
-
-amount: 5000,
-
-description:
-'Business Cloud - 30 jours',
-
-currency: {
-iso: 'XOF'
-}
-
-},
-
-customer: {
-
-email:user.email
-
-},
-
-```javascript
-callback: async function(response){
-
-try{
 
 const {
 
@@ -592,19 +542,40 @@ await supabaseClient
 const user =
 userData.user;
 
-if(!user){
+FedaPay.init({
 
-alert(
-'Utilisateur introuvable'
-);
+public_key:
 
-return;
+'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
+
+transaction:{
+
+amount:5000,
+
+description:
+
+'Business Cloud',
+
+currency:{
+
+iso:'XOF'
 
 }
 
-console.log(
-"Appel Edge Function..."
-);
+},
+
+customer:{
+
+email:
+user.email
+
+},
+
+callback:
+
+async function(response){
+
+try{
 
 const {
 
@@ -628,9 +599,11 @@ await supabaseClient
 body:{
 
 transaction_id:
+
 response.transaction.id,
 
 user_id:
+
 user.id
 
 }
@@ -640,12 +613,7 @@ user.id
 );
 
 console.log(
-"Réponse Edge:",
-data
-);
-
-console.log(
-"Erreur Edge:",
+data,
 error
 );
 
@@ -669,7 +637,7 @@ data?.message
 
 ||
 
-'Erreur activation abonnement'
+'Erreur'
 
 );
 
@@ -679,7 +647,7 @@ return;
 
 alert(
 
-'Business Cloud activé avec succès.'
+'Business activé'
 
 );
 
@@ -690,45 +658,30 @@ location.reload();
 catch(error){
 
 console.log(
-"Catch:",
 error
 );
 
-alert(
-'Erreur inattendue'
-);
-
 }
 
 }
-```
-
 
 }).open();
 
 }
 
-/*
-=========================================
-RENEW
-=========================================
-*/
-
 async function renewSubscription(){
 
-alert(
-'Fonction renouvellement bientôt disponible.'
-);
+activateBusiness();
 
 }
 
-/*
-=========================================
-START
-=========================================
-*/
+loadSubscription()
 
-loadSubscription().catch(error=>{console.log('Erreur loadSubscription',error);});
+.catch(
+
+console.log
+
+);
 
 </script>
 
