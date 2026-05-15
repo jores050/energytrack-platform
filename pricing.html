@@ -570,102 +570,157 @@ email:user.email
 
 },
 
+```javascript
 callback: async function(response){
 
-console.log(response);
+try{
 
-const { data:plans } =
-await supabaseClient
+console.log(
+"Paiement FedaPay :",
+response
+);
 
-.from('plans')
+/*
+VERIFY USER
+*/
 
-.select('*')
+const {
 
-.ilike('name','Business Cloud');
+data:userData
 
-const plan = plans?.[0];
+} = await supabaseClient
 
-if(!plan){
+.auth
+
+.getUser();
+
+const user =
+userData.user;
+
+if(!user){
 
 alert(
-'Plan Business Cloud introuvable.'
+"Utilisateur introuvable"
 );
 
 return;
 
 }
 
-const { error } =
+/*
+CALL EDGE FUNCTION
+*/
+
+const {
+
+data,
+error
+
+}
+
+=
+
 await supabaseClient
 
-.from('subscriptions')
+.functions
 
-.update({
+.invoke(
 
-plan_id:plan.id,
+"verify-fedapay-payment",
 
-status:'active',
+{
 
-started_at:new Date(),
+body:{
 
-expires_at:
-new Date(
-Date.now() + 30*24*60*60*1000
-)
+transaction_id:
 
-})
+response.transaction.id,
 
-.eq('user_id',user.id);
+user_id:
+
+user.id
+
+}
+
+}
+
+);
+
+/*
+ERROR
+*/
 
 if(error){
 
-alert(error.message);
+console.log(error);
+
+alert(
+
+"Erreur activation abonnement"
+
+);
 
 return;
 
 }
 
-const { data:subscription } =
-await supabaseClient
+/*
+FAILED
+*/
 
-.from('subscriptions')
+if(
 
-.select('*')
+!data
 
-.eq('user_id',user.id)
+||
 
-.single();
+data.success===false
 
-await supabaseClient
-
-.from('payments')
-
-.insert([{
-
-user_id:user.id,
-
-subscription_id:subscription.id,
-
-amount:5000,
-
-currency:'XOF',
-
-payment_method:'FedaPay',
-
-transaction_id:
-response.transaction.id,
-
-status:'paid'
-
-}]);
+){
 
 alert(
-'Business Cloud activé avec succès.'
+
+data?.message
+
+||
+
+"Paiement non validé"
+
+);
+
+return;
+
+}
+
+/*
+SUCCESS
+*/
+
+alert(
+
+"Business Cloud activé avec succès."
+
 );
 
 location.reload();
 
 }
+
+catch(error){
+
+console.log(error);
+
+alert(
+
+"Erreur inattendue"
+
+);
+
+}
+
+}
+```
+
 
 }).open();
 
