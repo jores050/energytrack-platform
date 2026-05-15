@@ -1,3 +1,4 @@
+```html id="dashboard-final"
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -5,13 +6,18 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard EnergyTrack</title>
+<title>
+Dashboard EnergyTrack
+</title>
 
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet"
+href="css/style.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -23,13 +29,15 @@
 
 .site-grid{
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(420px,1fr));
+grid-template-columns:
+repeat(auto-fit,minmax(420px,1fr));
 gap:25px;
 margin-top:30px;
 }
 
 .site-card{
-background:linear-gradient(145deg,#182235,#101826);
+background:
+linear-gradient(145deg,#182235,#101826);
 padding:25px;
 border-radius:26px;
 border:1px solid rgba(255,255,255,0.05);
@@ -38,7 +46,8 @@ transition:0.3s;
 
 .site-card:hover{
 transform:translateY(-5px);
-box-shadow:0 20px 40px rgba(0,0,0,0.35);
+box-shadow:
+0 20px 40px rgba(0,0,0,0.35);
 }
 
 .site-header{
@@ -106,6 +115,22 @@ margin-right:8px;
 animation:pulse 1s infinite;
 }
 
+.premium-banner{
+
+background:
+rgba(255,181,71,0.12);
+
+border:
+1px solid rgba(255,181,71,0.2);
+
+padding:22px;
+
+border-radius:20px;
+
+margin-bottom:25px;
+
+}
+
 @keyframes pulse{
 
 0%{
@@ -137,41 +162,50 @@ transform:scale(1);
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item active" href="dashboard.html">
+<a class="nav-item active"
+href="dashboard.html">
 🏠 Dashboard
 </a>
 
-<a class="nav-item" href="consommation.html">
+<a class="nav-item"
+href="consommation.html">
 ⚡ Consommation
 </a>
 
-<a class="nav-item" href="alertes.html">
+<a class="nav-item"
+href="alertes.html">
 🔔 Alertes
 </a>
 
-<a class="nav-item premium-feature" href="rapports.html">
+<a class="nav-item premium-feature"
+href="rapports.html">
 📊 Rapports
 </a>
 
-<a class="nav-item premium-feature" href="sites.html">
+<a class="nav-item premium-feature"
+href="sites.html">
 🏢 Multi-sites
 </a>
 
-<a class="nav-item" href="capteurs.html">
+<a class="nav-item"
+href="capteurs.html">
 📡 Capteurs IoT
 </a>
 
-<a class="nav-item premium-feature" href="ia.html">
+<a class="nav-item premium-feature"
+href="ia.html">
 🤖 Analyse IA
 </a>
 
-<a class="nav-item" href="parametres.html">
+<a class="nav-item"
+href="parametres.html">
 ⚙️ Paramètres
 </a>
 
 </div>
 
-<div class="main" style="display:block;">
+<div class="main"
+style="display:block;">
 
 <div id="subscriptionBanner"></div>
 
@@ -187,7 +221,7 @@ margin-bottom:20px;
 <div>
 
 <h1>
-Dashboard Multi-sites
+Dashboard EnergyTrack
 </h1>
 
 <p style="
@@ -197,7 +231,8 @@ color:#94a3b8;
 
 <span class="live-dot"></span>
 
-Supervision énergétique temps réel de tous les sites.
+Supervision énergétique
+temps réel.
 
 </p>
 
@@ -216,6 +251,8 @@ id="sitesContainer">
 <script>
 
 const charts = {};
+
+let canAccessMultiSite = false;
 
 /*
 =========================================
@@ -257,14 +294,21 @@ return;
 
 }
 
-const { data:sites, error } =
-await supabaseClient
+/*
+MULTISITE ACCESS
+*/
+
+let sitesQuery =
+supabaseClient
 
 .from('sites')
 
 .select('*')
 
 .eq('user_id',user.id);
+
+const { data:sites, error } =
+await sitesQuery;
 
 if(error){
 
@@ -274,12 +318,64 @@ return;
 
 }
 
+/*
+FREE PLAN
+ONLY FIRST SITE
+*/
+
+let filteredSites = sites;
+
+if(!canAccessMultiSite){
+
+filteredSites =
+sites.slice(0,1);
+
+}
+
+/*
+NO SITE
+*/
+
 const container =
-document.getElementById('sitesContainer');
+document.getElementById(
+'sitesContainer'
+);
 
 container.innerHTML='';
 
-for(const site of sites){
+if(filteredSites.length===0){
+
+container.innerHTML = `
+
+<div class="site-card">
+
+<h2>
+Aucun site
+</h2>
+
+<p style="
+margin-top:20px;
+color:#94a3b8;
+">
+
+Ajoutez un site
+pour commencer.
+
+</p>
+
+</div>
+
+`;
+
+return;
+
+}
+
+/*
+LOAD SITES
+*/
+
+for(const site of filteredSites){
 
 const { data:telemetry } =
 await supabaseClient
@@ -290,7 +386,10 @@ await supabaseClient
 
 .eq('site_id',site.id)
 
-.order('created_at',{ascending:false})
+.order(
+'created_at',
+{ascending:false}
+)
 
 .limit(12);
 
@@ -359,7 +458,8 @@ let totalKwh=0;
 
 telemetry.forEach(item=>{
 
-totalKwh += Number(item.kwh_total);
+totalKwh +=
+Number(item.kwh_total);
 
 });
 
@@ -459,7 +559,11 @@ ${alerts.length}
 
 }
 
-for(const site of sites){
+/*
+CHARTS
+*/
+
+for(const site of filteredSites){
 
 const { data:telemetry } =
 await supabaseClient
@@ -470,7 +574,10 @@ await supabaseClient
 
 .eq('site_id',site.id)
 
-.order('created_at',{ascending:false})
+.order(
+'created_at',
+{ascending:false}
+)
 
 .limit(12);
 
@@ -593,17 +700,11 @@ color:'rgba(255,255,255,0.05)'
 
 /*
 =========================================
-INIT
-=========================================
-*/
-
-loadDashboard();
-
-/*
-=========================================
 REALTIME
 =========================================
 */
+
+function startRealtime(){
 
 supabaseClient
 
@@ -643,123 +744,28 @@ loadDashboard();
 
 .subscribe();
 
-/*
-=========================================
-SUBSCRIPTION SYSTEM
-=========================================
-*/
-
-async function checkSubscriptionAccess(){
-
-const user =
-await getUser();
-
-if(!user){
-
-return;
-
-}
-
-const { data:subscription, error } =
-await supabaseClient
-
-.from('subscriptions')
-
-.select('*')
-
-.eq('user_id',user.id)
-
-.maybeSingle();
-
-/*
-NO SUBSCRIPTION
-*/
-
-if(error || !subscription){
-
-showUpgradePopup();
-
-return;
-
-}
-
-const now = new Date();
-
-const expiresAt =
-new Date(subscription.expires_at);
-
-/*
-ACTIVE
-*/
-
-if(
-
-subscription.status === 'active'
-
-&&
-
-expiresAt > now
-
-){
-
-showFullDashboard();
-
-return;
-
-}
-
-/*
-EXPIRED
-*/
-
-showLimitedDashboard();
-
 }
 
 /*
 =========================================
-FULL DASHBOARD
+SHOW FREE BANNER
 =========================================
 */
 
-function showFullDashboard(){
-
-document.getElementById(
-'subscriptionBanner'
-).style.display='none';
-
-}
-
-/*
-=========================================
-LIMITED DASHBOARD
-=========================================
-*/
-
-function showLimitedDashboard(){
-
-document.getElementById(
-'subscriptionBanner'
-).style.display='block';
+function showFreeBanner(){
 
 document.getElementById(
 'subscriptionBanner'
 ).innerHTML = `
 
-<div style="
-background:rgba(255,76,97,0.12);
-border:1px solid rgba(255,76,97,0.2);
-padding:22px;
-border-radius:20px;
-margin-bottom:25px;
-">
+<div class="premium-banner">
 
 <h3 style="
 margin-bottom:12px;
-color:#ff4c61;
+color:#ffb547;
 ">
 
-Votre abonnement a expiré
+Mode Essential
 
 </h3>
 
@@ -770,10 +776,14 @@ margin-bottom:20px;
 ">
 
 Vous utilisez actuellement
-le mode gratuit limité.
+la version gratuite d’EnergyTrack.
 
-Certaines fonctionnalités Premium
-nécessitent un abonnement actif.
+Les fonctionnalités suivantes
+restent Premium :
+
+• Multi-sites
+• Analyse IA
+• Rapports PDF
 
 </p>
 
@@ -791,7 +801,7 @@ cursor:pointer;
 
 onclick="window.location.href='pricing.html'">
 
-Réactiver mon abonnement
+Passer Premium
 
 </button>
 
@@ -803,71 +813,32 @@ Réactiver mon abonnement
 
 /*
 =========================================
-NO SUBSCRIPTION
+INIT FEATURES
 =========================================
 */
 
-function showUpgradePopup(){
+async function initDashboard(){
 
-document.getElementById(
-'subscriptionBanner'
-).style.display='block';
+canAccessMultiSite =
+await canUseMultiSite();
 
-document.getElementById(
-'subscriptionBanner'
-).innerHTML = `
+if(!canAccessMultiSite){
 
-<div style="
-background:rgba(255,181,71,0.12);
-border:1px solid rgba(255,181,71,0.2);
-padding:22px;
-border-radius:20px;
-margin-bottom:25px;
-">
-
-<h3 style="
-margin-bottom:12px;
-color:#ffb547;
-">
-
-Abonnement requis
-
-</h3>
-
-<p style="
-color:#94a3b8;
-line-height:1.8;
-margin-bottom:20px;
-">
-
-Certaines fonctionnalités Premium
-nécessitent un abonnement actif.
-
-</p>
-
-<button
-
-style="
-padding:14px 24px;
-border:none;
-border-radius:12px;
-background:#00c896;
-color:#081120;
-font-weight:700;
-cursor:pointer;
-"
-
-onclick="window.location.href='pricing.html'">
-
-Voir les offres
-
-</button>
-
-</div>
-
-`;
+showFreeBanner();
 
 }
+
+loadDashboard();
+
+startRealtime();
+
+}
+
+</script>
+
+<script src="js/feature-access.js"></script>
+
+<script>
 
 /*
 =========================================
@@ -875,9 +846,11 @@ START
 =========================================
 */
 
-checkSubscriptionAccess();
+initDashboard();
 
 </script>
 
 </body>
+
 </html>
+```
