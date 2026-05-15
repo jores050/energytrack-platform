@@ -288,7 +288,7 @@ Chargement...
 </div>
 
 </section>
-```html
+  
 <script>
 
 async function loadSubscription(){
@@ -545,7 +545,7 @@ userData.user;
 FedaPay.init({
 
 public_key:
-'pk_sandbox_...',
+'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
 
 transaction:{
 
@@ -565,6 +565,7 @@ email:user.email
 },
 
 callback:
+
 async function(response){
 
 alert(
@@ -572,6 +573,7 @@ alert(
 );
 
 console.log(
+"Réponse FedaPay",
 response
 );
 
@@ -579,8 +581,8 @@ response
 
 });
 
-
 }
+
 
 async function renewSubscription(){
 
