@@ -544,6 +544,7 @@ await supabaseClient
 const user =
 userData.user;
 
+
 FedaPay.init({
 
 public_key:
@@ -566,22 +567,21 @@ customer:{
 email:user.email
 },
 
-callback:
-
-async function(response){
+onComplete:
+function(response){
 
 alert(
-"Callback exécuté"
+"onComplete exécuté"
 );
 
 console.log(
-"Réponse FedaPay",
 response
 );
 
 }
 
 }).open();
+ 
 
 }
 
