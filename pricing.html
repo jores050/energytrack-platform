@@ -570,16 +570,139 @@ email:user.email
 
 },
 
+```javascript
 callback: async function(response){
+
 try{
-const {data:userData}=await supabaseClient.auth.getUser();
-const user=userData.user;
-if(!user){alert('Utilisateur introuvable');return;}
-const {data,error}=await supabaseClient.functions.invoke('verify-fedapay-payment',{body:{transaction_id:response.transaction.id,user_id:user.id}});
-if(error||!data||data.success===false){alert(data?.message||'Erreur activation abonnement');return;}
-alert('Business Cloud activé avec succès.');location.reload();
-}catch(error){console.log(error);alert('Erreur inattendue');}
+
+const {
+
+data:userData
+
 }
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+const user =
+userData.user;
+
+if(!user){
+
+alert(
+'Utilisateur introuvable'
+);
+
+return;
+
+}
+
+console.log(
+"Appel Edge Function..."
+);
+
+const {
+
+data,
+error
+
+}
+
+=
+
+await supabaseClient
+
+.functions
+
+.invoke(
+
+'verify-fedapay-payment',
+
+{
+
+body:{
+
+transaction_id:
+response.transaction.id,
+
+user_id:
+user.id
+
+}
+
+}
+
+);
+
+console.log(
+"Réponse Edge:",
+data
+);
+
+console.log(
+"Erreur Edge:",
+error
+);
+
+if(
+
+error
+
+||
+
+!data
+
+||
+
+data.success===false
+
+){
+
+alert(
+
+data?.message
+
+||
+
+'Erreur activation abonnement'
+
+);
+
+return;
+
+}
+
+alert(
+
+'Business Cloud activé avec succès.'
+
+);
+
+location.reload();
+
+}
+
+catch(error){
+
+console.log(
+"Catch:",
+error
+);
+
+alert(
+'Erreur inattendue'
+);
+
+}
+
+}
+```
+
 
 }).open();
 
