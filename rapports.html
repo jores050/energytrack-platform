@@ -1,119 +1,320 @@
 ```html
-<!-- AJOUTE CE SCRIPT JUSTE AVANT </body> -->
+<!DOCTYPE html>
+<html lang="fr">
 
-<script src="js/feature-access.js"></script>
+<head>
 
-<script>
+<meta charset="UTF-8">
 
-/*
-=========================================
-PREMIUM FEATURES SYSTEM
-=========================================
-*/
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-async function setupPremiumFeatures(){
+<title>
+Rapports EnergyTrack
+</title>
 
-/*
-PDF FEATURE
-*/
+<link rel="stylesheet"
+href="css/style.css">
 
-const canPDF =
-await canUsePDF();
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
 
-if(!canPDF){
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-const pdfButton =
-document.querySelector(
-'button[onclick="downloadPDF()"]'
-);
+<script src="js/supabase.js"></script>
 
-if(pdfButton){
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-pdfButton.innerHTML =
-'🔒 PDF Premium';
+<style>
 
-pdfButton.onclick = function(){
-
-window.location.href =
-'premium-required.html';
-
-};
-
-pdfButton.style.opacity='0.7';
-
+.report-grid{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(250px,1fr));
+gap:20px;
+margin-top:25px;
 }
 
+.report-card{
+background:
+linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:24px;
+border:1px solid rgba(255,255,255,0.05);
+transition:0.3s;
 }
 
-/*
-AI FEATURE
-*/
+.report-card:hover{
+transform:translateY(-5px);
+box-shadow:
+0 20px 40px rgba(0,0,0,0.3);
+}
 
-const canAI =
-await canUseAI();
-
-if(!canAI){
-
-document.getElementById(
-'aiRecommendation'
-).innerHTML = `
-
-<div style="
-background:rgba(255,255,255,0.04);
-padding:30px;
+.ai-box{
+margin-top:25px;
+background:rgba(0,200,150,0.12);
+padding:25px;
 border-radius:22px;
-border:1px solid rgba(255,255,255,0.08);
+border:1px solid rgba(0,200,150,0.2);
+}
+
+.site-filter{
+padding:16px;
+border:none;
+border-radius:16px;
+background:#182235;
+color:white;
+margin-top:20px;
+min-width:260px;
+}
+
+.premium-lock{
+
+margin-top:25px;
+
+background:
+rgba(255,76,97,0.08);
+
+border:
+1px solid rgba(255,76,97,0.25);
+
+padding:30px;
+
+border-radius:24px;
+
 text-align:center;
-margin-top:10px;
-">
 
-<div style="
-font-size:60px;
-margin-bottom:20px;
-">
+}
 
-🔒
+.premium-lock h2{
+
+margin-bottom:15px;
+
+}
+
+.premium-lock p{
+
+color:#94a3b8;
+
+line-height:1.8;
+
+margin-bottom:25px;
+
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="sidebar">
+
+<div class="logo">
+Energy<span>Track</span>
+</div>
+
+<a class="nav-item"
+href="dashboard.html">
+🏠 Dashboard
+</a>
+
+<a class="nav-item"
+href="consommation.html">
+⚡ Consommation
+</a>
+
+<a class="nav-item"
+href="alertes.html">
+🔔 Alertes
+</a>
+
+<a class="nav-item active"
+href="rapports.html">
+📊 Rapports
+</a>
+
+<a class="nav-item"
+href="sites.html">
+🏢 Multi-sites
+</a>
+
+<a class="nav-item"
+href="capteurs.html">
+📡 Capteurs IoT
+</a>
+
+<a class="nav-item"
+href="ia.html">
+🤖 Analyse IA
+</a>
+
+<a class="nav-item"
+href="parametres.html">
+⚙️ Paramètres
+</a>
+
+<div class="nav-item"
+onclick="logoutUser()">
+🚪 Déconnexion
+</div>
 
 </div>
 
-<h2 style="
-margin-bottom:15px;
+<div class="main"
+style="display:block;">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
 ">
 
-Analyse IA Premium
+<div>
 
-</h2>
+<h1>
+Rapports Énergétiques
+</h1>
 
 <p style="
-line-height:1.9;
+margin-top:10px;
 color:#94a3b8;
-margin-bottom:30px;
 ">
 
-Les recommandations intelligentes
-et analyses avancées nécessitent
-Business Cloud.
+Analyse intelligente
+des performances énergétiques.
+
+</p>
+
+</div>
+
+<button
+id="pdfButton"
+onclick="downloadPDF()">
+
+Télécharger PDF
+
+</button>
+
+</div>
+
+<select
+id="siteFilter"
+class="site-filter"
+onchange="loadReports()">
+
+<option value="ALL">
+Tous les sites
+</option>
+
+</select>
+
+<div class="report-grid">
+
+<div class="report-card">
+
+<h3>
+⚡ Consommation Totale
+</h3>
+
+<h1
+id="totalKwh"
+style="margin-top:15px;">
+
+0 kWh
+
+</h1>
+
+</div>
+
+<div class="report-card">
+
+<h3>
+💰 Coût Estimé
+</h3>
+
+<h1
+id="totalCost"
+style="margin-top:15px;">
+
+0 FCFA
+
+</h1>
+
+</div>
+
+<div class="report-card">
+
+<h3>
+⛽ Utilisation Groupe
+</h3>
+
+<h1
+id="groupeUsage"
+style="margin-top:15px;">
+
+0%
+
+</h1>
+
+</div>
+
+<div class="report-card">
+
+<h3>
+🔔 Coupures Détectées
+</h3>
+
+<h1
+id="outages"
+style="margin-top:15px;">
+
+0
+
+</h1>
+
+</div>
+
+</div>
+
+<div class="ai-box">
+
+<h2>
+🤖 Analyse IA
+</h2>
+
+<p
+id="aiRecommendation"
+style="
+margin-top:18px;
+line-height:1.8;
+">
+
+Analyse en cours...
+
+</p>
+
+<div
+id="aiPremiumLock"
+class="premium-lock"
+style="display:none;">
+
+<h2>
+Fonctionnalité Premium
+</h2>
+
+<p>
+
+Les analyses IA avancées
+nécessitent Business Cloud.
 
 </p>
 
 <button
-
-onclick="window.location.href='pricing.html'"
-
-style="
-padding:16px 28px;
-border:none;
-border-radius:16px;
-background:
-linear-gradient(
-90deg,
-#00c896,
-#00b4ff
-);
-color:white;
-font-weight:700;
-cursor:pointer;
-">
+onclick="window.location.href='pricing.html'">
 
 Passer Premium
 
@@ -121,19 +322,551 @@ Passer Premium
 
 </div>
 
-`;
+</div>
+
+<div class="section">
+
+<h2>
+Alertes Récentes
+</h2>
+
+<div
+id="alertsContainer"
+style="margin-top:25px;">
+
+</div>
+
+</div>
+
+</div>
+
+<script>
+
+let telemetryData = [];
+
+let alertsData = [];
+
+let canAccessPDF = false;
+
+let canAccessAI = false;
+
+/*
+=========================================
+AUTH
+=========================================
+*/
+
+async function getUser(){
+
+const { data:userData } =
+await supabaseClient.auth.getUser();
+
+if(!userData.user){
+
+window.location.href='auth.html';
+
+return null;
 
 }
+
+return userData.user;
 
 }
 
 /*
 =========================================
-START
+LOGOUT
 =========================================
 */
 
-setupPremiumFeatures();
+async function logoutUser(){
+
+await supabaseClient.auth.signOut();
+
+window.location.href='auth.html';
+
+}
+
+/*
+=========================================
+LOAD SITES
+=========================================
+*/
+
+async function loadSites(){
+
+const user =
+await getUser();
+
+if(!user){
+
+return;
+
+}
+
+const { data:sites } =
+await supabaseClient
+
+.from('sites')
+
+.select('*')
+
+.eq('user_id',user.id);
+
+const filter =
+document.getElementById('siteFilter');
+
+sites.forEach(site=>{
+
+filter.innerHTML += `
+
+<option value="${site.id}">
+
+${site.name}
+
+</option>
+
+`;
+
+});
+
+}
+
+/*
+=========================================
+LOAD REPORTS
+=========================================
+*/
+
+async function loadReports(){
+
+const user =
+await getUser();
+
+if(!user){
+
+return;
+
+}
+
+const selectedSite =
+document.getElementById(
+'siteFilter'
+).value;
+
+/*
+QUERY TELEMETRY
+*/
+
+let telemetryQuery =
+supabaseClient
+
+.from('telemetry')
+
+.select(`
+*,
+sites(name)
+`)
+
+.eq('sensor_id',user.id);
+
+if(selectedSite!=='ALL'){
+
+telemetryQuery =
+telemetryQuery.eq(
+'site_id',
+selectedSite
+);
+
+}
+
+const { data:telemetry } =
+await telemetryQuery;
+
+/*
+QUERY ALERTS
+*/
+
+let alertsQuery =
+supabaseClient
+
+.from('alerts')
+
+.select(`
+*,
+sites(name)
+`)
+
+.eq('sensor_id',user.id)
+
+.order(
+'created_at',
+{ascending:false}
+);
+
+if(selectedSite!=='ALL'){
+
+alertsQuery =
+alertsQuery.eq(
+'site_id',
+selectedSite
+);
+
+}
+
+const { data:alerts } =
+await alertsQuery;
+
+telemetryData = telemetry;
+
+alertsData = alerts;
+
+/*
+CALCULS
+*/
+
+let totalKwh = 0;
+
+let groupeCount = 0;
+
+telemetry.forEach(item=>{
+
+totalKwh +=
+Number(item.kwh_total);
+
+if(item.source==='GROUPE'){
+
+groupeCount++;
+
+}
+
+});
+
+const totalCost =
+Math.round(totalKwh * 91);
+
+const groupePercent =
+telemetry.length > 0
+
+?
+
+Math.round(
+(groupeCount/telemetry.length)*100
+)
+
+: 0;
+
+const outages =
+alerts.filter(alert=>
+
+alert.type==='SBEE_OUTAGE'
+
+).length;
+
+/*
+UPDATE UI
+*/
+
+document.getElementById(
+'totalKwh'
+).innerHTML =
+totalKwh.toFixed(3)+' kWh';
+
+document.getElementById(
+'totalCost'
+).innerHTML =
+totalCost.toLocaleString()+' FCFA';
+
+document.getElementById(
+'groupeUsage'
+).innerHTML =
+groupePercent+'%';
+
+document.getElementById(
+'outages'
+).innerHTML =
+outages;
+
+/*
+IA FEATURE
+*/
+
+if(canAccessAI){
+
+let recommendation='';
+
+if(groupePercent > 30){
+
+recommendation =
+'Utilisation importante du groupe électrogène détectée. Une optimisation énergétique est recommandée.';
+
+}else if(totalCost > 50000){
+
+recommendation =
+'Les coûts énergétiques sont élevés. Une analyse des équipements énergivores est recommandée.';
+
+}else if(outages > 5){
+
+recommendation =
+'Nombre élevé de coupures détectées. Vérifiez la stabilité du réseau.';
+
+}else{
+
+recommendation =
+'Installation énergétique stable et optimisée.';
+
+}
+
+document.getElementById(
+'aiRecommendation'
+).innerHTML =
+recommendation;
+
+}else{
+
+document.getElementById(
+'aiRecommendation'
+).style.display='none';
+
+document.getElementById(
+'aiPremiumLock'
+).style.display='block';
+
+}
+
+/*
+ALERTES UI
+*/
+
+const container =
+document.getElementById(
+'alertsContainer'
+);
+
+container.innerHTML='';
+
+if(alerts.length===0){
+
+container.innerHTML = `
+
+<p style="color:#94a3b8;">
+
+Aucune alerte récente.
+
+</p>
+
+`;
+
+return;
+
+}
+
+alerts.slice(0,10).forEach(alert=>{
+
+container.innerHTML += `
+
+<div style="
+background:#182235;
+padding:20px;
+border-radius:20px;
+margin-bottom:15px;
+">
+
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:10px;
+">
+
+<h3>
+
+${alert.type}
+
+</h3>
+
+<div style="
+font-size:13px;
+color:#94a3b8;
+">
+
+${new Date(alert.created_at)
+.toLocaleString()}
+
+</div>
+
+</div>
+
+<p style="
+margin-top:12px;
+line-height:1.8;
+color:#dbe4f0;
+">
+
+${alert.message}
+
+</p>
+
+<p style="
+margin-top:15px;
+color:#94a3b8;
+font-size:14px;
+">
+
+🏢 ${alert.sites?.name || 'Site inconnu'}
+
+</p>
+
+</div>
+
+`;
+
+});
+
+}
+
+/*
+=========================================
+PDF EXPORT
+=========================================
+*/
+
+async function downloadPDF(){
+
+if(!canAccessPDF){
+
+window.location.href =
+'premium-required.html';
+
+return;
+
+}
+
+const { jsPDF } = window.jspdf;
+
+const doc = new jsPDF();
+
+doc.setFontSize(22);
+
+doc.text(
+'EnergyTrack - Rapport Energetique',
+20,
+25
+);
+
+doc.save(
+'energytrack-report.pdf'
+);
+
+}
+
+/*
+=========================================
+REALTIME
+=========================================
+*/
+
+function startRealtime(){
+
+supabaseClient
+
+.channel('reports-live')
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'telemetry'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadReports();
+
+}
+
+)
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:'INSERT',
+
+schema:'public',
+
+table:'alerts'
+
+},
+
+(payload)=>{
+
+console.log(payload);
+
+loadReports();
+
+}
+
+)
+
+.subscribe();
+
+}
+
+/*
+=========================================
+INIT FEATURES
+=========================================
+*/
+
+async function initFeatures(){
+
+canAccessPDF =
+await canUsePDF();
+
+canAccessAI =
+await canUseAI();
+
+if(!canAccessPDF){
+
+document.getElementById(
+'pdfButton'
+).innerHTML =
+'🔒 PDF Premium';
+
+}
+
+loadSites();
+
+loadReports();
+
+startRealtime();
+
+}
 
 </script>
+
+<script src="js/feature-access.js"></script>
+
+<script>
+
+initFeatures();
+
+</script>
+
+</body>
+
+</html>
 ```
