@@ -562,7 +562,7 @@ data.kwh*tariff
             const deviceLabel = alt.sensors ? alt.sensors.name : 'Général';
             alertsHTML += `
                 <div class="data-row" style="color:#ff4c61; border-bottom: 1px solid rgba(255,76,97,0.1);">
-                    <span>⚠️ <b>${deviceLabel}</b> : ${alt.description}</span>
+                    <span>⚠️ <b>${deviceLabel}</b> : ${  alt.description  ||  'Seuil dépassé'  }</span>
                 </div>
             `;
         });
@@ -678,9 +678,31 @@ ONLINE
                 <div style="font-size:13px; color:#00c896; padding:5px 0;">
                     🤖 <b>Analyse IA active :</b> Votre équipement "${topSensorName}" surconsomme de 30% par rapport à sa classe énergétique nominale.
                 </div>
-                <button style="width:100%; padding:10px; margin-top:10px; background:#182235; border:1px solid #00c896; color:#00c896; border-radius:10px; cursor:pointer; font-weight:600;">
-                    📥 Exporter le rapport mensuel PDF
-                </button>
+               <button
+
+onclick="
+
+exportPDF()
+
+"
+
+style="
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#182235;
+border:1px solid #00c896;
+color:#00c896;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+"
+
+>
+
+📥 Exporter rapport PDF
+
+</button>
             ` : `
                 <div class="premium-locked-box">
                     <span style="font-size:12px; color:#ffb547; font-weight:600;">🤖 Analyse IA & Exports PDF Verrouillés</span>
@@ -756,9 +778,7 @@ function generateChart(siteId, targetSensorId) {
         }
     });
 }
-
-function triggerChartFilter(siteId) {
-    function scheduleReload(){
+function scheduleReload(){
 
 clearTimeout(
 
@@ -782,6 +802,7 @@ loadDashboard();
 );
 
 }
+function triggerChartFilter(siteId) {
     const dropdown = document.getElementById(`select-chart-${siteId}`);
     if(dropdown) {
         generateChart(siteId, dropdown.value);
@@ -793,7 +814,15 @@ loadDashboard();
 REALTIME
 =========================================
 */
+async function exportPDF(){
 
+alert(
+
+'Export PDF bientôt disponible'
+
+);
+
+}
 function startRealtime(){
 
 supabaseClient
