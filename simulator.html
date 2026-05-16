@@ -5,103 +5,111 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1">
 
-<title>EnergyTrack Simulator</title>
+<title>
+EnergyTrack Simulator
+</title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="
+https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+"></script>
 
-<script src="js/supabase.js"></script>
+<script src="
+js/supabase.js
+"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="
+https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap
+"
+rel="stylesheet">
 
 <style>
 
 body{
+
 background:#0b1220;
 color:white;
-font-family:'Poppins',sans-serif;
-padding:60px;
+font-family:Poppins;
+padding:50px;
+
 }
 
 .card{
+
 background:#182235;
 padding:35px;
 border-radius:28px;
-max-width:750px;
+max-width:850px;
 margin:auto;
-}
 
-h1{
-font-family:'Orbitron',sans-serif;
-margin-bottom:25px;
 }
 
 .value{
-font-size:42px;
-margin-top:10px;
+
+font-size:40px;
 color:#00c896;
-}
 
-button{
-padding:18px 28px;
-border:none;
-border-radius:16px;
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:white;
-font-weight:600;
-cursor:pointer;
-margin-top:30px;
-transition:0.3s;
-}
-
-button:hover{
-transform:translateY(-2px);
-opacity:0.95;
-}
-
-.stop-btn{
-background:#ff4c61;
-margin-left:15px;
-}
-
-.log{
-margin-top:25px;
-background:#0f1729;
-padding:20px;
-border-radius:18px;
-max-height:250px;
-overflow:auto;
-line-height:1.8;
-}
-
-select{
-width:100%;
-padding:18px;
-border:none;
-border-radius:16px;
-margin-top:25px;
-background:#101826;
-color:white;
-font-size:16px;
-}
-
-.badge{
-display:inline-block;
-padding:8px 14px;
-border-radius:999px;
-background:rgba(0,200,150,0.15);
-color:#00c896;
-font-size:12px;
-font-weight:600;
-margin-bottom:20px;
 }
 
 .grid{
+
 display:grid;
-grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+grid-template-columns:
+repeat(auto-fit,minmax(200px,1fr));
+
 gap:20px;
-margin-top:30px;
+margin-top:25px;
+
+}
+
+button{
+
+padding:16px 22px;
+border:none;
+border-radius:14px;
+margin-top:20px;
+cursor:pointer;
+
+}
+
+.start{
+
+background:#00c896;
+color:white;
+
+}
+
+.stop{
+
+background:#ff4c61;
+color:white;
+
+}
+
+.log{
+
+background:#0f1729;
+padding:20px;
+margin-top:25px;
+border-radius:18px;
+max-height:260px;
+overflow:auto;
+
+}
+
+select{
+
+width:100%;
+padding:16px;
+border:none;
+border-radius:14px;
+margin-top:18px;
+background:#101826;
+color:white;
+
 }
 
 </style>
@@ -112,140 +120,202 @@ margin-top:30px;
 
 <div class="card">
 
-<div class="badge">
-Simulation IoT Temps Réel
-</div>
-
 <h1>
-⚡ EnergyTrack Simulator v2
+
+⚡ EnergyTrack Simulator v3
+
 </h1>
 
-<p style="
-color:#94a3b8;
-line-height:1.8;
-">
 
-Simulation énergétique multi-sites compatible dashboard,
-alertes, rapports et IA.
+<select
+id="siteSelector"
+onchange="loadSensors()">
 
-</p>
+<option>
 
-<select id="siteSelector">
+Choisir site
 
-<option value="">
-Choisir un site
 </option>
 
 </select>
+
+
+<select
+id="sensorSelector">
+
+<option>
+
+Choisir capteur
+
+</option>
+
+</select>
+
 
 <div class="grid">
 
 <div>
 
 <p>
-Tension
+
+Voltage
+
 </p>
 
-<div class="value" id="voltage">
-0 V
+<div
+class="value"
+id="voltage">
+
+0V
+
 </div>
 
 </div>
+
 
 <div>
 
 <p>
+
 Puissance
+
 </p>
 
-<div class="value" id="power">
-0 W
+<div
+class="value"
+id="power">
+
+0W
+
 </div>
 
 </div>
+
 
 <div>
 
 <p>
+
 Source
+
 </p>
 
-<div class="value" id="source">
+<div
+class="value"
+id="source">
+
 SBEE
-</div>
 
 </div>
 
 </div>
 
-<button onclick="startSimulation()">
-Démarrer la simulation
-</button>
+</div>
+
 
 <button
-class="stop-btn"
-onclick="stopSimulation()">
 
-Arrêter
+class="start"
+
+onclick="startSimulation()">
+
+Démarrer
 
 </button>
 
-<div class="log" id="log">
 
-Logs simulation...
+<button
+
+class="stop"
+
+onclick="stopSimulation()">
+
+Stop
+
+</button>
+
+
+<div
+id="log"
+class="log">
+
+Logs…
 
 </div>
 
 </div>
+
+
 
 <script>
 
-let simulationRunning = false;
+let simulation=false;
 
-let simulationInterval = null;
+let interval=null;
 
-let lastAlertTime = {};
+let lastAlert={};
 
-/*
-AUTH
-*/
+
 
 async function getUser(){
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+const {
 
-if(!userData.user){
+data:userData
 
-window.location.href='auth.html';
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+
+if(
+
+!userData.user
+
+){
+
+location.href=
+
+'auth.html';
 
 return null;
 
 }
 
+
 return userData.user;
 
 }
 
-/*
-ANTI-SPAM ALERTES
-*/
+
 
 function canTriggerAlert(type){
 
-const now = Date.now();
+const now=
+
+Date.now();
 
 if(
 
-!lastAlertTime[type]
+!lastAlert[type]
 
 ||
 
-(now - lastAlertTime[type]) > 60000
+now-lastAlert[type]
+
+>60000
 
 ){
 
-lastAlertTime[type] = now;
+lastAlert[type]=
+
+now;
 
 return true;
 
@@ -255,55 +325,71 @@ return false;
 
 }
 
-/*
-LOAD SITES
-*/
+
 
 async function loadSites(){
 
-const user = await getUser();
+const user=
 
-if(!user){
+await getUser();
 
-return;
+if(!user)return;
+
+
+const {
+
+data:sites
 
 }
 
-const { data:sites, error } =
+=
+
 await supabaseClient
 
-.from('sites')
+.from(
+
+'sites'
+
+)
 
 .select('*')
 
-.eq('user_id',user.id)
+.eq(
 
-.order('created_at',{ascending:false});
+'user_id',
 
-if(error){
+user.id
 
-console.log(error);
+);
 
-return;
 
-}
+const selector=
 
-const selector =
-document.getElementById('siteSelector');
+document
 
-selector.innerHTML = `
+.getElementById(
 
-<option value="">
-Choisir un site
-</option>
+'siteSelector'
 
-`;
+);
 
-sites.forEach(site=>{
 
-selector.innerHTML += `
+selector.innerHTML=
 
-<option value="${site.id}">
+'<option>Choisir site</option>';
+
+
+sites.forEach(
+
+site=>{
+
+selector.innerHTML+=`
+
+<option
+
+value="${site.id}"
+
+>
 
 ${site.name}
 
@@ -311,286 +397,598 @@ ${site.name}
 
 `;
 
-});
+}
+
+);
 
 }
 
-/*
-SIMULATION
-*/
+
+
+async function loadSensors(){
+
+const site=
+
+document
+
+.getElementById(
+
+'siteSelector'
+
+)
+
+.value;
+
+
+const {
+
+data:sensors
+
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'sensors'
+
+)
+
+.select('*')
+
+.eq(
+
+'site_id',
+
+site
+
+);
+
+
+const selector=
+
+document
+
+.getElementById(
+
+'sensorSelector'
+
+);
+
+
+selector.innerHTML=
+
+'<option>Choisir capteur</option>';
+
+
+sensors.forEach(
+
+sensor=>{
+
+selector.innerHTML+=`
+
+<option
+
+value="${sensor.id}"
+
+>
+
+${sensor.name}
+
+</option>
+
+`;
+
+}
+
+);
+
+}
+
+
 
 async function startSimulation(){
 
-if(simulationRunning){
+if(simulation)
+
+return;
+
+
+const site=
+
+document
+
+.getElementById(
+
+'siteSelector'
+
+)
+
+.value;
+
+
+const sensor=
+
+document
+
+.getElementById(
+
+'sensorSelector'
+
+)
+
+.value;
+
+
+if(
+
+!site
+
+||
+
+!sensor
+
+){
+
+alert(
+
+'Sélectionner site + capteur'
+
+);
 
 return;
 
 }
 
-const selectedSite =
-document.getElementById('siteSelector').value;
 
-if(selectedSite===''){
 
-alert('Veuillez sélectionner un site.');
+simulation=true;
 
-return;
 
-}
 
-const user = await getUser();
+await supabaseClient
 
-if(!user){
+.from(
 
-return;
+'sensors'
 
-}
+)
 
-simulationRunning = true;
+.update({
 
-simulationInterval = setInterval(async()=>{
+status:
 
-/*
-VALEURS SIMULÉES
-*/
+'ONLINE'
 
-const voltage =
-Math.floor(Math.random()*220)+40;
+})
 
-const power =
-Math.floor(Math.random()*5000);
+.eq(
 
-const current =
-(power/voltage).toFixed(2);
+'id',
 
-/*
-KWH RÉALISTE
-5 secondes
-*/
+sensor
 
-const kwh =
-((power*5)/3600000).toFixed(5);
+);
 
-const source =
+
+
+interval=
+
+setInterval(
+
+async()=>{
+
+
+const voltage=
+
+Math.floor(
+
+Math.random()*220
+
+)+40;
+
+
+const power=
+
+Math.floor(
+
+Math.random()*5000
+
+);
+
+
+const current=
+
+(
+
+power
+
+/
+
+voltage
+
+).toFixed(2);
+
+
+const kwh=
+
+(
+
+power*5
+
+/
+
+3600000
+
+).toFixed(5);
+
+
+const source=
+
 Math.random()>0.8
-? 'GROUPE'
-: 'SBEE';
 
-/*
-UI
-*/
+?
 
-document.getElementById('voltage').innerHTML =
-voltage+' V';
+'GROUPE'
 
-document.getElementById('power').innerHTML =
-power+' W';
+:
 
-document.getElementById('source').innerHTML =
+'SBEE';
+
+
+
+document
+
+.getElementById(
+
+'voltage'
+
+)
+
+.innerHTML=
+
+voltage+
+
+'V';
+
+
+
+document
+
+.getElementById(
+
+'power'
+
+)
+
+.innerHTML=
+
+power+
+
+'W';
+
+
+
+document
+
+.getElementById(
+
+'source'
+
+)
+
+.innerHTML=
+
 source;
 
-/*
-INSERT TELEMETRY
-*/
 
-const { error } =
+
 await supabaseClient
 
-.from('telemetry')
+.from(
+
+'telemetry'
+
+)
 
 .insert([{
 
-sensor_id:user.id,
+sensor_id:
 
-site_id:selectedSite,
+sensor,
 
-voltage:voltage,
+site_id:
 
-current:current,
+site,
 
-power_w:power,
+voltage,
 
-kwh_total:kwh,
+current,
 
-source:source
+power_w:
+
+power,
+
+kwh_total:
+
+kwh,
+
+source
 
 }]);
 
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-/*
-ALERTES
-*/
 
 if(
-voltage < 190
-&& canTriggerAlert('LOW_VOLTAGE')
+
+voltage<190
+
+&&
+
+canTriggerAlert(
+
+'LOW'
+
+)
+
 ){
 
 await supabaseClient
 
-.from('alerts')
+.from(
+
+'alerts'
+
+)
 
 .insert([{
 
-sensor_id:user.id,
+sensor_id:
 
-site_id:selectedSite,
+sensor,
 
-type:'LOW_VOLTAGE',
+site_id:
 
-message:'Tension basse détectée',
+site,
 
-value:voltage,
+type:
 
-threshold:190
+'LOW_VOLTAGE',
+
+message:
+
+'Tension basse',
+
+value:
+
+voltage,
+
+threshold:
+
+190
 
 }]);
 
 }
 
+
+
 if(
-power > 3000
-&& canTriggerAlert('OVERCONSUMPTION')
+
+power>3000
+
+&&
+
+canTriggerAlert(
+
+'OVER'
+
+)
+
 ){
 
 await supabaseClient
 
-.from('alerts')
+.from(
+
+'alerts'
+
+)
 
 .insert([{
 
-sensor_id:user.id,
+sensor_id:
 
-site_id:selectedSite,
+sensor,
 
-type:'OVERCONSUMPTION',
+site_id:
 
-message:'Surconsommation détectée',
+site,
 
-value:power,
+type:
 
-threshold:3000
+'OVERCONSUMPTION',
+
+message:
+
+'Surconsommation',
+
+value:
+
+power,
+
+threshold:
+
+3000
 
 }]);
 
 }
 
-if(
-voltage < 50
-&& canTriggerAlert('SBEE_OUTAGE')
-){
 
-await supabaseClient
 
-.from('alerts')
+const sensorName=
 
-.insert([{
+document
 
-sensor_id:user.id,
+.getElementById(
 
-site_id:selectedSite,
+'sensorSelector'
 
-type:'SBEE_OUTAGE',
+)
 
-message:'Coupure SBEE détectée',
+.options[
 
-value:voltage,
+document
 
-threshold:50
+.getElementById(
 
-}]);
+'sensorSelector'
 
-}
+)
 
-if(
-voltage > 250
-&& canTriggerAlert('HIGH_VOLTAGE')
-){
+.selectedIndex
 
-await supabaseClient
+]
 
-.from('alerts')
+.text;
 
-.insert([{
 
-sensor_id:user.id,
 
-site_id:selectedSite,
+const log=
 
-type:'HIGH_VOLTAGE',
+document
 
-message:'Surtension détectée',
+.getElementById(
 
-value:voltage,
+'log'
 
-threshold:250
+);
 
-}]);
 
-}
-
-/*
-LOGS
-*/
-
-const log =
-document.getElementById('log');
-
-log.innerHTML =
+log.innerHTML=
 
 '✅ '
 
-+new Date().toLocaleTimeString()
++
 
-+' → '
+sensorName
 
-+power+' W | '
++
 
-+voltage+' V | '
+' | '
 
-+source
++
 
-+'<br><br>'
+power
 
-+log.innerHTML;
++
 
-},5000);
+'W | '
+
++
+
+voltage
+
++
+
+'V<br>'
+
++
+
+log.innerHTML;
+
+
+
+},
+
+5000);
 
 }
 
-/*
-STOP
-*/
 
-function stopSimulation(){
 
-clearInterval(simulationInterval);
+async function stopSimulation(){
 
-simulationRunning = false;
+clearInterval(
 
-document.getElementById('log').innerHTML =
+interval
 
-'⛔ Simulation arrêtée.<br><br>'
+);
 
-+document.getElementById('log').innerHTML;
+simulation=false;
+
+
+const sensor=
+
+document
+
+.getElementById(
+
+'sensorSelector'
+
+)
+
+.value;
+
+
+await supabaseClient
+
+.from(
+
+'sensors'
+
+)
+
+.update({
+
+status:
+
+'OFFLINE'
+
+})
+
+.eq(
+
+'id',
+
+sensor
+
+);
+
+
+document
+
+.getElementById(
+
+'log'
+
+)
+
+.innerHTML=
+
+'⛔ STOP<br>'
+
++
+
+document
+
+.getElementById(
+
+'log'
+
+)
+
+.innerHTML;
 
 }
 
-/*
-INIT
-*/
+
 
 loadSites();
 
 </script>
 
 </body>
-
 </html>
