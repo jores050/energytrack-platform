@@ -261,7 +261,8 @@ id="sitesContainer">
 
 const charts = {};
 let telemetryDataStore = {}; // Stockage local temporaire pour filtrer les graphiques côté client
-let canAccessMultiSite = false;
+let canAccessMultiSensor =
+false;
 
 /*
 =========================================
@@ -298,7 +299,19 @@ const { data: allSensors } = await supabaseClient
     .select('*')
     .in('site_id', siteIds);
 
-if(!canAccessMultiSite && allSensors && allSensors.length > 1){
+if(
+
+!canAccessMultiSensor
+
+&&
+
+allSensors
+
+&&
+
+allSensors.length>1
+
+){
     document.getElementById('subscriptionBanner').innerHTML = `
         <div class="premium-banner">
             <h3 style="color:#ff4c61; margin-bottom:8px;">Plan Essential Limité</h3>
@@ -631,7 +644,13 @@ INIT FEATURES
 */
 
 async function initDashboard(){
-canAccessMultiSite = await canUseMultiSite();
+canAccessMultiSite =
+
+await canUseMultiSite();
+
+canAccessMultiSensor =
+
+await canUseMultiSensor();
 if(!canAccessMultiSite){
     showFreeBanner();
 }
