@@ -2,183 +2,598 @@
 <html lang="fr">
 
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Capteurs IoT</title>
-<link rel="stylesheet" href="css/style.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1">
+
+<title>
+
+Capteurs IoT
+
+</title>
+
+<link
+rel="stylesheet"
+href="css/style.css">
+
+<script src="
+https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+"></script>
+
+<script src="
+js/supabase.js
+"></script>
 
 <style>
+
 .sensor-card{
-background: linear-gradient(145deg, #182235, #101826);
-padding: 25px;
-border-radius: 24px;
-margin-bottom: 25px;
+
+background:
+linear-gradient(
+145deg,
+#182235,
+#101826
+);
+
+padding:
+25px;
+
+border-radius:
+24px;
+
+margin-bottom:
+25px;
+
 }
 
 .sensor{
-background: #0f1729;
-padding: 18px;
-border-radius: 16px;
-margin-top: 15px;
+
+background:
+#0f1729;
+
+padding:
+18px;
+
+border-radius:
+16px;
+
+margin-top:
+15px;
+
 }
 
 .status{
-padding: 8px 14px;
-border-radius: 999px;
-display: inline-block;
-margin-top: 10px;
+
+padding:
+8px 14px;
+
+border-radius:
+999px;
+
+display:
+inline-block;
+
+margin-top:
+10px;
+
 }
 
 .online{
-background: rgba(0,200,150,.15);
-color: #00c896;
+
+background:
+rgba(
+0,200,150,.15
+);
+
+color:
+#00c896;
+
 }
 
 .offline{
-background: rgba(255,76,97,.15);
-color: #ff4c61;
+
+background:
+rgba(
+255,76,97,.15
+);
+
+color:
+#ff4c61;
+
 }
 
 .form{
-background: #182235;
-padding: 25px;
-border-radius: 20px;
-margin: 25px 0;
+
+background:
+#182235;
+
+padding:
+25px;
+
+border-radius:
+20px;
+
+margin:
+25px 0;
+
 }
 
-input, select{
-width: 100%;
-padding: 16px;
-margin-top: 15px;
-border: none;
-border-radius: 12px;
-background: #101826;
-color: white;
+input,
+select{
+
+width:
+100%;
+
+padding:
+16px;
+
+margin-top:
+15px;
+
+border:
+none;
+
+border-radius:
+12px;
+
+background:
+#101826;
+
+color:
+white;
+
 }
 
 button{
-padding: 14px 22px;
-border: none;
-border-radius: 14px;
-background: #00c896;
-color: white;
+
+padding:
+14px 22px;
+
+border:
+none;
+
+border-radius:
+14px;
+
+background:
+#00c896;
+
+color:
+white;
+
 cursor: pointer;
-margin-top: 15px;
+
+margin-top:
+15px;
+
 }
+
 </style>
+
 </head>
 
 <body>
 
 <div class="sidebar">
+
 <div class="logo">
+
 Energy<span>Track</span>
+
 </div>
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
-<a class="nav-item" href="rapports.html">📊 Rapports</a>
-<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-<a class="nav-item active" href="capteurs.html">📡 Capteurs IoT</a>
-<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
-<a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+
+<a
+class="nav-item"
+href="dashboard.html">
+
+🏠 Dashboard
+
+</a>
+
+<a
+class="nav-item"
+href="consommation.html">
+
+⚡ Consommation
+
+</a>
+
+<a
+class="nav-item"
+href="alertes.html">
+
+🔔 Alertes
+
+</a>
+
+<a
+class="nav-item"
+href="rapports.html">
+
+📊 Rapports
+
+</a>
+
+<a
+class="nav-item"
+href="sites.html">
+
+🏢 Multi-sites
+
+</a>
+
+<a
+class="nav-item active"
+href="capteurs.html">
+
+📡 Capteurs IoT
+
+</a>
+
+<a
+class="nav-item"
+href="ia.html">
+
+🤖 Analyse IA
+
+</a>
+
+<a
+class="nav-item"
+href="parametres.html">
+
+⚙️ Paramètres
+
+</a>
+
 </div>
+
 
 <div class="main">
-<h1>📡 Capteurs IoT</h1>
-<button onclick="showAddSensor()">Ajouter capteur</button>
-<div id="formContainer"></div>
-<div id="container"></div>
+
+<h1>
+
+📡 Capteurs IoT
+
+</h1>
+
+<button
+onclick="showAddSensor()">
+
+Ajouter capteur
+
+</button>
+
+<div
+id="formContainer">
+
 </div>
+
+<div
+id="container">
+
+</div>
+
+</div>
+
 
 <script>
+
 async function loadSensors(){
-const { data:userData } = await supabaseClient.auth.getUser();
-const user = userData.user;
 
-if(!user){
-location.href = 'auth.html';
+const {
+
+data:userData
+
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+const user=
+
+userData.user;
+
+if(
+
+!user
+
+){
+
+location.href=
+
+'auth.html';
+
 return;
+
 }
 
-const { data:sites } = await supabaseClient
-.from('sites')
-.select(`*, sensors(*)`)
-.eq('user_id', user.id);
+const {
 
-const container = document.getElementById('container');
-container.innerHTML = '';
+data:sites
 
-sites.forEach(site => {
-container.innerHTML += `
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'sites'
+
+)
+
+.select(`
+
+*,
+
+sensors(*)
+
+`)
+
+.eq(
+
+'user_id',
+
+user.id
+
+);
+
+const container=
+
+document.getElementById(
+
+'container'
+
+);
+
+container.innerHTML='';
+
+sites.forEach(
+
+site=>{
+
+container.innerHTML+=`
+
 <div class="sensor-card">
-<h2>🏠 ${site.name}</h2>
+
+<h2>
+
+🏠 ${site.name}
+
+</h2>
+
 ${
-site.sensors.length === 0
-? '<p>Aucun capteur</p>'
-: site.sensors.map(sensor => `
+site.sensors.length===0
+
+?
+
+'<p>Aucun capteur</p>'
+
+:
+
+site.sensors.map(
+
+sensor=>`
+
 <div class="sensor">
-<h3>📡 ${sensor.name}</h3>
-<p>Type : ${sensor.type}</p>
-<div class="status ${sensor.status === 'ONLINE' ? 'online' : 'offline'}">
+
+<h3>
+
+📡 ${sensor.name}
+
+</h3>
+
+<p>
+
+Type :
+
+${sensor.type}
+
+</p>
+
+<div class="status
+
+${
+sensor.status==='ONLINE'
+
+?
+
+'online'
+
+:
+
+'offline'
+
+}">
+
 ${sensor.status}
+
 </div>
+
 </div>
-`).join('')
+
+`
+
+).join('')
 }
+
 </div>
+
 `;
-});
+
+}
+
+);
+
 }
 
 async function addSensor(){
-const site = document.getElementById('site').value;
-const name = document.getElementById('name').value;
-const type = document.getElementById('type').value;
-const serial = document.getElementById('serial').value;
 
-const { error } = await supabaseClient
-.from('sensors')
+const site =
+
+document
+
+.getElementById(
+
+'site'
+
+).value;
+
+const name =
+
+document
+
+.getElementById(
+
+'name'
+
+).value;
+
+const type =
+
+document
+
+.getElementById(
+
+'type'
+
+).value;
+
+const serial =
+
+document
+
+.getElementById(
+
+'serial'
+
+).value;
+
+const {
+
+error
+
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'sensors'
+
+)
+
 .insert([{
-site_id: site,
-name: name,
-type: type,
-serial_number: serial,
-status: 'ONLINE'
+
+site_id:
+site,
+
+name:
+name,
+
+type:
+type,
+
+serial_number:
+serial,
+
+status:
+'ONLINE'
+
 }]);
 
+
 if(error){
-alert(error.message);
+
+alert(
+
+error.message
+
+);
+
 return;
+
 }
 
-document.getElementById('formContainer').innerHTML = '';
+document
+
+.getElementById(
+
+'formContainer'
+
+)
+
+.innerHTML='';
+
 loadSensors();
+
 }
+
 
 async function showAddSensor(){
-const { data:userData } = await supabaseClient.auth.getUser();
 
-const { data:sites } = await supabaseClient
-.from('sites')
+const {
+
+data:userData
+
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+
+const {
+
+data:sites
+
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'sites'
+
+)
+
 .select('*')
-.eq('user_id', userData.user.id);
 
-/* CORRECTION ICI : Ajout des backticks (``) manquants pour l'assignation de la chaîne HTML */
+.eq(
+
+'user_id',
+
+userData.user.id
+
+);
+
+
+/* CORRECTION ICI : Passage du template HTML brut en Template Literal JavaScript avec les accents graves `` */
 document.getElementById('formContainer').innerHTML = `
 <div class="form">
+
 <select id="site">
+
 ${
-sites.map(s => `
-<option value="${s.id}">${s.name}</option>
-`).join('')
-}
-</select>
-<input id="name" placeholder="Nom capteur">
-<input id="type" placeholder="Type appareil">
-<input id="serial" placeholder="Numéro série">
-<button onclick="addSensor()">Ajouter</button>
-</div>
-`;
+
+sites.map(
+
+s
