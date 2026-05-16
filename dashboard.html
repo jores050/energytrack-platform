@@ -838,39 +838,185 @@ PHASE 1 — BANNIERE D'ABONNEMENT COMPARATIVE STRICTE
 */
 
 function showFreeBanner(){
-document.getElementById('subscriptionBanner').innerHTML = `
-<div class="premium-banner">
-    <h3 style="margin-bottom:8px; color:#ffb547; font-family:'Orbitron';">Mode Essential Actif</h3>
-    <p style="color:#94a3b8; font-size:13px; line-height:1.6; margin-bottom:15px;">
-        Votre compte est actuellement restreint aux limitations d'infrastructure d'entrée de gamme.
-    </p>
-    
-    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap:15px; margin-bottom:20px; font-size:12px;">
-        <div style="background:rgba(0,0,0,0.15); padding:10px; border-radius:8px;">
-            <span style="color:#ff4c61; font-weight:700;">❌ OFFRE ESSENTIAL :</span>
-            <ul style="margin:5px 0 0 15px; padding:0; color:#94a3b8;">
-                <li>1 Site unique maximum</li>
-                <li>1 Seul capteur actif par site</li>
-            </ul>
-        </div>
-        <div style="background:rgba(0,200,150,0.05); padding:10px; border-radius:8px; border: 1px solid rgba(0,200,150,0.15);">
-            <span style="color:#00c896; font-weight:700;">🚀 PREMIUM BUSINESS CLOUD :</span>
-            <ul style="margin:5px 0 0 15px; padding:0; color:#ffffff;">
-                <li>Multi-sites illimités</li>
-                <li>Multi-capteurs (Analyse par appareil)</li>
-                <li>Audits de surconsommation par IA</li>
-                <li>Rapports réglementaires PDF</li>
-            </ul>
-        </div>
-    </div>
 
-    <button
-        style="padding:12px 24px; border:none; border-radius:10px; background:#00c896; color:#081120; font-weight:700; cursor:pointer; font-family:'Poppins'; transition:0.2s;"
-        onclick="window.location.href='pricing.html'">
-        🚀 Passer Premium Business
-    </button>
+document.getElementById(
+
+'subscriptionBanner'
+
+).innerHTML=
+
+`
+
+<div class="premium-banner">
+
+
+<h3 style="
+margin-bottom:18px;
+color:#ffb547;
+font-family:'Orbitron';
+">
+
+Plan Essential
+
+</h3>
+
+
+
+<div style="
+display:grid;
+grid-template-columns:
+repeat(
+auto-fit,
+minmax(
+180px,
+1fr
+)
+);
+
+gap:
+15px;
+
+margin-bottom:
+20px;
+
+">
+
+
+<div style="
+background:
+rgba(
+255,
+76,
+97,
+0.08
+);
+
+padding:
+15px;
+
+border-radius:
+12px;
+">
+
+<b>
+
+❌ Essential
+
+</b>
+
+
+<p style="
+margin-top:
+10px;
+
+color:
+#94a3b8;
+">
+
+1 site
+
+<br>
+
+1 capteur
+
+</p>
+
 </div>
+
+
+
+<div style="
+background:
+rgba(
+0,
+200,
+150,
+0.08
+);
+
+padding:
+15px;
+
+border-radius:
+12px;
+">
+
+<b>
+
+🚀 Business
+
+</b>
+
+
+<p style="
+margin-top:
+10px;
+">
+
+∞ sites
+
+<br>
+
+∞ capteurs
+
+<br>
+
+IA
+
+<br>
+
+PDF
+
+</p>
+
+</div>
+
+
+</div>
+
+
+
+<button
+
+onclick="
+
+window.location.href=
+
+'pricing.html'
+
+"
+
+style="
+padding:
+14px 24px;
+
+background:
+#00c896;
+
+border:
+none;
+
+border-radius:
+12px;
+
+font-weight:
+700;
+
+cursor:
+pointer;
+"
+
+>
+
+🚀 Passer Premium Business
+
+</button>
+
+
+</div>
+
 `;
+
 }
 
 /*
