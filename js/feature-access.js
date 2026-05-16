@@ -3,7 +3,11 @@
 GET CURRENT USER
 =========================================
 */
+let canAccessMultiSite =
+false;
 
+let canAccessMultiSensor =
+false;
 async function getCurrentUser(){
 
 const { data:userData } =
