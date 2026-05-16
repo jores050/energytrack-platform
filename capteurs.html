@@ -564,6 +564,7 @@ await supabaseClient
 
 .getUser();
 
+
 const {
 
 data:sites
@@ -590,11 +591,12 @@ userData.user.id
 
 );
 
+
 document.getElementById(
 
 'formContainer'
 
-).innerHTML=`
+).innerHTML=
 
 <div class="form">
 
@@ -617,11 +619,13 @@ ${s.name}
 </option>
 
 
+
 ).join('')
 
 }
 
 </select>
+
 
 <input
 
@@ -629,14 +633,20 @@ id="name"
 
 placeholder="Nom capteur">
 
-d="serial"
 
-placeholder="Numéro série">
+<input
+
+id="type"
+
+placeholder="Type appareil">
+
+
 <input
 
 id="serial"
 
 placeholder="Numéro série">
+
 
 <button
 
@@ -646,9 +656,10 @@ Ajouter
 
 </button>
 
+
 </div>
 
-`;
+;
 
 }
 
