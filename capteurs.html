@@ -443,32 +443,55 @@ ${sensor.status}
 
 }
 
-
 async function addSensor(){
 
-const site=
+const site =
 
-document.getElementById(
+document
+
+.getElementById(
 
 'site'
 
 ).value;
 
-const name=
+const name =
 
-document.getElementById(
+document
+
+.getElementById(
 
 'name'
 
 ).value;
 
-const type=
+const type =
 
-document.getElementById(
+document
+
+.getElementById(
 
 'type'
 
 ).value;
+
+const serial =
+
+document
+
+.getElementById(
+
+'serial'
+
+).value;
+
+const {
+
+error
+
+}
+
+=
 
 await supabaseClient
 
@@ -489,16 +512,36 @@ name,
 type:
 type,
 
+serial_number:
+serial,
+
 status:
 'ONLINE'
 
 }]);
 
-document.getElementById(
+
+if(error){
+
+alert(
+
+error.message
+
+);
+
+return;
+
+}
+
+document
+
+.getElementById(
 
 'formContainer'
 
-).innerHTML='';
+)
+
+.innerHTML='';
 
 loadSensors();
 
@@ -561,7 +604,7 @@ ${
 
 sites.map(
 
-s=>`
+s=>
 
 <option
 
@@ -573,7 +616,6 @@ ${s.name}
 
 </option>
 
-`
 
 ).join('')
 
@@ -587,11 +629,14 @@ id="name"
 
 placeholder="Nom capteur">
 
+d="serial"
+
+placeholder="Numéro série">
 <input
 
-id="type"
+id="serial"
 
-placeholder="Type appareil">
+placeholder="Numéro série">
 
 <button
 
