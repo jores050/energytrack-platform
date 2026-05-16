@@ -164,7 +164,8 @@ background:
 color:
 white;
 
-cursor: pointer;
+cursor:
+pointer;
 
 margin-top:
 15px;
@@ -425,6 +426,7 @@ ${sensor.status}
 `
 
 ).join('')
+
 }
 
 </div>
@@ -586,9 +588,14 @@ userData.user.id
 );
 
 
-/* CORRECTION ICI : Passage du template HTML brut en Template Literal JavaScript avec les accents graves `` */
-document.getElementById('formContainer').innerHTML = `
-<div class="form">
+/* UNIQUEMENT CORRIGÉ ICI : Ajout des accents graves (``) */
+document.getElementById(
+
+'formContainer'
+
+).innerHTML=
+
+`<div class="form">
 
 <select id="site">
 
@@ -596,4 +603,67 @@ ${
 
 sites.map(
 
-s
+s=>
+
+`<option
+
+value="${s.id}"
+
+>
+
+${s.name}
+
+</option>`
+
+
+
+).join('')
+
+}
+
+</select>
+
+
+<input
+
+id="name"
+
+placeholder="Nom capteur">
+
+
+<input
+
+id="type"
+
+placeholder="Type appareil">
+
+
+<input
+
+id="serial"
+
+placeholder="Numéro série">
+
+
+<button
+
+onclick="addSensor()">
+
+Ajouter
+
+</button>
+
+
+</div>`
+
+;
+
+}
+
+
+loadSensors();
+
+</script>
+
+</body>
+</html>
