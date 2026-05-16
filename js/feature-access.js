@@ -197,3 +197,12 @@ return await hasFeature(
 );
 
 }
+async function canUseMultiSensor(){
+
+return await hasFeature(
+
+'multisensor'
+
+);
+
+}
