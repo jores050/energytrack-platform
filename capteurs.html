@@ -4,32 +4,172 @@
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Capteurs IoT - EnergyTrack</title>
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1">
 
-<link rel="stylesheet" href="css/style.css">
+<title>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+Capteurs IoT
 
-<script src="js/supabase.js"></script>
+</title>
+
+<link
+rel="stylesheet"
+href="css/style.css">
+
+<script src="
+https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+"></script>
+
+<script src="
+js/supabase.js
+"></script>
 
 <style>
 
 .sensor-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:25px;
-border-radius:24px;
-margin-bottom:20px;
+
+background:
+linear-gradient(
+145deg,
+#182235,
+#101826
+);
+
+padding:
+25px;
+
+border-radius:
+24px;
+
+margin-bottom:
+25px;
+
 }
 
-.sensor-status{
-padding:8px 14px;
-border-radius:999px;
-display:inline-block;
-margin-top:15px;
-background:rgba(0,200,150,0.15);
-color:#00c896;
+.sensor{
+
+background:
+#0f1729;
+
+padding:
+18px;
+
+border-radius:
+16px;
+
+margin-top:
+15px;
+
+}
+
+.status{
+
+padding:
+8px 14px;
+
+border-radius:
+999px;
+
+display:
+inline-block;
+
+margin-top:
+10px;
+
+}
+
+.online{
+
+background:
+rgba(
+0,200,150,.15
+);
+
+color:
+#00c896;
+
+}
+
+.offline{
+
+background:
+rgba(
+255,76,97,.15
+);
+
+color:
+#ff4c61;
+
+}
+
+.form{
+
+background:
+#182235;
+
+padding:
+25px;
+
+border-radius:
+20px;
+
+margin:
+25px 0;
+
+}
+
+input,
+select{
+
+width:
+100%;
+
+padding:
+16px;
+
+margin-top:
+15px;
+
+border:
+none;
+
+border-radius:
+12px;
+
+background:
+#101826;
+
+color:
+white;
+
+}
+
+button{
+
+padding:
+14px 22px;
+
+border:
+none;
+
+border-radius:
+14px;
+
+background:
+#00c896;
+
+color:
+white;
+
+cursor:
+pointer;
+
+margin-top:
+15px;
+
 }
 
 </style>
@@ -38,114 +178,439 @@ color:#00c896;
 
 <body>
 
+<!-- SIDEBAR -->
+
 <div class="sidebar">
 
 <div class="logo">
+
 Energy<span>Track</span>
-</div>
-
-<a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
-<a class="nav-item" href="consommation.html">⚡ Consommation</a>
-<a class="nav-item" href="alertes.html">🔔 Alertes</a>
-<a class="nav-item" href="rapports.html">📊 Rapports</a>
-<a class="nav-item" href="sites.html">🏢 Multi-sites</a>
-<a class="nav-item active" href="capteurs.html">📡 Capteurs IoT</a>
-<a class="nav-item" href="ia.html">🤖 Analyse IA</a>
 
 </div>
+
+<a
+class="nav-item"
+href="dashboard.html">
+
+🏠 Dashboard
+
+</a>
+
+<a
+class="nav-item"
+href="consommation.html">
+
+⚡ Consommation
+
+</a>
+
+<a
+class="nav-item"
+href="alertes.html">
+
+🔔 Alertes
+
+</a>
+
+<a
+class="nav-item"
+href="rapports.html">
+
+📊 Rapports
+
+</a>
+
+<a
+class="nav-item"
+href="sites.html">
+
+🏢 Multi-sites
+
+</a>
+
+<a
+class="nav-item active"
+href="capteurs.html">
+
+📡 Capteurs IoT
+
+</a>
+
+<a
+class="nav-item"
+href="ia.html">
+
+🤖 Analyse IA
+
+</a>
+
+<a
+class="nav-item"
+href="parametres.html">
+
+⚙️ Paramètres
+
+</a>
+
+</div>
+
+
+<!-- CONTENU -->
 
 <div class="main">
 
 <h1>
-Capteurs IoT
+
+📡 Capteurs IoT
+
 </h1>
 
-<div id="sensorsContainer">
+<button
+onclick="showAddSensor()">
+
+Ajouter capteur
+
+</button>
+
+<div
+id="formContainer">
+
+</div>
+
+<div
+id="container">
 
 </div>
 
 </div>
+
 
 <script>
 
 async function loadSensors(){
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+const {
 
-if(!userData.user){
+data:userData
 
-window.location.href='auth.html';
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+const user=
+
+userData.user;
+
+if(
+
+!user
+
+){
+
+location.href=
+
+'auth.html';
 
 return;
 
 }
 
-const userId =
-userData.user.id;
+const {
 
-const { data:sites } =
+data:sites
+
+}
+
+=
+
 await supabaseClient
 
-.from('sites')
+.from(
 
-.select('*')
+'sites'
 
-.eq('user_id',userId);
+)
 
-const container =
-document.getElementById('sensorsContainer');
+.select(`
+
+*,
+
+sensors(*)
+
+`)
+
+.eq(
+
+'user_id',
+
+user.id
+
+);
+
+const container=
+
+document.getElementById(
+
+'container'
+
+);
 
 container.innerHTML='';
 
-sites.forEach(site=>{
+sites.forEach(
 
-container.innerHTML += `
+site=>{
+
+container.innerHTML+=`
 
 <div class="sensor-card">
 
 <h2>
 
-${site.name}
+🏠 ${site.name}
 
 </h2>
 
-<p style="
-margin-top:15px;
-color:#94a3b8;
-">
+${
+site.sensors.length===0
 
-📍 ${site.city}
+?
+
+'<p>Aucun capteur</p>'
+
+:
+
+site.sensors.map(
+
+sensor=>`
+
+<div class="sensor">
+
+<h3>
+
+📡 ${sensor.name}
+
+</h3>
+
+<p>
+
+Type :
+
+${sensor.type}
 
 </p>
 
-<div class="sensor-status">
+<div class="status
 
-EN LIGNE
+${
+sensor.status==='ONLINE'
+
+?
+
+'online'
+
+:
+
+'offline'
+
+}">
+
+${sensor.status}
 
 </div>
 
-<p style="
-margin-top:20px;
-line-height:1.8;
-">
+</div>
 
-ESP32 connecté au cloud EnergyTrack.
+`
 
-</p>
+).join('')
+
+}
 
 </div>
 
 `;
 
-});
+}
+
+);
 
 }
+
+
+async function addSensor(){
+
+const site=
+
+document.getElementById(
+
+'site'
+
+).value;
+
+const name=
+
+document.getElementById(
+
+'name'
+
+).value;
+
+const type=
+
+document.getElementById(
+
+'type'
+
+).value;
+
+await supabaseClient
+
+.from(
+
+'sensors'
+
+)
+
+.insert([{
+
+site_id:
+site,
+
+name:
+name,
+
+type:
+type,
+
+status:
+'ONLINE'
+
+}]);
+
+document.getElementById(
+
+'formContainer'
+
+).innerHTML='';
+
+loadSensors();
+
+}
+
+
+async function showAddSensor(){
+
+const {
+
+data:userData
+
+}
+
+=
+
+await supabaseClient
+
+.auth
+
+.getUser();
+
+const {
+
+data:sites
+
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'sites'
+
+)
+
+.select('*')
+
+.eq(
+
+'user_id',
+
+userData.user.id
+
+);
+
+document.getElementById(
+
+'formContainer'
+
+).innerHTML=`
+
+<div class="form">
+
+<select id="site">
+
+${
+
+sites.map(
+
+s=>`
+
+<option
+
+value="${s.id}"
+
+>
+
+${s.name}
+
+</option>
+
+`
+
+).join('')
+
+}
+
+</select>
+
+<input
+
+id="name"
+
+placeholder="Nom capteur">
+
+<input
+
+id="type"
+
+placeholder="Type appareil">
+
+<button
+
+onclick="addSensor()">
+
+Ajouter
+
+</button>
+
+</div>
+
+`;
+
+}
+
 
 loadSensors();
 
 </script>
 
 </body>
-
 </html>
