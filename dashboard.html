@@ -288,11 +288,6 @@ async function loadDashboard(){
 const user = await getUser();
 if(!user){ return; }
 
-// 1. LIMITATION CRITIQUE : Vérification globale du nombre de capteurs de l'utilisateur
-const { data: totalSensors } = await supabaseClient
-    .from('sensors')
-    .select('id')
-    .eq('site_id', user.id); // Basé sur le fait que l'utilisateur possède les sites sous-jacents
 
 // Si la jointure via site_id n'est pas directe, on récupère via une requête propre
 const { data: userSites } = await supabaseClient.from('sites').select('id').eq('user_id', user.id);
