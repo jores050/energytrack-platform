@@ -263,7 +263,8 @@ const charts = {};
 let telemetryDataStore = {}; // Stockage local temporaire pour filtrer les graphiques côté client
 let canAccessMultiSensor =
 false;
-
+let canAccessMultiSite =
+false;
 /*
 =========================================
 GET USER
@@ -299,6 +300,18 @@ const { data: allSensors } = await supabaseClient
     .select('*')
     .in('site_id', siteIds);
 
+const banner =
+
+document.getElementById(
+
+'subscriptionBanner'
+
+);
+
+
+banner.innerHTML='';
+
+
 if(
 
 !canAccessMultiSensor
@@ -312,6 +325,102 @@ allSensors
 allSensors.length>1
 
 ){
+
+banner.innerHTML=`
+
+<div class="premium-banner">
+
+<h3 style="
+color:#ffb547;
+margin-bottom:12px;
+">
+
+Mode Essential Actif
+
+</h3>
+
+
+<p style="
+color:#94a3b8;
+line-height:1.8;
+margin-bottom:20px;
+">
+
+Votre offre actuelle limite :
+
+<b>
+
+1 site
+
+</b>
+
+et
+
+<b>
+
+1 capteur IoT
+
+</b>
+
+<br><br>
+
+Passez à
+
+<b>
+
+Business Cloud
+
+</b>
+
+pour :
+
+<br>
+
+✓ Multi-sites
+
+<br>
+
+✓ Multi-capteurs
+
+<br>
+
+✓ IA
+
+<br>
+
+✓ Rapports PDF
+
+</p>
+
+
+<button
+
+style="
+padding:14px 24px;
+border:none;
+border-radius:12px;
+background:#00c896;
+font-weight:700;
+cursor:pointer;
+"
+
+onclick="
+
+window.location.href='pricing.html'
+
+">
+
+🚀 Passer Premium Business
+
+</button>
+
+
+</div>
+
+`;
+
+}
+{
     document.getElementById('subscriptionBanner').innerHTML = `
         <div class="premium-banner">
             <h3 style="color:#ff4c61; margin-bottom:8px;">Plan Essential Limité</h3>
@@ -616,26 +725,7 @@ supabaseClient
 =========================================
 */
 
-function showFreeBanner(){
-document.getElementById('subscriptionBanner').innerHTML = `
-<div class="premium-banner">
-    <h3 style="margin-bottom:12px; color:#ffb547;">Mode Essential Actif</h3>
-    <p style="color:#94a3b8; line-height:1.8; margin-bottom:20px;">
-        Votre offre actuelle limite votre compte à <b>1 site unique</b> et <b>1 capteur IoT</b>.<br>
-        Basculez sur l'infrastructure <b>Business Cloud</b> pour faire sauter les restrictions :
-    </p>
-    <div style="font-size:13px; color:white; margin-bottom:20px; display:grid; grid-template-columns: 1fr 1fr; gap:10px;">
-        <div>❌ <b>Essential</b> : 1 Site / 1 Capteur maximum</div>
-        <div>✅ <b>Business</b> : Multi-sites / Multi-capteurs / IA / Rapports PDF</div>
-    </div>
-    <button
-        style="padding:14px 24px; border:none; border-radius:12px; background:#00c896; color:#081120; font-weight:700; cursor:pointer;"
-        onclick="window.location.href='pricing.html'">
-        Passer Premium Business
-    </button>
-</div>
-`;
-}
+
 
 /*
 =========================================
@@ -644,18 +734,22 @@ INIT FEATURES
 */
 
 async function initDashboard(){
+
 canAccessMultiSite =
 
 await canUseMultiSite();
 
+
 canAccessMultiSensor =
 
 await canUseMultiSensor();
-if(!canAccessMultiSite){
-    showFreeBanner();
-}
-loadDashboard();
+
+
+await loadDashboard();
+
+
 startRealtime();
+
 }
 
 </script>
