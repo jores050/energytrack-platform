@@ -291,6 +291,8 @@ id="sitesContainer">
 
 const charts = {};
 let cachedTelemetryBySite = {}; // Permet de filtrer le graphique côté client sans requêter Supabase à chaque clic
+    let realtimeTimeout =
+null;
 
 let canAccessMultiSite = false; // Devient true via initDashboard si l'utilisateur possède l'abonnement Business
 let canAccessMultiSensor =
@@ -723,6 +725,30 @@ function generateChart(siteId, targetSensorId) {
 }
 
 function triggerChartFilter(siteId) {
+    function scheduleReload(){
+
+clearTimeout(
+
+realtimeTimeout
+
+);
+
+
+realtimeTimeout =
+
+setTimeout(
+
+()=>{
+
+loadDashboard();
+
+},
+
+5000
+
+);
+
+}
     const dropdown = document.getElementById(`select-chart-${siteId}`);
     if(dropdown) {
         generateChart(siteId, dropdown.value);
@@ -736,11 +762,73 @@ REALTIME
 */
 
 function startRealtime(){
+
 supabaseClient
-.channel('dashboard-live')
-.on('postgres_changes', { event:'INSERT', schema:'public', table:'telemetry' }, () => { loadDashboard(); })
-.on('postgres_changes', { event:'INSERT', schema:'public', table:'alerts' }, () => { loadDashboard(); })
+
+.channel(
+
+'dashboard-live'
+
+)
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:
+
+'INSERT',
+
+schema:
+
+'public',
+
+table:
+
+'telemetry'
+
+},
+
+()=>{
+
+scheduleReload();
+
+}
+
+)
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:
+
+'INSERT',
+
+schema:
+
+'public',
+
+table:
+
+'alerts'
+
+},
+
+()=>{
+
+scheduleReload();
+
+}
+
+)
+
 .subscribe();
+
 }
 
 /*
