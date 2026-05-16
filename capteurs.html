@@ -507,7 +507,6 @@ document
 
 ).value;
 
-/* Récupération de la nouvelle option sélectionnée */
 const sensorClass = 
 
 document
@@ -517,6 +516,12 @@ document
 'sensor_class'
 
 ).value;
+
+/* Sécurité : On vérifie que le site et la classe du capteur ont bien été sélectionnés */
+if (!site || !sensorClass || !name || !type || !serial) {
+    alert("Veuillez remplir tous les champs et faire les sélections requises.");
+    return;
+}
 
 const {
 
@@ -548,7 +553,7 @@ type,
 serial_number:
 serial,
 
-sensor_class: // <-- Remplace ici par le nom exact de ta colonne Supabase si besoin
+sensor_class:
 sensorClass,
 
 status:
