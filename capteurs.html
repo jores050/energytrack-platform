@@ -637,7 +637,7 @@ document.getElementById(
 `<div class="form">
 
 <select id="site">
-
+<option value="" disabled selected hidden>Sélectionner un site</option>
 ${
 
 sites.map(
@@ -662,7 +662,9 @@ ${s.name}
 
 </select>
 
+
 <select id="sensor_class">
+<option value="" disabled selected hidden>Catégorie (Global / Appareil fixe)</option>
 
 <option value="Global">Global</option>
 
