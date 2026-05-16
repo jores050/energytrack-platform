@@ -144,6 +144,7 @@ background:
 
 color:
 white;
+box-sizing: border-box;
 
 }
 
@@ -487,16 +488,6 @@ document
 
 ).value;
 
-const type =
-
-document
-
-.getElementById(
-
-'type'
-
-).value;
-
 const serial =
 
 document
@@ -507,7 +498,7 @@ document
 
 ).value;
 
-const sensorClass = 
+const sensorClass = 
 
 document
 
@@ -517,10 +508,15 @@ document
 
 ).value;
 
-/* Sécurité : On vérifie que le site et la classe du capteur ont bien été sélectionnés */
+/* Si la classe est 'Global', on attribue automatiquement la valeur 'Global' au type */
+const type = sensorClass === 'Global'
+    ? 'Global'
+    : document.getElementById('type').value;
+
+/* Sécurité : On valide l'ensemble des champs requis selon la situation */
 if (!site || !sensorClass || !name || !type || !serial) {
-    alert("Veuillez remplir tous les champs et faire les sélections requises.");
-    return;
+    alert("Veuillez remplir tous les champs et faire les sélections requises.");
+    return;
 }
 
 const {
@@ -668,7 +664,7 @@ ${s.name}
 </select>
 
 
-<select id="sensor_class">
+<select id="sensor_class" onchange="toggleTypeField()">
 <option value="" disabled selected hidden>Sélectionner le type de capteur</option>
 
 <option value="Global">Global</option>
@@ -689,7 +685,7 @@ placeholder="Nom capteur">
 
 id="type"
 
-placeholder="Type appareil">
+placeholder="Nom de l'appareil">
 
 
 <input
@@ -712,6 +708,18 @@ Ajouter
 
 ;
 
+}
+
+/* Fonction permettant de basculer l'affichage du champ type d'appareil */
+function toggleTypeField() {
+    const sensorClass = document.getElementById('sensor_class').value;
+    const typeInput = document.getElementById('type');
+    
+    if (sensorClass === 'Global') {
+        typeInput.style.display = 'none';
+    } else {
+        typeInput.style.display = 'block';
+    }
 }
 
 
