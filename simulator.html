@@ -495,7 +495,7 @@ document
 
 selector.innerHTML=
 
-'<option>Choisir site</option>';
+'<option value="">Choisir site</option>';
 
 
 
@@ -582,7 +582,7 @@ document
 
 selector.innerHTML=
 
-'<option>Choisir capteur</option>';
+'<option value="">Choisir capteur</option>';
 
 
 
@@ -644,29 +644,33 @@ document
 )
 
 .value;
-
-
-
 if(
 
 !site
 
 ||
 
+site === 'Choisir site'
+
+||
+
 !sensor
+
+||
+
+sensor === 'Choisir capteur'
 
 ){
 
 alert(
 
-'Sélectionnez site + capteur'
+'Sélectionnez un site et un capteur'
 
 );
 
 return;
 
 }
-
 
 
 simulation=true;
