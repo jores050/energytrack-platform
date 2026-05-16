@@ -386,8 +386,18 @@ const container =
 document.getElementById(
 
 'sitesContainer'
-
 );
+
+
+if(
+
+container.innerHTML===''
+
+){
+
+container.innerHTML='';
+
+}
 
 
 const firstLoad =
@@ -615,15 +625,13 @@ data.kwh*tariff
     }
 
     // Injection dynamique de la carte du site dans la grille principale
-    if(
-
-firstLoad
-
-){
-
-container.innerHTML += `
+    container.innerHTML += `
 
 <div class="site-card">
+
+...
+
+`;
         
         <div class="site-header">
             <div>
