@@ -645,7 +645,10 @@ data.kwh*tariff
             <span>❤️ Santé : <b style=" color: ${healthColor} ">${healthPercentage}%</b></span>
         </div>
 <div class="metrics-grid">
-        <div class="metric-box">
+
+<!-- Puissance -->
+
+<div class="metric-box">
 
 <div class="metric-title">
 
@@ -656,10 +659,7 @@ data.kwh*tariff
 
 <div
 class="metric-value"
-
-id="power-${site.id}"
-
->
+id="power-${site.id}">
 
 ${Math.round(
 latest.power_w
@@ -671,6 +671,8 @@ latest.power_w
 
 
 
+<!-- Energie -->
+
 <div class="metric-box">
 
 <div class="metric-title">
@@ -678,14 +680,11 @@ latest.power_w
 🔋 Énergie consommée
 
 </div>
-</div>
+
 
 <div
 class="metric-value"
-
-id="energy-${site.id}"
-
->
+id="energy-${site.id}">
 
 ${
 
@@ -699,7 +698,7 @@ totalKwh*1000
 
 )
 
-+'Wh'
++' Wh'
 
 :
 
@@ -707,7 +706,9 @@ totalKwh.toFixed(
 
 2
 
-)+' kWh'
+)
+
++' kWh'
 
 }
 
@@ -715,8 +716,171 @@ totalKwh.toFixed(
 
 </div>
 
-            <div class="metric-box" style="border: 1px solid rgba(255,181,71,0.15);">
-                <div class="metric-title" style="color:#ffb547;">🔥 Top Appareil</div>
+
+
+<!-- Cout -->
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+💰 Coût cumulé
+
+</div>
+
+
+<div class="metric-value">
+
+${estimatedCost}
+
+FCFA
+
+</div>
+
+</div>
+
+
+
+<!-- Disponibilité -->
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+🟢 Disponibilité
+
+</div>
+
+
+<div class="metric-value">
+
+${healthPercentage}%
+
+</div>
+
+
+<div style="
+font-size:12px;
+margin-top:8px;
+color:${healthColor};
+">
+
+${onlineCount}
+
+/
+
+${totalSensorsCount}
+
+ONLINE
+
+</div>
+
+</div>
+
+
+
+<!-- Top appareil -->
+
+<div
+class="metric-box"
+
+style="
+border:
+1px solid rgba(
+255,
+181,
+71,
+0.15
+);
+">
+
+<div
+class="metric-title"
+
+style="
+color:
+#ffb547;
+">
+
+🔥 Top appareil
+
+</div>
+
+
+<div
+class="metric-value"
+
+style="
+font-size:
+14px;
+
+line-height:
+1.4;
+">
+
+${topSensorName}
+
+
+<br>
+
+
+<span style="
+font-size:
+20px;
+
+color:
+#ffb547;
+">
+
+${topSensorPower}
+
+W
+
+</span>
+
+</div>
+
+</div>
+
+
+
+<!-- Alertes -->
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+⚠ Alertes actives
+
+</div>
+
+
+<div class="metric-value">
+
+${activeAlerts.length}
+
+</div>
+
+
+<div style="
+font-size:
+12px;
+
+margin-top:
+8px;
+
+color:
+#ff4c61;
+">
+
+Diagnostics
+
+</div>
+
+</div>
+
+</div>
+
                 <div class="metric-value" style="font-size:14px; margin-top:5px; line-height:1.4; color:#ffffff;">
                     ${topSensorName} <br><span style="font-size:20px; font-weight:700; color:#ffb547;">${topSensorPower} W</span>
                 </div>
