@@ -293,7 +293,8 @@ const charts = {};
 let cachedTelemetryBySite = {}; // Permet de filtrer le graphique côté client sans requêter Supabase à chaque clic
 
 let canAccessMultiSite = false; // Devient true via initDashboard si l'utilisateur possède l'abonnement Business
-
+let canAccessMultiSensor =
+false;
 /*
 =========================================
 GET USER
@@ -365,9 +366,27 @@ for(const site of filteredSites){
     let activeSensors = sensors || [];
 
     // Application du Feature Flag "multisensor" : Si Essential, on ne retient que le premier capteur
-    if(!canAccessMultiSite && activeSensors.length > 1) {
-        activeSensors = activeSensors.slice(0, 1);
-    }
+ if(
+
+!canAccessMultiSensor
+
+&&
+
+activeSensors.length>1
+
+){
+
+activeSensors =
+
+activeSensors.slice(
+
+0,
+
+1
+
+);
+
+}
 
     const sensorIds = activeSensors.map(s => s.id);
 
@@ -721,15 +740,37 @@ INIT FEATURES
 */
 
 async function initDashboard(){
-// Appel de la fonction globale asynchrone issue de feature-access.js
-canAccessMultiSite = await canUseMultiSite();
 
-if(!canAccessMultiSite){
-    showFreeBanner();
+canAccessMultiSite =
+
+await canUseMultiSite();
+
+
+canAccessMultiSensor =
+
+await canUseMultiSensor();
+
+
+if(
+
+!canAccessMultiSite
+
+||
+
+!canAccessMultiSensor
+
+){
+
+showFreeBanner();
+
 }
 
-loadDashboard();
+
+await loadDashboard();
+
+
 startRealtime();
+
 }
 
 </script>
