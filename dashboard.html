@@ -637,52 +637,79 @@ container.innerHTML += `
 
         <div style="display:flex; gap:15px; margin-bottom:15px; font-size:12px; color:#94a3b8;">
             <span>🟢 Capteurs : <b>${onlineCount}/${totalSensorsCount}</b></span>
-            <span>❤️ Santé : <b style=" color: ${healthColor} ">${healthPercentage}%</b></span>
+            <span>🟢 Disponibilité : <b style=" color: ${healthColor} ">${healthPercentage}%</b></span>
         </div>
 
-        <div class="metrics-grid">
-            <div class="metric-box">
-                <div class="metric-title">Puissance Totale</div>
-                <div class="metric-value">${Math.round(latest.power_w)} W</div>
-            </div>
+      <div class="metric-box">
 
-            <div class="metric-box">
-                <div class="metric-title">Consommation</div>
-                <div class="metric-value">${totalKwh.toFixed(2)} kWh</div>
-            </div>
+<div class="metric-title">
+
+⚡ Puissance instantanée
+
+</div>
+
+
+<div
+class="metric-value"
+
+id="power-${site.id}"
+
+>
+
+${Math.round(
+latest.power_w
+)} W
+
+</div>
+
+</div>
+
+
+
 <div class="metric-box">
 
 <div class="metric-title">
 
-Capteurs actifs
-
-</div>
-
-<div class="metric-box">
-
-<div class="metric-title">
-
-Alertes actives
+🔋 Énergie consommée
 
 </div>
 
 
-<div class="metric-value">
+<div
+class="metric-value"
 
-${activeAlerts.length}
+id="energy-${site.id}"
+
+>
+
+${
+
+totalKwh<1
+
+?
+
+Math.round(
+
+totalKwh*1000
+
+)
+
++' Wh'
+
+:
+
+totalKwh.toFixed(
+
+2
+
+)+' kWh'
+
+}
 
 </div>
 
-
-<div style="
-font-size:12px;
-color:#ff4c61;
-margin-top:8px;
-">
-
+</div>
 Diagnostics
-
-</div>
 
 </div>
 <div class="metric-value">
@@ -711,8 +738,12 @@ ONLINE
 
 </div>
             <div class="metric-box">
-                <div class="metric-title">Coût estimé</div>
-                <div class="metric-value" style="color:#00c896;">${estimatedCost.toLocaleString()} F</div>
+                <div class="metric-title">
+
+💰 Coût cumulé
+
+</div>
+                <div class="metric-value" style="color:#00c896;">${estimatedCost.toLocaleString()} FCFA </div>
             </div>
 
             <div class="metric-box" style="border: 1px solid rgba(255,181,71,0.15);">
@@ -835,34 +866,44 @@ function generateChart(siteId, targetSensorId) {
         values.push(item.power_w);
     });
 
-    if(charts[siteId]){
-        charts[siteId].destroy();
-    }
+    if(
 
-    charts[siteId] = new Chart(ctx, {
-        type: 'line',
-        data: {
-            labels: labels,
-            datasets: [{
-                label: targetSensorId === "ALL" ? 'Puissance Totale Combinée (W)' : 'Puissance Appareil (W)',
-                data: values,
-                borderColor: '#00c896',
-                backgroundColor: 'rgba(0,200,150,0.08)',
-                fill: true,
-                tension: 0.35
-            }]
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: { labels: { color: '#ffffff', font: { family: 'Poppins' } } }
-            },
-            scales: {
-                x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } },
-                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } }
-            }
-        }
-    });
+charts[siteId]
+
+){
+
+charts[siteId]
+
+.data.labels=
+
+labels;
+
+
+charts[siteId]
+
+.data.datasets[0]
+
+.data=
+
+values;
+
+
+charts[siteId]
+
+.update();
+
+
+return;
+
+}
+
+
+
+charts[siteId]=
+
+new Chart(
+...
+);;
 }
 function scheduleReload(){
 
@@ -883,7 +924,7 @@ loadDashboard();
 
 },
 
-5000
+15000
 
 );
 
