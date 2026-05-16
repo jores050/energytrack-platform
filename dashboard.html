@@ -1,4 +1,3 @@
-```html id="dashboard-final"
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -129,6 +128,24 @@ border-radius:20px;
 
 margin-bottom:25px;
 
+}
+
+/* Styles pour les fonctionnalités verrouillées dans la sidebar */
+.nav-item.locked {
+opacity: 0.35;
+cursor: not-allowed;
+position: relative;
+}
+
+.badge-pro {
+background: #ffb547;
+color: #081120;
+font-size: 10px;
+font-weight: 700;
+padding: 2px 6px;
+border-radius: 4px;
+float: right;
+margin-top: 4px;
 }
 
 @keyframes pulse{
@@ -404,14 +421,14 @@ await supabaseClient
 
 .eq('status','ACTIVE');
 
-if(telemetry.length===0){
+if(!telemetry || telemetry.length===0){
 
 container.innerHTML += `
 
 <div class="site-card">
 
 <h2>
-${site.name}
+🏢 ${site.name}
 </h2>
 
 <p style="
@@ -459,7 +476,7 @@ let totalKwh=0;
 telemetry.forEach(item=>{
 
 totalKwh +=
-Number(item.kwh_total);
+Number(item.kwh_total || 0);
 
 });
 
@@ -540,7 +557,7 @@ Alertes actives
 </div>
 
 <div class="metric-value">
-${alerts.length}
+${alerts ? alerts.length : 0}
 </div>
 
 </div>
@@ -581,7 +598,7 @@ await supabaseClient
 
 .limit(12);
 
-if(telemetry.length===0){
+if(!telemetry || telemetry.length===0){
 
 continue;
 
@@ -602,7 +619,9 @@ const labels = [];
 
 const values = [];
 
-telemetry.reverse().forEach(item=>{
+const reversedTelemetry = [...telemetry].reverse();
+
+reversedTelemetry.forEach(item=>{
 
 labels.push(
 new Date(item.created_at)
@@ -809,7 +828,23 @@ Passer Premium
 
 `;
 
+// Brider visuellement le menu latéral gauche
+document.querySelectorAll('.premium-feature').forEach(link => {
+link.classList.add('locked');
+link.innerHTML += '<span class="badge-pro">PRO</span>';
+link.onclick = function(e) {
+e.preventDefault();
+alert("🔒 Cette option est réservée aux abonnés Premium.");
+};
+});
+
 }
+
+</script>
+
+<script src="js/feature-access.js"></script>
+
+<script>
 
 /*
 =========================================
@@ -819,6 +854,7 @@ INIT FEATURES
 
 async function initDashboard(){
 
+// Ajout du await indispensable car la vérification de l'abonnement interroge la BDD de manière asynchrone
 canAccessMultiSite =
 await canUseMultiSite();
 
@@ -834,12 +870,6 @@ startRealtime();
 
 }
 
-</script>
-
-<script src="js/feature-access.js"></script>
-
-<script>
-
 /*
 =========================================
 START
@@ -853,4 +883,3 @@ initDashboard();
 </body>
 
 </html>
-```
