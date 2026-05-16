@@ -487,13 +487,22 @@ ${sensor.name}
 }
 
 
-
 async function startSimulation(){
 
-if(simulation)return;
+if(simulation){
+
+console.log(
+
+'Simulation déjà active'
+
+);
+
+return;
+
+}
 
 
-const site=
+const site =
 
 document
 
@@ -506,7 +515,7 @@ document
 .value;
 
 
-const sensor=
+const sensor =
 
 document
 
@@ -519,10 +528,9 @@ document
 .value;
 
 
-
 console.log(
 
-'SITE',
+'SITE =',
 
 site
 
@@ -530,27 +538,26 @@ site
 
 console.log(
 
-'SENSOR',
+'SENSOR =',
 
 sensor
 
 );
 
 
-
 if(
 
-!site
+site === ''
 
 ||
 
-!sensor
+sensor === ''
 
 ){
 
 alert(
 
-'Sélectionnez site + capteur'
+'Sélectionnez un site ET un capteur'
 
 );
 
@@ -559,10 +566,30 @@ return;
 }
 
 
-
 simulation=true;
 
 
+document
+
+.getElementById(
+
+'log'
+
+)
+
+.innerHTML=
+
+'▶ Simulation démarrée<br>';
+
+
+
+const {
+
+error:updateError
+
+}
+
+=
 
 await supabaseClient
 
@@ -584,19 +611,24 @@ status:
 
 'id',
 
-sensor
+sensor);
+
+
+console.log(
+
+'UPDATE SENSOR',
+
+updateError
 
 );
 
 
-
-interval=
-
-setInterval(
+interval = setInterval(
 
 async()=>{
 
-const voltage=
+
+const voltage =
 
 Math.floor(
 
@@ -605,7 +637,7 @@ Math.random()*220
 )+40;
 
 
-const power=
+const power =
 
 Math.floor(
 
@@ -614,15 +646,9 @@ Math.random()*5000
 );
 
 
-const current=
+const current = (
 
-(
-
-power
-
-/
-
-voltage
+power/voltage
 
 ).toFixed(
 
@@ -631,9 +657,7 @@ voltage
 );
 
 
-const kwh=
-
-(
+const kwh=(
 
 power*5
 
@@ -735,14 +759,43 @@ error
 );
 
 
-
-if(error){
-
-console.error(
+if(
 
 error
 
-);
+){
+
+document
+
+.getElementById(
+
+'log'
+
+)
+
+.innerHTML=
+
+'❌ '
+
++
+
+error.message
+
++
+
+'<br>'
+
++
+
+document
+
+.getElementById(
+
+'log'
+
+)
+
+.innerHTML;
 
 return;
 
@@ -850,6 +903,7 @@ document
 );
 
 }
+
 
 
 
