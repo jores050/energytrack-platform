@@ -381,8 +381,30 @@ if(!canAccessMultiSite){
 filteredSites = sites.slice(0,1);
 }
 
-const container = document.getElementById('sitesContainer');
-container.innerHTML = '';
+const container =
+
+document.getElementById(
+
+'sitesContainer'
+
+);
+
+
+const firstLoad =
+
+container.innerHTML === '';
+
+
+
+if(
+
+firstLoad
+
+){
+
+container.innerHTML='';
+
+}
 
 if(filteredSites.length === 0){
 container.innerHTML = `
@@ -593,8 +615,15 @@ data.kwh*tariff
     }
 
     // Injection dynamique de la carte du site dans la grille principale
-    container.innerHTML += `
-    <div class="site-card">
+    if(
+
+firstLoad
+
+){
+
+container.innerHTML += `
+
+<div class="site-card">
         
         <div class="site-header">
             <div>
@@ -765,7 +794,14 @@ font-weight:600;
     `;
 
     // Rendu graphique initial unifié
-    generateChart(site.id, "ALL");
+  `;
+
+}
+
+generateChart(
+site.id,
+"ALL"
+);
 }
 
 }
