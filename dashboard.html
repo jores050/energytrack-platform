@@ -5,15 +5,192 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
 
-<title>Dashboard EnergyTrack</title>
+<title>
+Dashboard EnergyTrack
+</title>
 
-<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet"
+href="css/style.css">
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap"
+rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+<script src="js/supabase.js"></script>
+
+<style>
+
+.site-grid{
+display:grid;
+grid-template-columns:
+repeat(auto-fit,minmax(420px,1fr));
+gap:25px;
+margin-top:30px;
+}
+
+.site-card{
+background:
+linear-gradient(145deg,#182235,#101826);
+padding:25px;
+border-radius:26px;
+border:1px solid rgba(255,255,255,0.05);
+transition:0.3s;
+}
+
+.site-card:hover{
+transform:translateY(-5px);
+box-shadow:
+0 20px 40px rgba(0,0,0,0.35);
+}
+
+.site-header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:25px;
+}
+
+.status-badge{
+padding:8px 14px;
+border-radius:999px;
+font-size:12px;
+font-weight:600;
+}
+
+.green{
+background:rgba(0,200,150,0.15);
+color:#00c896;
+}
+
+.orange{
+background:rgba(255,181,71,0.15);
+color:#ffb547;
+}
+
+.red{
+background:rgba(255,76,97,0.15);
+color:#ff4c61;
+}
+
+.metrics-grid{
+display:grid;
+grid-template-columns:repeat(2,1fr);
+gap:20px;
+margin-top:20px;
+}
+
+.metric-box{
+background:#0f1729;
+padding:18px;
+border-radius:18px;
+}
+
+.metric-title{
+font-size:13px;
+color:#94a3b8;
+}
+
+.metric-value{
+font-size:24px;
+margin-top:10px;
+font-weight:700;
+}
+
+.live-dot{
+width:10px;
+height:10px;
+border-radius:50%;
+background:#00c896;
+display:inline-block;
+margin-right:8px;
+animation:pulse 1s infinite;
+}
+
+.premium-banner{
+background:
+linear-gradient(135deg, rgba(255,181,71,0.15), rgba(24,34,53,0.4));
+border:
+1px solid rgba(255,181,71,0.3);
+padding:22px;
+border-radius:20px;
+margin-bottom:25px;
+}
+
+/* Nouveaux composants UX d'analyse multi-capteurs */
+.sensor-selector-container {
+margin-top: 20px;
+display: flex;
+flex-direction: column;
+gap: 8px;
+}
+
+.sensor-select {
+width: 100%;
+padding: 12px;
+background: #0f1729;
+color: #ffffff;
+border: 1px solid rgba(255,255,255,0.1);
+border-radius: 12px;
+outline: none;
+font-family: 'Poppins', sans-serif;
+font-size: 14px;
+cursor: pointer;
+}
+
+.analysis-section {
+background: rgba(15, 23, 41, 0.6);
+border-radius: 16px;
+padding: 16px;
+margin-top: 15px;
+border: 1px solid rgba(255,255,255,0.02);
+}
+
+.analysis-title {
+font-size: 12px;
+color: #94a3b8;
+font-weight: 600;
+letter-spacing: 0.5px;
+margin-bottom: 10px;
+text-transform: uppercase;
+}
+
+.data-row {
+display: flex;
+justify-content: space-between;
+align-items: center;
+font-size: 13px;
+padding: 8px 0;
+border-bottom: 1px solid rgba(255,255,255,0.05);
+}
+
+.data-row:last-child {
+border-bottom: none;
+}
+
+.premium-locked-box {
+background: rgba(15, 23, 41, 0.8);
+border: 1px dashed rgba(255, 181, 71, 0.2);
+padding: 15px;
+border-radius: 14px;
+text-align: center;
+margin-top: 15px;
+}
+
+@keyframes pulse{
+0%{ opacity:0.3; transform:scale(1); }
+50%{ opacity:1; transform:scale(1.2); }
+100%{ opacity:0.3; transform:scale(1); }
+}
+
+</style>
 
 </head>
 
@@ -25,121 +202,86 @@
 Energy<span>Track</span>
 </div>
 
-<a class="nav-item active" href="dashboard.html">
+<a class="nav-item active"
+href="dashboard.html">
 🏠 Dashboard
 </a>
 
-<a class="nav-item" href="consommation.html">
+<a class="nav-item"
+href="consommation.html">
 ⚡ Consommation
 </a>
 
-<a class="nav-item" href="alertes.html">
+<a class="nav-item"
+href="alertes.html">
 🔔 Alertes
 </a>
 
-<a class="nav-item" href="rapports.html">
+<a class="nav-item premium-feature"
+href="rapports.html">
 📊 Rapports
 </a>
 
-<a class="nav-item" href="sites.html">
+<a class="nav-item premium-feature"
+href="sites.html">
 🏢 Multi-sites
 </a>
 
-<a class="nav-item" href="capteurs.html">
+<a class="nav-item"
+href="capteurs.html">
 📡 Capteurs IoT
 </a>
 
-<a class="nav-item" href="ia.html">
+<a class="nav-item premium-feature"
+href="ia.html">
 🤖 Analyse IA
 </a>
 
-<a class="nav-item" href="parametres.html">
+<a class="nav-item"
+href="parametres.html">
 ⚙️ Paramètres
 </a>
 
-<div class="nav-item" onclick="logoutUser()">
-🚪 Déconnexion
 </div>
 
-</div>
+<div class="main"
+style="display:block;">
 
-<div class="main" style="display:block;">
+<div id="subscriptionBanner"></div>
 
-<div class="topbar">
+<div style="
+display:flex;
+justify-content:space-between;
+align-items:center;
+flex-wrap:wrap;
+gap:15px;
+margin-bottom:20px;
+">
 
-<div class="title">
+<div>
 
 <h1>
-Dashboard Énergétique
+Dashboard EnergyTrack
 </h1>
 
-<p>
-Monitoring temps réel des installations électriques
+<p style="
+margin-top:10px;
+color:#94a3b8;
+">
+
+<span class="live-dot"></span>
+
+Supervision énergétique analytique multi-capteurs.
+
 </p>
 
 </div>
 
 </div>
 
-<div class="card-grid">
-
-<div class="card">
-
-<div class="card-title">
-Facture estimée
-</div>
-
-<div class="card-value" id="facture">
-47 200 FCFA
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Économie estimée
-</div>
-
-<div class="card-value green">
-12 400 FCFA
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-Groupe électrogène
-</div>
-
-<div class="card-value orange">
-18h
-</div>
-
-</div>
-
-<div class="card">
-
-<div class="card-title">
-État réseau SBEE
-</div>
-
-<div class="card-value red">
-Coupure détectée
-</div>
-
-</div>
-
-</div>
-
-<div class="section">
-
-<h2>
-Consommation hebdomadaire
-</h2>
-
-<canvas id="chart"></canvas>
+<div
+class="site-grid"
+id="sitesContainer">
 
 </div>
 
@@ -147,110 +289,901 @@ Consommation hebdomadaire
 
 <script>
 
-if(localStorage.getItem('sensorConfigured')!=='true'){
+const charts = {};
+let cachedTelemetryBySite = {}; // Permet de filtrer le graphique côté client sans requêter Supabase à chaque clic
+    let realtimeTimeout =
+null;
 
+let canAccessMultiSite = false; // Devient true via initDashboard si l'utilisateur possède l'abonnement Business
+let canAccessMultiSensor =
+false;
+/*
+=========================================
+GET USER
+=========================================
+*/
+
+async function getUser(){
+const { data:userData } = await supabaseClient.auth.getUser();
+if(!userData.user){
 window.location.href='auth.html';
+return null;
+}
+return userData.user;
+}
+
+/*
+=========================================
+LOAD DASHBOARD
+=========================================
+*/
+
+async function loadDashboard(){
+const user = await getUser();
+    const {
+
+data:userSettings
 
 }
 
-function logoutUser(){
+=
 
-localStorage.removeItem('energytrackUser');
+await supabaseClient
 
-localStorage.removeItem('paymentStatus');
+.from(
 
-localStorage.removeItem('deliveryStatus');
+'settings'
 
-localStorage.removeItem('sensorConfigured');
+)
 
-localStorage.removeItem('sensorCode');
+.select(
 
-alert('Déconnexion effectuée.');
+'tariff'
 
-window.location.href='index.html';
+)
+
+.eq(
+
+'user_id',
+
+user.id
+
+)
+
+.single();
+
+
+const tariff =
+
+userSettings?.tariff
+
+||
+
+91;
+if(!user){ return; }
+
+/*
+RECUPERATION DES SITES
+*/
+let sitesQuery = supabaseClient.from('sites').select('*').eq('user_id', user.id);
+const { data:sites, error: sitesError } = await sitesQuery;
+
+if(sitesError || !sites){
+console.log(sitesError);
+return;
+}
+
+/*
+FREE PLAN MANAGEMENT (ESSENTIAL)
+*/
+let filteredSites = sites;
+if(!canAccessMultiSite){
+filteredSites = sites.slice(0,1);
+}
+
+const container = document.getElementById('sitesContainer');
+container.innerHTML = '';
+
+if(filteredSites.length === 0){
+container.innerHTML = `
+<div class="site-card">
+<h2>Aucun site enregistré</h2>
+<p style="margin-top:20px; color:#94a3b8;">Ajoutez un site depuis le menu pour commencer le suivi.</p>
+</div>
+`;
+return;
+}
+
+/*
+BOUCLE DE CHARGEMENT MULTI-CAPTEURS DES SITES FILTRES
+*/
+for(const site of filteredSites){
+
+    // 1. Récupération des capteurs du site courant
+    const { data: sensors } = await supabaseClient
+        .from('sensors')
+        .select('*')
+        .eq('site_id', site.id);
+    
+    let activeSensors = sensors || [];
+
+    // Application du Feature Flag "multisensor" : Si Essential, on ne retient que le premier capteur
+ if(
+
+!canAccessMultiSensor
+
+&&
+
+activeSensors.length>1
+
+){
+
+activeSensors =
+
+activeSensors.slice(
+
+0,
+
+1
+
+);
 
 }
 
-const ctx=document.getElementById('chart');
+    const sensorIds = activeSensors.map(s => s.id);
 
-new Chart(ctx,{
+    // 2. Récupération des télémesures des capteurs retenus (avec jointure sensor pour récupérer le nom de l'appareil)
+    let currentTelemetry = [];
+    if(sensorIds.length > 0) {
+        const { data: telemetryData } = await supabaseClient
+            .from('telemetry')
+            .select('*, sensors(name)')
+            .in('sensor_id', sensorIds)
+            .order('created_at', {ascending: false});
+        currentTelemetry = telemetryData || [];
+    }
 
-type:'line',
+    // Sauvegarde en cache pour la gestion du filtrage graphique interactif
+    cachedTelemetryBySite[site.id] = currentTelemetry;
 
-data:{
+    // 3. Récupération des alertes actives liées aux capteurs de ce site
+    let activeAlerts = [];
+    if(sensorIds.length > 0) {
+        const { data: alertsData } = await supabaseClient
+            .from('alerts')
+            .select('*, sensors(name)')
+            .in('sensor_id', sensorIds)
+            .eq('status', 'ACTIVE');
+        activeAlerts = alertsData || [];
+    }
 
-labels:['Lun','Mar','Mer','Jeu','Ven','Sam','Dim'],
+    // Gestion de l'état d'un site vide de données
+    if(currentTelemetry.length === 0){
+        container.innerHTML += `
+        <div class="site-card">
+            <h2>🏢 ${site.name}</h2>
+            <p style="margin-top:20px; color:#94a3b8;">Aucune donnée disponible pour le ou les capteurs de ce site.</p>
+        </div>
+        `;
+        continue;
+    }
 
-datasets:[{
+    // CALCUL DES METRIQUES & KPIS GENERAUX
+    const latest = currentTelemetry[0];
+    
+    let statusText = 'SBEE OK';
+    let statusClass = 'green';
+    if(latest.source === 'GROUPE'){ statusText = 'GROUPE ACTIF'; statusClass = 'orange'; }
+    if(latest.voltage < 50){ statusText = 'COUPURE'; statusClass = 'red'; }
 
-label:'Consommation kWh',
+    // Phase 1 : Extraction Santé du système (ONLINE / TOTAL du site filtré)
+    const onlineCount = activeSensors.filter(s => s.status === 'ONLINE').length;
+    const totalSensorsCount = activeSensors.length;
+    const healthPercentage = totalSensorsCount > 0 ? Math.round((onlineCount / totalSensorsCount) * 100) : 0;
+let healthColor =
 
-data:[12,19,15,22,18,14,25],
+'#00c896';
 
-borderColor:'#00c896',
 
-backgroundColor:'rgba(0,200,150,0.1)',
+if(
 
-fill:true,
+healthPercentage<70
 
-tension:0.4
+)
 
-}]
+healthColor=
+
+'#ffb547';
+
+
+if(
+
+healthPercentage<40
+
+)
+
+healthColor=
+
+'#ff4c61';
+    // Phase 1 : Top Appareil Consommateur en puissance instantanée
+    const telemetrySortedByPower = [...currentTelemetry].sort((a,b) => b.power_w - a.power_w);
+    const topPowerRecord = telemetrySortedByPower[0];
+    const topSensorName = (topPowerRecord && topPowerRecord.sensors) ? topPowerRecord.sensors.name : 'Inconnu';
+    const topSensorPower = topPowerRecord ? Math.round(topPowerRecord.power_w) : 0;
+
+    // Phase 2 & 3 : Calcul des consommations cumulées par appareil, coût et dates clés
+    let totalKwh = 0;
+    let lastTransmissionTime = 'Aucune';
+    let lastPowerCutTime = 'Aucune coupure enregistrée';
+    const consumptionMapBySensor = {};
+
+    currentTelemetry.forEach(item => {
+        // Détection de la dernière panne survenue dans l'historique remonté
+        if(item.voltage < 50 && lastPowerCutTime === 'Aucune coupure enregistrée') {
+            lastPowerCutTime = new Date(item.created_at).toLocaleTimeString();
+        }
+
+        // Cumuls de kWh
+        const kwh = Number(item.kwh_total || 0);
+        const sName = item.sensors ? item.sensors.name : 'Générique';
+        
+        if(!consumptionMapBySensor[sName]) {
+            consumptionMapBySensor[sName] = { kwh: 0, power_w: 0 };
+        }
+        
+        // Ajout uniquement si c'est la valeur cumulée maximale (télémétrie descendante ordonnée)
+        if(kwh > consumptionMapBySensor[sName].kwh) {
+            consumptionMapBySensor[sName].kwh = kwh;
+        }
+    });
+
+    // Somme globale des kwh réels calculés par capteur
+    Object.keys(consumptionMapBySensor).forEach(key => {
+        totalKwh += consumptionMapBySensor[key].kwh;
+    });
+
+    if(currentTelemetry[0]) {
+        lastTransmissionTime = new Date(currentTelemetry[0].created_at).toLocaleTimeString();
+    }
+
+    const estimatedCost =
+
+Math.round(
+
+totalKwh*tariff
+
+);
+
+    // Generation HTML de la Phase 2 : Répartition Coût, Pourcentage, et Top 3
+    let breakdownHTML = '';
+    const sortedSensorsByCons = Object.entries(consumptionMapBySensor)
+        .sort((a, b) => b[1].kwh - a[1].kwh)
+        .slice(0, 3); // Isolation Top 3 Consommateurs (Phase 2)
+
+    sortedSensorsByCons.forEach(([name, data]) => {
+        const sensorCost =
+
+Math.round(
+
+data.kwh*tariff
+
+);
+        const percentage = totalKwh > 0 ? Math.round((data.kwh / totalKwh) * 100) : 0;
+        breakdownHTML += `
+            <div class="data-row">
+                <span>📡 ${name} (${percentage}%)</span>
+                <b>${sensorCost.toLocaleString()} FCFA</b>
+            </div>
+        `;
+    });
+
+    // Phase 1 : Alertes ciblées par appareil spécifique
+    let alertsHTML = '';
+    if(activeAlerts.length === 0) {
+        alertsHTML = `<div style="color:#00c896; font-size:13px;">✔ Aucun dysfonctionnement détecté</div>`;
+    } else {
+        activeAlerts.forEach(alt => {
+            const deviceLabel = alt.sensors ? alt.sensors.name : 'Général';
+            alertsHTML += `
+                <div class="data-row" style="color:#ff4c61; border-bottom: 1px solid rgba(255,76,97,0.1);">
+                    <span>⚠️ <b>${deviceLabel}</b> : ${  alt.description  ||  'Seuil dépassé'  }</span>
+                </div>
+            `;
+        });
+    }
+
+    // Injection dynamique de la carte du site dans la grille principale
+    container.innerHTML += `
+    <div class="site-card">
+        
+        <div class="site-header">
+            <div>
+                <h2>🏢 ${site.name}</h2>
+                <p style="margin-top:8px; color:#94a3b8;">📍 ${site.city}</p>
+            </div>
+            <div class="status-badge ${statusClass}">
+                ${statusText}
+            </div>
+        </div>
+
+        <div style="display:flex; gap:15px; margin-bottom:15px; font-size:12px; color:#94a3b8;">
+            <span>🟢 Capteurs : <b>${onlineCount}/${totalSensorsCount}</b></span>
+            <span>❤️ Santé : <b style=" color: ${healthColor} ">${healthPercentage}%</b></span>
+        </div>
+
+        <div class="metrics-grid">
+            <div class="metric-box">
+                <div class="metric-title">Puissance Totale</div>
+                <div class="metric-value">${Math.round(latest.power_w)} W</div>
+            </div>
+
+            <div class="metric-box">
+                <div class="metric-title">Consommation</div>
+                <div class="metric-value">${totalKwh.toFixed(2)} kWh</div>
+            </div>
+<div class="metric-box">
+
+<div class="metric-title">
+
+Capteurs actifs
+
+</div>
+
+<div class="metric-box">
+
+<div class="metric-title">
+
+Alertes actives
+
+</div>
+
+
+<div class="metric-value">
+
+${activeAlerts.length}
+
+</div>
+
+
+<div style="
+font-size:12px;
+color:#ff4c61;
+margin-top:8px;
+">
+
+Diagnostics
+
+</div>
+
+</div>
+<div class="metric-value">
+
+${totalSensorsCount}
+
+</div>
+
+
+<div style="
+font-size:
+12px;
+
+color:
+#94a3b8;
+
+margin-top:
+8px;
+">
+
+${onlineCount}
+
+ONLINE
+
+</div>
+
+</div>
+            <div class="metric-box">
+                <div class="metric-title">Coût estimé</div>
+                <div class="metric-value" style="color:#00c896;">${estimatedCost.toLocaleString()} F</div>
+            </div>
+
+            <div class="metric-box" style="border: 1px solid rgba(255,181,71,0.15);">
+                <div class="metric-title" style="color:#ffb547;">🔥 Top Appareil</div>
+                <div class="metric-value" style="font-size:14px; margin-top:5px; line-height:1.4; color:#ffffff;">
+                    ${topSensorName} <br><span style="font-size:20px; font-weight:700; color:#ffb547;">${topSensorPower} W</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="analysis-section">
+            <div class="analysis-title">📡 États Réseau & Électrique</div>
+            <div class="data-row"><span>Dernière émission IoT</span> <span style="font-family:'Orbitron';">${lastTransmissionTime}</span></div>
+            <div class="data-row"><span>Dernière coupure secteur</span> <span style="color:#ff4c61;">${lastPowerCutTime}</span></div>
+        </div>
+
+        <div class="analysis-section">
+            <div class="analysis-title">📊 Top Consommateurs & Coûts</div>
+            ${breakdownHTML}
+        </div>
+
+        <div class="analysis-section" style="background: rgba(255,76,97,0.02); border: 1px solid rgba(255,76,97,0.1);">
+            <div class="analysis-title" style="color:#ff4c61;">🔔 Diagnostics & Alertes Appareils</div>
+            ${alertsHTML}
+        </div>
+
+        <div class="sensor-selector-container">
+            <span class="metric-title">Analyse graphique ciblée :</span>
+            <select class="sensor-select" id="select-chart-${site.id}" onchange="triggerChartFilter('${site.id}')">
+                <option value="ALL">Tous les capteurs réunis</option>
+                ${activeSensors.map(s => `<option value="${s.id}">🔌 ${s.name}</option>`).join('')}
+            </select>
+        </div>
+
+        <div style="margin-top:25px;">
+            <canvas id="chart-${site.id}"></canvas>
+        </div>
+
+        <div class="analysis-section" style="margin-top:20px; background: rgba(255,255,255,0.01);">
+            <div class="analysis-title">✨ Modules Avancés</div>
+            ${  await hasFeature(  'ai'  )  ?  `
+                <div style="font-size:13px; color:#00c896; padding:5px 0;">
+                    🤖 <b>Analyse IA active :</b> Votre équipement "${topSensorName}" surconsomme de 30% par rapport à sa classe énergétique nominale.
+                </div>
+               <button
+
+onclick="
+
+exportPDF()
+
+"
+
+style="
+width:100%;
+padding:10px;
+margin-top:10px;
+background:#182235;
+border:1px solid #00c896;
+color:#00c896;
+border-radius:10px;
+cursor:pointer;
+font-weight:600;
+"
+
+>
+
+📥 Exporter rapport PDF
+
+</button>
+            ` : `
+                <div class="premium-locked-box">
+                    <span style="font-size:12px; color:#ffb547; font-weight:600;">🤖 Analyse IA & Exports PDF Verrouillés</span>
+                    <p style="font-size:11px; color:#94a3b8; margin-top:5px;">Passez au Plan Business Cloud pour activer l'audit prédictif IA.</p>
+                </div>
+            `}
+        </div>
+
+    </div>
+    `;
+
+    // Rendu graphique initial unifié
+    generateChart(site.id, "ALL");
+}
+
+}
+
+/*
+=========================================
+PHASE 2 — LOGIQUE DU FILTRE ET RENDU DE CHART.JS
+=========================================
+*/
+
+function generateChart(siteId, targetSensorId) {
+    const rawTelemetry = cachedTelemetryBySite[siteId] || [];
+    const ctx = document.getElementById('chart-' + siteId);
+    
+    if(!ctx || rawTelemetry.length === 0) return;
+
+    // Filtrage des données selon la sélection de la liste déroulante
+    let processDataset = rawTelemetry;
+    if(targetSensorId !== "ALL") {
+        processDataset = rawTelemetry.filter(t => t.sensor_id === targetSensorId);
+    }
+
+    // On isole les 12 points les plus récents et on les inverse pour l'affichage chronologique (gauche à droite)
+    const displayPoints = [...processDataset].slice(0, 12).reverse();
+
+    const labels = [];
+    const values = [];
+
+    displayPoints.forEach(item => {
+        labels.push(new Date(item.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}));
+        values.push(item.power_w);
+    });
+
+    if(charts[siteId]){
+        charts[siteId].destroy();
+    }
+
+    charts[siteId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: targetSensorId === "ALL" ? 'Puissance Totale Combinée (W)' : 'Puissance Appareil (W)',
+                data: values,
+                borderColor: '#00c896',
+                backgroundColor: 'rgba(0,200,150,0.08)',
+                fill: true,
+                tension: 0.35
+            }]
+        },
+        options: {
+            responsive: true,
+            plugins: {
+                legend: { labels: { color: '#ffffff', font: { family: 'Poppins' } } }
+            },
+            scales: {
+                x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } },
+                y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } }
+            }
+        }
+    });
+}
+function scheduleReload(){
+
+clearTimeout(
+
+realtimeTimeout
+
+);
+
+
+realtimeTimeout =
+
+setTimeout(
+
+()=>{
+
+loadDashboard();
 
 },
 
-options:{
+5000
 
-responsive:true,
-
-plugins:{
-
-legend:{
-
-labels:{
-
-color:'white'
+);
 
 }
+function triggerChartFilter(siteId) {
+    const dropdown = document.getElementById(`select-chart-${siteId}`);
+    if(dropdown) {
+        generateChart(siteId, dropdown.value);
+    }
+}
+
+/*
+=========================================
+REALTIME
+=========================================
+*/
+async function exportPDF(){
+
+alert(
+
+'Export PDF bientôt disponible'
+
+);
 
 }
+function startRealtime(){
+
+supabaseClient
+
+.channel(
+
+'dashboard-live'
+
+)
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:
+
+'INSERT',
+
+schema:
+
+'public',
+
+table:
+
+'telemetry'
 
 },
 
-scales:{
+()=>{
 
-x:{
+scheduleReload();
 
-ticks:{color:'white'},
+}
 
-grid:{color:'rgba(255,255,255,0.05)'}
+)
+
+.on(
+
+'postgres_changes',
+
+{
+
+event:
+
+'INSERT',
+
+schema:
+
+'public',
+
+table:
+
+'alerts'
 
 },
 
-y:{
+()=>{
 
-ticks:{color:'white'},
-
-grid:{color:'rgba(255,255,255,0.05)'}
+scheduleReload();
 
 }
 
-}
+)
+
+.subscribe();
 
 }
 
-});
+/*
+=========================================
+PHASE 1 — BANNIERE D'ABONNEMENT COMPARATIVE STRICTE
+=========================================
+*/
 
-setInterval(()=>{
+function showFreeBanner(){
 
-const random=Math.floor(Math.random()*10000)+40000;
+document.getElementById(
 
-document.getElementById('facture').innerHTML=
-random.toLocaleString()+' FCFA';
+'subscriptionBanner'
 
-},5000);
+).innerHTML=
+
+`
+
+<div class="premium-banner">
+
+
+<h3 style="
+margin-bottom:18px;
+color:#ffb547;
+font-family:'Orbitron';
+">
+
+Plan Essential
+
+</h3>
+
+
+
+<div style="
+display:grid;
+grid-template-columns:
+repeat(
+auto-fit,
+minmax(
+180px,
+1fr
+)
+);
+
+gap:
+15px;
+
+margin-bottom:
+20px;
+
+">
+
+
+<div style="
+background:
+rgba(
+255,
+76,
+97,
+0.08
+);
+
+padding:
+15px;
+
+border-radius:
+12px;
+">
+
+<b>
+
+❌ Essential
+
+</b>
+
+
+<p style="
+margin-top:
+10px;
+
+color:
+#94a3b8;
+">
+
+1 site
+
+<br>
+
+1 capteur
+
+</p>
+
+</div>
+
+
+
+<div style="
+background:
+rgba(
+0,
+200,
+150,
+0.08
+);
+
+padding:
+15px;
+
+border-radius:
+12px;
+">
+
+<b>
+
+🚀 Business
+
+</b>
+
+
+<p style="
+margin-top:
+10px;
+">
+
+∞ sites
+
+<br>
+
+∞ capteurs
+
+<br>
+
+IA
+
+<br>
+
+PDF
+
+</p>
+
+</div>
+
+
+</div>
+
+
+
+<button
+
+onclick="
+
+window.location.href=
+
+'pricing.html'
+
+"
+
+style="
+padding:
+14px 24px;
+
+background:
+#00c896;
+
+border:
+none;
+
+border-radius:
+12px;
+
+font-weight:
+700;
+
+cursor:
+pointer;
+"
+
+>
+
+🚀 Passer Premium Business
+
+</button>
+
+
+</div>
+
+`;
+
+}
+
+/*
+=========================================
+INIT FEATURES
+=========================================
+*/
+
+async function initDashboard(){
+
+canAccessMultiSite =
+
+await canUseMultiSite();
+
+
+canAccessMultiSensor =
+
+await canUseMultiSensor();
+
+
+if(
+
+!canAccessMultiSite
+
+&&
+
+!canAccessMultiSensor
+
+){
+
+showFreeBanner();
+
+}
+
+
+await loadDashboard();
+
+
+startRealtime();
+
+}
 
 </script>
 
+<script src="js/feature-access.js"></script>
+
+<script>
+/*
+=========================================
+START
+=========================================
+*/
+initDashboard();
+</script>
+
 </body>
+
 </html>
