@@ -440,7 +440,7 @@ ${sensor.status}
 }
 
 async function addSensor(){
-
+const sensorClass = document.getElementById('sensor_class').value;
 const site =
 
 document
@@ -513,7 +513,25 @@ serial,
 
 status:
 'ONLINE'
+const { error } = await supabaseClient
 
+.from('sensors')
+
+.insert([{
+
+    site_id: site,
+
+    name: name,
+
+    type: type,
+
+    serial_number: serial,
+
+   fonction_capteur: sensorClass, // <-- Ajoute cette ligne ici
+
+    status: 'ONLINE'
+
+}]);
 }]);
 
 
@@ -622,7 +640,10 @@ ${s.name}
 }
 
 </select>
-
+<select id="sensor_class">
+    <option value="Global">Global</option>
+    <option value="Appareil fixe">Appareil fixe</option>
+</select>
 
 <input
 
