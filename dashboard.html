@@ -318,6 +318,46 @@ LOAD DASHBOARD
 
 async function loadDashboard(){
 const user = await getUser();
+    const {
+
+data:userSettings
+
+}
+
+=
+
+await supabaseClient
+
+.from(
+
+'settings'
+
+)
+
+.select(
+
+'tariff'
+
+)
+
+.eq(
+
+'user_id',
+
+user.id
+
+)
+
+.single();
+
+
+const tariff =
+
+userSettings?.tariff
+
+||
+
+91;
 if(!user){ return; }
 
 /*
@@ -480,7 +520,13 @@ activeSensors.slice(
         lastTransmissionTime = new Date(currentTelemetry[0].created_at).toLocaleTimeString();
     }
 
-    const estimatedCost = Math.round(totalKwh * 91);
+    const estimatedCost =
+
+Math.round(
+
+totalKwh*tariff
+
+);
 
     // Generation HTML de la Phase 2 : Répartition Coût, Pourcentage, et Top 3
     let breakdownHTML = '';
@@ -489,7 +535,13 @@ activeSensors.slice(
         .slice(0, 3); // Isolation Top 3 Consommateurs (Phase 2)
 
     sortedSensorsByCons.forEach(([name, data]) => {
-        const sensorCost = Math.round(data.kwh * 91);
+        const sensorCost =
+
+Math.round(
+
+data.kwh*tariff
+
+);
         const percentage = totalKwh > 0 ? Math.round((data.kwh / totalKwh) * 100) : 0;
         breakdownHTML += `
             <div class="data-row">
