@@ -5,837 +5,1560 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Dashboard EnergyTrack</title>
 
-<link rel="stylesheet" href="css/style.css">
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script> -->
+<!-- <script src="js/supabase.js"></script> -->
+<!-- <script src="js/feature-access.js"></script> -->
 
 <style>
 /* =====================================================================
-   LAYOUT GRILLE SITES
+   VARIABLES & RESET
+   ===================================================================== */
+:root {
+  --bg:          #080d14;
+  --bg-card:     #0d1520;
+  --bg-deep:     #060b10;
+  --bg-panel:    #111b28;
+  --border:      rgba(255,255,255,0.06);
+  --border-glow: rgba(0, 220, 160, 0.2);
+
+  --green:       #00dca0;
+  --green-dim:   rgba(0, 220, 160, 0.12);
+  --green-glow:  rgba(0, 220, 160, 0.25);
+  --amber:       #f5a623;
+  --amber-dim:   rgba(245, 166, 35, 0.12);
+  --red:         #ff3e5e;
+  --red-dim:     rgba(255, 62, 94, 0.12);
+  --blue:        #3b82f6;
+  --blue-dim:    rgba(59, 130, 246, 0.12);
+  --purple:      #a855f7;
+  --purple-dim:  rgba(168, 85, 247, 0.12);
+
+  --text:        #e2e8f0;
+  --text-muted:  #64748b;
+  --text-dim:    #94a3b8;
+
+  --font-display: 'Orbitron', monospace;
+  --font-body:    'Syne', sans-serif;
+  --font-mono:    'JetBrains Mono', monospace;
+
+  --radius:      20px;
+  --radius-sm:   12px;
+  --sidebar-w:   240px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-body);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* =====================================================================
+   LAYOUT
+   ===================================================================== */
+.app-shell {
+  display: flex;
+  min-height: 100vh;
+}
+
+/* =====================================================================
+   SIDEBAR
+   ===================================================================== */
+.sidebar {
+  width: var(--sidebar-w);
+  background: var(--bg-deep);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  padding: 28px 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-family: var(--font-display);
+  font-size: 15px;
+  font-weight: 700;
+  color: var(--green);
+  letter-spacing: 2px;
+  padding: 0 24px 28px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 16px;
+}
+.logo span { color: var(--text-muted); font-weight: 400; }
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 24px;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-muted);
+  text-decoration: none;
+  border-left: 3px solid transparent;
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+.nav-item.active {
+  color: var(--green);
+  border-left-color: var(--green);
+  background: var(--green-dim);
+}
+.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
+.nav-badge {
+  margin-left: auto;
+  background: var(--amber-dim);
+  color: var(--amber);
+  font-size: 10px;
+  font-weight: 700;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-family: var(--font-mono);
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 16px 24px 0;
+  border-top: 1px solid var(--border);
+}
+.plan-badge {
+  background: var(--amber-dim);
+  border: 1px solid rgba(245,166,35,0.2);
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--amber);
+  font-family: var(--font-display);
+  letter-spacing: 1px;
+}
+
+/* =====================================================================
+   MAIN
+   ===================================================================== */
+.main {
+  margin-left: var(--sidebar-w);
+  flex: 1;
+  padding: 32px 36px;
+  max-width: calc(100vw - var(--sidebar-w));
+}
+
+/* =====================================================================
+   TOP BAR
+   ===================================================================== */
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 32px;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.topbar-title h1 {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 1px;
+}
+.topbar-title p {
+  margin-top: 8px;
+  color: var(--text-muted);
+  font-size: 13px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--green);
+  display: inline-block;
+  animation: pulse-dot 1.6s ease-in-out infinite;
+}
+@keyframes pulse-dot {
+  0%,100% { opacity: 0.4; transform: scale(1); box-shadow: 0 0 0 0 var(--green-glow); }
+  50%      { opacity: 1;   transform: scale(1.15); box-shadow: 0 0 0 5px transparent; }
+}
+
+.topbar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
+.btn {
+  padding: 10px 18px;
+  border-radius: var(--radius-sm);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  font-family: var(--font-body);
+  transition: all 0.2s;
+  letter-spacing: 0.3px;
+}
+.btn-primary { background: var(--green); color: #000; }
+.btn-primary:hover { background: #00f5b0; box-shadow: 0 0 20px var(--green-glow); }
+.btn-ghost {
+  background: transparent;
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+}
+.btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+/* =====================================================================
+   BANNIÈRE PLAN
+   ===================================================================== */
+.plan-banner {
+  background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(13,21,32,0.6));
+  border: 1px solid rgba(245,166,35,0.25);
+  border-radius: var(--radius);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  margin-bottom: 28px;
+  flex-wrap: wrap;
+}
+.plan-banner-text { font-size: 13px; color: var(--text-dim); }
+.plan-banner-text strong { color: var(--amber); }
+
+/* =====================================================================
+   SITE GRID
    ===================================================================== */
 .site-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
-  gap: 25px;
-  margin-top: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(480px, 1fr));
+  gap: 28px;
 }
 
 .site-card {
-  background: linear-gradient(145deg, #182235, #101826);
-  padding: 25px;
-  border-radius: 26px;
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: transform 0.3s, box-shadow 0.3s;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 28px;
+  animation: card-in 0.4s ease both;
+  transition: border-color 0.3s;
+}
+.site-card:hover { border-color: var(--border-glow); }
+@keyframes card-in {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-.site-card:hover {
-  transform: translateY(-5px);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35);
-}
-
-.site-header {
+/* ---- En-tête de carte ---- */
+.card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 15px;
-  margin-bottom: 25px;
+  align-items: flex-start;
+  margin-bottom: 24px;
+  gap: 12px;
 }
+.card-title { font-size: 15px; font-weight: 700; color: var(--text); }
+.card-subtitle { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
 
-/* =====================================================================
-   STATUS BADGE
-   ===================================================================== */
 .status-badge {
-  padding: 8px 14px;
+  padding: 6px 14px;
   border-radius: 999px;
-  font-size: 12px;
-  font-weight: 600;
-  transition: background 0.4s, color 0.4s;
+  font-size: 11px;
+  font-weight: 700;
+  font-family: var(--font-display);
+  letter-spacing: 0.8px;
+  white-space: nowrap;
+  transition: all 0.4s;
 }
-.green  { background: rgba(0, 200, 150, 0.15); color: #00c896; }
-.orange { background: rgba(255, 181, 71, 0.15);  color: #ffb547; }
-.red    { background: rgba(255, 76, 97, 0.15);   color: #ff4c61; }
+.status-green  { background: var(--green-dim);  color: var(--green); border: 1px solid rgba(0,220,160,0.2); }
+.status-orange { background: var(--amber-dim);  color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
+.status-red    { background: var(--red-dim);    color: var(--red);   border: 1px solid rgba(255,62,94,0.2); }
 
 /* =====================================================================
-   MÉTRIQUES GRID — 4 TUILES 2×2
+   BARRE SANTÉ
+   ===================================================================== */
+.health-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--text-muted);
+}
+.health-bar-track {
+  flex: 1;
+  height: 4px;
+  background: rgba(255,255,255,0.06);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.health-bar-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 0.6s ease, background 0.4s;
+}
+
+/* =====================================================================
+   MÉTRIQUES PRINCIPALES — GRILLE
    ===================================================================== */
 .metrics-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-  margin-top: 20px;
+  gap: 12px;
+  margin-bottom: 12px;
 }
 
 .metric-box {
-  background: #0f1729;
-  padding: 18px;
-  border-radius: 18px;
-  /* Transition douce sur les valeurs */
-  transition: box-shadow 0.3s;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  transition: border-color 0.3s, box-shadow 0.3s;
 }
-.metric-box:hover { box-shadow: 0 4px 20px rgba(0, 200, 150, 0.08); }
+.metric-box:hover { border-color: rgba(255,255,255,0.1); }
+.metric-box.accent-green { border-color: rgba(0,220,160,0.15); }
+.metric-box.accent-amber { border-color: rgba(245,166,35,0.15); }
+.metric-box.accent-red   { border-color: rgba(255,62,94,0.15); }
+.metric-box.accent-blue  { border-color: rgba(59,130,246,0.15); }
+.metric-box.span-full    { grid-column: 1 / -1; }
 
-.metric-title {
-  font-size: 12px;
-  color: #94a3b8;
-  font-weight: 500;
-  letter-spacing: 0.3px;
+.metric-label {
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--text-muted);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 10px;
 }
-
 .metric-value {
-  font-size: 24px;
-  margin-top: 10px;
-  font-weight: 700;
-  /* Transition visible sur changement de valeur */
+  font-family: var(--font-mono);
+  font-size: 22px;
+  font-weight: 500;
+  color: var(--text);
+  line-height: 1;
   transition: color 0.4s;
 }
-
-/* =====================================================================
-   LIVE DOT
-   ===================================================================== */
-.live-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-  background: #00c896;
-  display: inline-block;
-  margin-right: 8px;
-  animation: pulse 1.4s infinite;
-}
-
-/* =====================================================================
-   PREMIUM BANNER
-   ===================================================================== */
-.premium-banner {
-  background: linear-gradient(135deg, rgba(255, 181, 71, 0.15), rgba(24, 34, 53, 0.4));
-  border: 1px solid rgba(255, 181, 71, 0.3);
-  padding: 22px;
-  border-radius: 20px;
-  margin-bottom: 25px;
-}
-
-/* =====================================================================
-   SENSOR SELECTOR
-   ===================================================================== */
-.sensor-selector-container {
-  margin-top: 20px;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.sensor-select {
-  width: 100%;
-  padding: 12px;
-  background: #0f1729;
-  color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.1);
-  border-radius: 12px;
-  outline: none;
-  font-family: 'Poppins', sans-serif;
-  font-size: 14px;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-.sensor-select:focus { border-color: #00c896; }
-
-/* =====================================================================
-   SECTIONS D'ANALYSE
-   ===================================================================== */
-.analysis-section {
-  background: rgba(15, 23, 41, 0.6);
-  border-radius: 16px;
-  padding: 16px;
-  margin-top: 15px;
-  border: 1px solid rgba(255, 255, 255, 0.02);
-}
-
-.analysis-title {
+.metric-value.large { font-size: 28px; }
+.metric-sub {
+  margin-top: 6px;
   font-size: 11px;
-  color: #94a3b8;
+  color: var(--text-muted);
+}
+
+/* =====================================================================
+   BLOCS ÉLECTRIQUES TEMPS RÉEL (V / I / Hz / PF)
+   ===================================================================== */
+.elec-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.elec-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 13px 10px;
+  text-align: center;
+}
+.elec-label {
+  font-size: 10px;
+  color: var(--text-muted);
   font-weight: 600;
   letter-spacing: 0.6px;
-  margin-bottom: 10px;
   text-transform: uppercase;
 }
+.elec-value {
+  font-family: var(--font-display);
+  font-size: 16px;
+  font-weight: 700;
+  margin-top: 6px;
+  transition: color 0.4s;
+}
+.elec-unit {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
 
+/* =====================================================================
+   SECTION D'ANALYSE (génériques)
+   ===================================================================== */
+.analysis-section {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  margin-bottom: 12px;
+}
+.analysis-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
 .data-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  font-size: 13px;
+  font-size: 12px;
   padding: 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+  border-bottom: 1px solid var(--border);
+  gap: 10px;
 }
-.data-row:last-child { border-bottom: none; }
+.data-row:last-child { border-bottom: none; padding-bottom: 0; }
+.data-row-label { color: var(--text-dim); }
+.data-row-value { font-family: var(--font-mono); font-size: 12px; }
 
 /* =====================================================================
-   PREMIUM LOCKED BOX
+   BARRE DE RÉPARTITION SBEE vs GROUPE
    ===================================================================== */
-.premium-locked-box {
-  background: rgba(15, 23, 41, 0.8);
-  border: 1px dashed rgba(255, 181, 71, 0.2);
-  padding: 15px;
-  border-radius: 14px;
-  text-align: center;
-  margin-top: 15px;
+.cost-split {
+  margin-top: 10px;
+}
+.cost-split-bar {
+  height: 8px;
+  border-radius: 999px;
+  background: var(--bg-deep);
+  overflow: hidden;
+  display: flex;
+  margin: 8px 0;
+}
+.cost-split-sbee   { background: var(--green); transition: width 0.6s ease; }
+.cost-split-groupe { background: var(--amber); transition: width 0.6s ease; }
+.cost-split-legend {
+  display: flex;
+  gap: 16px;
+  font-size: 11px;
+  color: var(--text-muted);
+}
+.legend-dot {
+  display: inline-block;
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  margin-right: 5px;
+  vertical-align: middle;
 }
 
 /* =====================================================================
-   SQUELETTE DE CHARGEMENT (placeholder au premier rendu)
+   ÉCONOMIE POSSIBLE
+   ===================================================================== */
+.savings-box {
+  background: linear-gradient(135deg, rgba(0,220,160,0.06), rgba(13,21,32,0.6));
+  border: 1px solid rgba(0,220,160,0.15);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+.savings-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
+.savings-value { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--green); }
+.savings-note  { font-size: 10px; color: var(--text-muted); margin-top: 3px; }
+
+/* =====================================================================
+   CHRONOMÈTRE COUPURE
+   ===================================================================== */
+.outage-timer {
+  background: var(--red-dim);
+  border: 1px solid rgba(255,62,94,0.25);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 12px;
+  font-size: 12px;
+  display: none; /* caché par défaut, visible si coupure active */
+}
+.outage-timer.visible { display: flex; }
+.outage-time-display {
+  font-family: var(--font-display);
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--red);
+  font-variant-numeric: tabular-nums;
+}
+.outage-cost-live {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  color: var(--amber);
+}
+
+/* =====================================================================
+   STATUT CAPTEUR IoT
+   ===================================================================== */
+.iot-status-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.iot-chip {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 11px;
+  color: var(--text-dim);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-family: var(--font-mono);
+}
+.iot-chip-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+/* =====================================================================
+   BUFFER OFFLINE / 72H
+   ===================================================================== */
+.buffer-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 11px;
+  color: var(--text-muted);
+  margin-bottom: 12px;
+}
+.buffer-track {
+  flex: 1;
+  height: 3px;
+  background: var(--border);
+  border-radius: 999px;
+  overflow: hidden;
+}
+.buffer-fill {
+  height: 100%;
+  background: var(--blue);
+  border-radius: 999px;
+  transition: width 0.6s;
+}
+
+/* =====================================================================
+   ALERTES
+   ===================================================================== */
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--border);
+  font-size: 12px;
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
+.alert-content { flex: 1; }
+.alert-label { font-weight: 600; color: var(--text); }
+.alert-meta { color: var(--text-muted); margin-top: 2px; font-family: var(--font-mono); font-size: 11px; }
+.alert-ack-btn {
+  font-size: 10px;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--font-body);
+  white-space: nowrap;
+}
+.alert-ack-btn:hover { border-color: var(--green); color: var(--green); }
+
+/* =====================================================================
+   SÉLECTEUR CAPTEUR + GRAPHIQUE
+   ===================================================================== */
+.chart-controls {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chart-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
+.period-tabs { display: flex; gap: 4px; }
+.period-tab {
+  padding: 5px 10px;
+  border-radius: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-muted);
+  font-family: var(--font-body);
+  transition: all 0.2s;
+}
+.period-tab.active { background: var(--green-dim); border-color: var(--border-glow); color: var(--green); }
+
+.sensor-select {
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 7px 12px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  outline: none;
+  cursor: pointer;
+  transition: border-color 0.2s;
+}
+.sensor-select:focus { border-color: var(--green); }
+
+/* =====================================================================
+   MODULE IA / PREMIUM LOCK
+   ===================================================================== */
+.ai-block {
+  background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(13,21,32,0.6));
+  border: 1px solid rgba(168,85,247,0.2);
+  border-radius: var(--radius-sm);
+  padding: 14px 16px;
+}
+.ai-label { font-size: 11px; color: var(--purple); font-weight: 700; margin-bottom: 8px; letter-spacing: 0.5px; }
+.ai-message { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
+
+.premium-lock {
+  background: rgba(245,166,35,0.04);
+  border: 1px dashed rgba(245,166,35,0.2);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  text-align: center;
+}
+.premium-lock-title { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
+.premium-lock-desc  { font-size: 11px; color: var(--text-muted); }
+
+/* =====================================================================
+   SKELETON
    ===================================================================== */
 .skeleton {
-  background: linear-gradient(90deg, #1a2740 25%, #1f3050 50%, #1a2740 75%);
+  background: linear-gradient(90deg, #0d1520 25%, #111b28 50%, #0d1520 75%);
   background-size: 200% 100%;
-  animation: skeleton-shimmer 1.4s infinite;
-  border-radius: 8px;
+  animation: shimmer 1.5s infinite;
+  border-radius: 6px;
 }
-@keyframes skeleton-shimmer {
+@keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
 /* =====================================================================
-   ANIMATIONS GLOBALES
+   RAPPORT WHATSAPP BUTTON
    ===================================================================== */
-@keyframes pulse {
-  0%   { opacity: 0.3; transform: scale(1);   }
-  50%  { opacity: 1;   transform: scale(1.2); }
-  100% { opacity: 0.3; transform: scale(1);   }
+.whatsapp-btn {
+  width: 100%;
+  padding: 11px;
+  background: rgba(37,211,102,0.08);
+  border: 1px solid rgba(37,211,102,0.2);
+  border-radius: var(--radius-sm);
+  color: #25D366;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all 0.2s;
+  margin-top: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.whatsapp-btn:hover {
+  background: rgba(37,211,102,0.14);
+  box-shadow: 0 0 15px rgba(37,211,102,0.15);
 }
 
-/* Fade-in d'une carte lors du premier rendu */
-@keyframes cardIn {
-  from { opacity: 0; transform: translateY(12px); }
-  to   { opacity: 1; transform: translateY(0);    }
+/* =====================================================================
+   RESPONSIVE
+   ===================================================================== */
+@media (max-width: 900px) {
+  .sidebar { display: none; }
+  .main { margin-left: 0; padding: 20px; max-width: 100vw; }
+  .site-grid { grid-template-columns: 1fr; }
+  .elec-grid { grid-template-columns: repeat(2, 1fr); }
 }
-.site-card { animation: cardIn 0.35s ease both; }
 </style>
 </head>
 
 <body>
+<div class="app-shell">
 
 <!-- ================================================================
      SIDEBAR
      ================================================================ -->
-<div class="sidebar">
+<aside class="sidebar">
   <div class="logo">Energy<span>Track</span></div>
-  <a class="nav-item active"   href="dashboard.html">🏠 Dashboard</a>
-  <a class="nav-item"          href="consommation.html">⚡ Consommation</a>
-  <a class="nav-item"          href="alertes.html">🔔 Alertes</a>
-  <a class="nav-item premium-feature" href="rapports.html">📊 Rapports</a>
-  <a class="nav-item premium-feature" href="sites.html">🏢 Multi-sites</a>
-  <a class="nav-item"          href="capteurs.html">📡 Capteurs IoT</a>
-  <a class="nav-item premium-feature" href="ia.html">🤖 Analyse IA</a>
-  <a class="nav-item"          href="parametres.html">⚙️ Paramètres</a>
-</div>
+
+  <a class="nav-item active"   href="dashboard.html">
+    <span class="nav-icon">🏠</span> Dashboard
+  </a>
+  <a class="nav-item"          href="consommation.html">
+    <span class="nav-icon">⚡</span> Consommation
+  </a>
+  <a class="nav-item"          href="alertes.html">
+    <span class="nav-icon">🔔</span> Alertes
+    <span class="nav-badge" id="sidebar-alert-count">—</span>
+  </a>
+  <a class="nav-item"          href="rapports.html">
+    <span class="nav-icon">📊</span> Rapports
+  </a>
+  <a class="nav-item"          href="sites.html">
+    <span class="nav-icon">🏢</span> Multi-sites
+  </a>
+  <a class="nav-item"          href="capteurs.html">
+    <span class="nav-icon">📡</span> Capteurs IoT
+  </a>
+  <a class="nav-item"          href="ia.html">
+    <span class="nav-icon">🤖</span> Analyse IA
+  </a>
+  <a class="nav-item"          href="parametres.html">
+    <span class="nav-icon">⚙️</span> Paramètres
+  </a>
+
+  <div class="sidebar-footer">
+    <div class="plan-badge">ESSENTIAL</div>
+  </div>
+</aside>
 
 <!-- ================================================================
      MAIN
      ================================================================ -->
-<div class="main" style="display:block;">
+<main class="main">
 
-  <div id="subscriptionBanner"></div>
-
-  <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; margin-bottom:20px;">
-    <div>
-      <h1>Dashboard EnergyTrack</h1>
-      <p style="margin-top:10px; color:#94a3b8;">
+  <!-- TOP BAR -->
+  <div class="topbar">
+    <div class="topbar-title">
+      <h1>Dashboard</h1>
+      <p>
         <span class="live-dot"></span>
-        Supervision énergétique analytique multi-capteurs.
+        Supervision énergétique temps réel · Cotonou, Bénin
       </p>
+    </div>
+    <div class="topbar-actions">
+      <button class="btn btn-ghost" onclick="triggerWeeklyReport()">
+        📲 Rapport WhatsApp
+      </button>
+      <button class="btn btn-primary" onclick="window.location.href='pricing.html'">
+        🚀 Passer Business
+      </button>
     </div>
   </div>
 
-  <!-- La grille : les cartes sont créées une seule fois, puis mises à jour -->
+  <!-- BANNIÈRE PLAN -->
+  <div class="plan-banner" id="subscriptionBanner">
+    <div class="plan-banner-text">
+      <strong>Plan Essential actif :</strong> 1 site · 1 capteur · Alertes WhatsApp incluses.
+      Passez au <strong>Plan Business</strong> pour débloquer multi-sites, multi-capteurs, exports PDF et IA prédictive.
+    </div>
+    <button class="btn btn-primary" onclick="window.location.href='pricing.html'">Voir les plans</button>
+  </div>
+
+  <!-- GRILLE DES SITES -->
   <div class="site-grid" id="sitesContainer"></div>
 
+</main>
 </div>
 
 <!-- ================================================================
-     JAVASCRIPT PRINCIPAL
+     JAVASCRIPT
      ================================================================ -->
 <script>
 /* =================================================================
    ÉTAT GLOBAL
    ================================================================= */
-const charts = {};                  // instances Chart.js — réutilisées, jamais recréées
-let cachedTelemetryBySite = {};     // cache télémétrie par site — pour filtre graphique sans requête
-let realtimeTimeout       = null;   // debounce realtime
-let canAccessMultiSite    = false;
-let canAccessMultiSensor  = false;
+const charts          = {};
+const renderedSites   = new Set();
+let cachedTelemetry   = {};
+let realtimeTimeout   = null;
+let outageTickers     = {};     // timers chronomètre par site
 
-// IDs des sites déjà rendus dans le DOM (pour différencier 1er rendu vs mise à jour)
-const renderedSites = new Set();
+// Feature flags (lire depuis feature-access.js en prod)
+let canAccessMultiSite   = false;
+let canAccessMultiSensor = false;
+let canAccessAI          = false;
+
+/* =================================================================
+   DONNÉES MOCK (à remplacer par requêtes Supabase)
+   ================================================================= */
+const MOCK_SITES = [
+  { id: 'site-001', name: 'Boutique Gbèto', city: 'Cotonou — Cadjehoun' },
+  { id: 'site-002', name: 'Hôtel Fidjrossè', city: 'Cotonou — Fidjrossè' },
+];
+
+const MOCK_SENSORS = {
+  'site-001': [
+    { id: 'sens-001', name: 'Tableau Principal', status: 'ONLINE', firmware_v: '1.0.3', gsm_signal: -78 },
+    { id: 'sens-002', name: 'Groupe Électrogène', status: 'ONLINE', firmware_v: '1.0.3', gsm_signal: -82 },
+  ],
+  'site-002': [
+    { id: 'sens-003', name: 'Tableau Réception', status: 'ONLINE', firmware_v: '1.0.2', gsm_signal: -75 },
+  ],
+};
+
+function makeTelemetry(sensorId, isOutage = false, isGroupe = false) {
+  const now = Date.now();
+  return Array.from({ length: 24 }, (_, i) => ({
+    id: i,
+    sensor_id: sensorId,
+    created_at: new Date(now - i * 5 * 60 * 1000).toISOString(),
+    voltage:       isOutage && i < 3 ? 12 : (210 + Math.random() * 10),
+    current:       2.1 + Math.random() * 0.8,
+    power_w:       (isGroupe ? 1800 : 1200) + Math.random() * 600,
+    apparent_power: 2500 + Math.random() * 300,
+    power_factor:  0.87 + Math.random() * 0.1,
+    frequency_hz:  50 + (Math.random() - 0.5) * 0.4,
+    kwh_total:     14.5 + i * 0.15,
+    kwh_sbee:      isGroupe ? 9.2  : 14.5 + i * 0.15,
+    kwh_groupe:    isGroupe ? 5.3 : 0,
+    sbee_ok:       !(isOutage && i < 3),
+    source:        isGroupe ? 'GROUPE' : 'SBEE',
+    sensors:       { name: sensorId === 'sens-002' ? 'Groupe Électrogène' : 'Tableau Principal' },
+  }));
+}
+
+const MOCK_TELEMETRY = {
+  'site-001': [
+    ...makeTelemetry('sens-001', false, false),
+    ...makeTelemetry('sens-002', false, true),
+  ],
+  'site-002': [
+    ...makeTelemetry('sens-003', true, false), // coupure simulée
+  ],
+};
+
+const MOCK_ALERTS = {
+  'site-001': [],
+  'site-002': [
+    {
+      id: 1, type: 'SBEE_OUTAGE', severity: 'critical',
+      description: 'Coupure SBEE détectée · Tension 12V',
+      created_at: new Date(Date.now() - 18 * 60 * 1000).toISOString(),
+      acknowledged: false, sensors: { name: 'Tableau Réception' }
+    },
+    {
+      id: 2, type: 'HIGH_VOLTAGE', severity: 'warning',
+      description: 'Surtension détectée · 248V (seuil 245V)',
+      created_at: new Date(Date.now() - 2 * 3600 * 1000).toISOString(),
+      acknowledged: false, sensors: { name: 'Tableau Réception' }
+    },
+  ],
+};
+
+const MOCK_TARIFF = 91;   // FCFA/kWh SBEE
+const MOCK_TARIFF_GRP = 350; // FCFA/kWh groupe
 
 /* =================================================================
    UTILITAIRES
    ================================================================= */
-
-/** Formate l'énergie : <1 kWh → "245 Wh", ≥1 kWh → "1.2 kWh" */
 function formatEnergy(kwh) {
+  if (kwh === null || kwh === undefined) return '—';
   if (kwh < 1) return `${Math.round(kwh * 1000)} Wh`;
   return `${kwh.toFixed(2)} kWh`;
 }
 
-/** Formate un nombre en FCFA avec espace comme séparateur milliers */
 function formatFcfa(n) {
-  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
+  if (n === null || n === undefined) return '—';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f') + ' F';
 }
 
-/** Retourne { text, cssClass } selon état réseau */
-function resolveStatus(latest) {
-  if (!latest) return { text: 'HORS LIGNE', cssClass: 'red' };
-  if (latest.voltage < 50)           return { text: 'COUPURE',      cssClass: 'red'    };
-  if (latest.source === 'GROUPE')    return { text: 'GROUPE ACTIF', cssClass: 'orange' };
-  return                                    { text: 'SBEE OK',       cssClass: 'green'  };
+function formatTime(isoString) {
+  if (!isoString) return '—';
+  return new Date(isoString).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
 }
 
-/** Mise à jour douce d'un élément texte (évite le flash si identique) */
 function safeSetText(id, value) {
   const el = document.getElementById(id);
   if (el && el.textContent !== String(value)) el.textContent = value;
 }
 
-/** Mise à jour douce d'un attribut de classe */
-function safeSetClass(el, removePat, addCls) {
-  if (!el) return;
-  if (!el.classList.contains(addCls)) {
-    el.classList.remove(...removePat);
-    el.classList.add(addCls);
-  }
+function safeSetHTML(id, html) {
+  const el = document.getElementById(id);
+  if (el) el.innerHTML = html;
+}
+
+function resolveStatus(latest) {
+  if (!latest) return { text: 'HORS LIGNE', cls: 'status-red' };
+  if (latest.voltage < 50) return { text: 'COUPURE SBEE', cls: 'status-red' };
+  if (latest.source === 'GROUPE') return { text: 'GROUPE ACTIF', cls: 'status-orange' };
+  return { text: 'SBEE OK', cls: 'status-green' };
+}
+
+function gsmSignalLabel(dbm) {
+  if (!dbm) return '—';
+  if (dbm > -70) return 'Excellent';
+  if (dbm > -80) return 'Bon';
+  if (dbm > -90) return 'Faible';
+  return 'Très faible';
+}
+
+// Convertit dBm en % pour affichage
+function gsmSignalPct(dbm) {
+  if (!dbm) return 0;
+  return Math.max(0, Math.min(100, Math.round(((dbm + 120) / 70) * 100)));
 }
 
 /* =================================================================
-   AUTHENTIFICATION
+   CONSTRUCTION HTML D'UNE CARTE (premier rendu uniquement)
    ================================================================= */
-async function getUser() {
-  const { data: { user } } = await supabaseClient.auth.getUser();
-  if (!user) { window.location.href = 'auth.html'; return null; }
-  return user;
-}
-
-/* =================================================================
-   BANNIÈRE ABONNEMENT (affichée une seule fois)
-   ================================================================= */
-function showFreeBanner() {
-  const banner = document.getElementById('subscriptionBanner');
-  if (banner.innerHTML !== '') return; // déjà injectée
-  banner.innerHTML = `
-    <div class="premium-banner">
-      <h3 style="margin-bottom:18px; color:#ffb547; font-family:'Orbitron';">Plan Essential</h3>
-      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(180px,1fr)); gap:15px; margin-bottom:20px;">
-        <div style="background:rgba(255,76,97,0.08); padding:15px; border-radius:12px;">
-          <b>❌ Essential</b>
-          <p style="margin-top:10px; color:#94a3b8;">1 site<br>1 capteur</p>
-        </div>
-        <div style="background:rgba(0,200,150,0.08); padding:15px; border-radius:12px;">
-          <b>🚀 Business</b>
-          <p style="margin-top:10px;">∞ sites<br>∞ capteurs<br>IA<br>PDF</p>
-        </div>
-      </div>
-      <button onclick="window.location.href='pricing.html'"
-        style="padding:14px 24px; background:#00c896; border:none; border-radius:12px; font-weight:700; cursor:pointer;">
-        🚀 Passer Premium Business
-      </button>
-    </div>`;
-}
-
-/* =================================================================
-   GÉNÉRATION HTML INITIAL D'UNE CARTE SITE
-   (appelée UNE seule fois par site, au premier rendu)
-   ================================================================= */
-function buildSiteCardHTML(site, sensors, aiEnabled) {
+function buildSiteCardHTML(site, sensors) {
   const sid = site.id;
   const sensorOptions = sensors.map(s =>
-    `<option value="${s.id}">🔌 ${s.name}</option>`
+    `<option value="${s.id}">📡 ${s.name}</option>`
   ).join('');
 
-  const aiBlock = aiEnabled ? `
-    <div id="ai-block-${sid}" style="font-size:13px; color:#00c896; padding:5px 0;">
-      🤖 <b>Analyse IA active :</b> <span id="ai-msg-${sid}">Chargement…</span>
-    </div>
-    <button onclick="exportPDF()"
-      style="width:100%; padding:10px; margin-top:10px; background:#182235;
-             border:1px solid #00c896; color:#00c896; border-radius:10px;
-             cursor:pointer; font-weight:600;">
-      📥 Exporter rapport PDF
-    </button>` : `
-    <div class="premium-locked-box">
-      <span style="font-size:12px; color:#ffb547; font-weight:600;">🤖 Analyse IA & Exports PDF Verrouillés</span>
-      <p style="font-size:11px; color:#94a3b8; margin-top:5px;">
-        Passez au Plan Business Cloud pour activer l'audit prédictif IA.
-      </p>
-    </div>`;
+  const aiContent = canAccessAI
+    ? `<div class="ai-block">
+        <div class="ai-label">🤖 ANALYSE IA PRÉDICTIVE</div>
+        <div class="ai-message" id="ai-msg-${sid}">Analyse en cours…</div>
+        <button class="btn btn-ghost" style="margin-top:10px; width:100%; font-size:11px;"
+                onclick="exportPDF('${sid}')">📥 Exporter rapport PDF</button>
+       </div>`
+    : `<div class="premium-lock">
+        <div class="premium-lock-title">🤖 Analyse IA & Exports PDF — Plan Business requis</div>
+        <div class="premium-lock-desc">Débloquez l'audit prédictif, la maintenance préventive et les exports PDF.</div>
+       </div>`;
 
   return `
-  <div class="site-card" id="card-${sid}">
+<div class="site-card" id="card-${sid}">
 
-    <!-- EN-TÊTE SITE -->
-    <div class="site-header">
-      <div>
-        <h2>🏢 ${site.name}</h2>
-        <p style="margin-top:8px; color:#94a3b8;">📍 ${site.city}</p>
-      </div>
-      <div class="status-badge green" id="status-badge-${sid}">SBEE OK</div>
+  <!-- EN-TÊTE -->
+  <div class="card-header">
+    <div>
+      <div class="card-title">🏢 ${site.name}</div>
+      <div class="card-subtitle">📍 ${site.city}</div>
     </div>
+    <div class="status-badge status-green" id="status-badge-${sid}">SBEE OK</div>
+  </div>
 
-    <!-- SANTÉ / DISPONIBILITÉ -->
-    <div style="display:flex; gap:15px; margin-bottom:15px; font-size:12px; color:#94a3b8;">
-      <span>📡 Capteurs : <b id="sensor-count-${sid}">—</b></span>
-      <span>🟢 Disponibilité : <b id="health-val-${sid}" style="transition:color 0.4s;">—</b></span>
+  <!-- SANTÉ CAPTEURS -->
+  <div class="health-bar-row">
+    <span id="health-label-${sid}" style="min-width:140px;">Santé —</span>
+    <div class="health-bar-track">
+      <div class="health-bar-fill" id="health-fill-${sid}" style="width:0%; background:var(--green);"></div>
     </div>
+    <span id="health-pct-${sid}" style="min-width:30px; text-align:right;">—</span>
+  </div>
 
-    <!-- KPI GRID : 4 tuiles indépendantes (HTML propre, pas d'imbrication) -->
-    <div class="metrics-grid">
+  <!-- CHRONOMÈTRE COUPURE (visible uniquement si coupure active) -->
+  <div class="outage-timer" id="outage-timer-${sid}">
+    <span style="font-size:18px;">🔴</span>
+    <div>
+      <div style="font-size:11px; color:var(--red); font-weight:600; margin-bottom:4px;">COUPURE EN COURS</div>
+      <div class="outage-time-display" id="outage-time-${sid}">00:00:00</div>
+      <div class="outage-cost-live" id="outage-cost-${sid}">Coût groupe : — F</div>
+    </div>
+  </div>
 
-      <!-- Tuile 1 : Puissance instantanée -->
-      <div class="metric-box">
-        <div class="metric-title">⚡ Puissance instantanée</div>
-        <div class="metric-value" id="kpi-power-${sid}">— W</div>
+  <!-- PARAMÈTRES ÉLECTRIQUES TEMPS RÉEL (V / I / Hz / PF) -->
+  <div class="elec-grid">
+    <div class="elec-box">
+      <div class="elec-label">Tension</div>
+      <div class="elec-value" id="elec-v-${sid}" style="color:var(--blue);">—</div>
+      <div class="elec-unit">V (AC)</div>
+    </div>
+    <div class="elec-box">
+      <div class="elec-label">Courant</div>
+      <div class="elec-value" id="elec-i-${sid}" style="color:var(--green);">—</div>
+      <div class="elec-unit">A (RMS)</div>
+    </div>
+    <div class="elec-box">
+      <div class="elec-label">Fréquence</div>
+      <div class="elec-value" id="elec-hz-${sid}" style="color:var(--amber);">—</div>
+      <div class="elec-unit">Hz (réseau)</div>
+    </div>
+    <div class="elec-box">
+      <div class="elec-label">Facteur P.</div>
+      <div class="elec-value" id="elec-pf-${sid}" style="color:var(--purple);">—</div>
+      <div class="elec-unit">cos φ</div>
+    </div>
+  </div>
+
+  <!-- KPI PRINCIPAUX -->
+  <div class="metrics-grid">
+    <div class="metric-box accent-green">
+      <div class="metric-label">⚡ Puissance instantanée</div>
+      <div class="metric-value large" id="kpi-power-${sid}">— W</div>
+      <div class="metric-sub" id="kpi-apparent-${sid}">Apparente : — VA</div>
+    </div>
+    <div class="metric-box accent-amber">
+      <div class="metric-label">💰 Coût estimé (mois civil)</div>
+      <div class="metric-value large" id="kpi-cost-${sid}" style="color:var(--amber);">—</div>
+      <div class="metric-sub" id="kpi-kwh-month-${sid}">— kWh ce mois</div>
+    </div>
+    <div class="metric-box">
+      <div class="metric-label">🔋 Énergie totale cumulée</div>
+      <div class="metric-value" id="kpi-energy-${sid}">—</div>
+      <div class="metric-sub">Depuis démarrage capteur</div>
+    </div>
+    <div class="metric-box accent-red">
+      <div class="metric-label">⚠️ Alertes actives</div>
+      <div class="metric-value" id="kpi-alerts-${sid}" style="color:var(--red);">—</div>
+      <div class="metric-sub">Non acquittées</div>
+    </div>
+    <div class="metric-box span-full" style="background:rgba(0,220,160,0.04); border-color:rgba(0,220,160,0.12);">
+      <div class="metric-label">🔥 Top consommateur</div>
+      <div style="display:flex; align-items:center; justify-content:space-between; margin-top:6px;">
+        <span id="kpi-top-name-${sid}" style="font-size:13px; font-weight:600;">—</span>
+        <span class="metric-value" id="kpi-top-power-${sid}" style="color:var(--amber); font-size:20px;">— W</span>
       </div>
+    </div>
+  </div>
 
-      <!-- Tuile 2 : Énergie consommée -->
-      <div class="metric-box">
-        <div class="metric-title">🔋 Énergie consommée</div>
-        <div class="metric-value" id="kpi-energy-${sid}">— Wh</div>
+  <!-- RÉPARTITION SBEE vs GROUPE -->
+  <div class="analysis-section">
+    <div class="analysis-title">⚡ Répartition énergétique — SBEE vs Groupe</div>
+    <div class="cost-split">
+      <div style="display:flex; justify-content:space-between; font-size:12px; margin-bottom:4px;">
+        <span>Réseau SBEE (<span id="sbee-pct-${sid}">—</span>%)</span>
+        <span>Groupe (<span id="groupe-pct-${sid}">—</span>%)</span>
       </div>
-
-      <!-- Tuile 3 : Capteurs actifs (indépendant) -->
-      <div class="metric-box">
-        <div class="metric-title">📡 Capteurs actifs</div>
-        <div class="metric-value" id="kpi-sensors-${sid}">—</div>
-        <div style="font-size:12px; color:#94a3b8; margin-top:8px;" id="kpi-sensors-sub-${sid}">— ONLINE</div>
+      <div class="cost-split-bar">
+        <div class="cost-split-sbee"   id="sbee-bar-${sid}"   style="width:0%"></div>
+        <div class="cost-split-groupe" id="groupe-bar-${sid}" style="width:0%"></div>
       </div>
-
-      <!-- Tuile 4 : Alertes actives (indépendant) -->
-      <div class="metric-box">
-        <div class="metric-title">⚠️ Alertes actives</div>
-        <div class="metric-value" id="kpi-alerts-${sid}" style="color:#ff4c61;">—</div>
-        <div style="font-size:12px; color:#ff4c61; margin-top:8px;">Diagnostics</div>
+      <div class="cost-split-legend">
+        <span><span class="legend-dot" style="background:var(--green)"></span>SBEE (<span id="sbee-kwh-${sid}">—</span> kWh · <span id="sbee-cost-${sid}">—</span>)</span>
+        <span><span class="legend-dot" style="background:var(--amber)"></span>Groupe (<span id="grp-kwh-${sid}">—</span> kWh · <span id="grp-cost-${sid}">—</span>)</span>
       </div>
+    </div>
+    <div class="data-row" style="margin-top:10px;">
+      <span class="data-row-label">Surcoût groupe (vs réseau)</span>
+      <span class="data-row-value" id="groupe-premium-${sid}" style="color:var(--red);">—</span>
+    </div>
+  </div>
 
-      <!-- Tuile 5 : Coût cumulé (span 2 colonnes sur mobile) -->
-      <div class="metric-box" style="grid-column: 1 / -1; border:1px solid rgba(0,200,150,0.12);">
-        <div class="metric-title">💰 Coût cumulé</div>
-        <div class="metric-value" style="color:#00c896;" id="kpi-cost-${sid}">— F</div>
+  <!-- ÉCONOMIE POSSIBLE -->
+  <div class="savings-box">
+    <div>
+      <div class="savings-label">💡 ÉCONOMIE POSSIBLE (si 0% groupe)</div>
+      <div class="savings-note">En arrêtant le groupe hors heures d'ouverture</div>
+    </div>
+    <div>
+      <div class="savings-value" id="savings-val-${sid}">— F</div>
+      <div class="savings-note" style="text-align:right;">/mois estimé</div>
+    </div>
+  </div>
+
+  <!-- ÉTATS RÉSEAU -->
+  <div class="analysis-section">
+    <div class="analysis-title">📡 États réseau & électrique</div>
+    <div class="data-row">
+      <span class="data-row-label">Dernière émission IoT</span>
+      <span class="data-row-value" id="last-emit-${sid}">—</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-label">Dernière coupure SBEE</span>
+      <span class="data-row-value" id="last-cut-${sid}" style="color:var(--red);">—</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-label">Coupures (7 derniers jours)</span>
+      <span class="data-row-value" id="outage-count-${sid}">—</span>
+    </div>
+    <div class="data-row">
+      <span class="data-row-label">Durée totale coupures (7j)</span>
+      <span class="data-row-value" id="outage-duration-${sid}">—</span>
+    </div>
+  </div>
+
+  <!-- STATUT CAPTEUR IoT -->
+  <div class="analysis-section">
+    <div class="analysis-title">🔌 Statut capteurs IoT</div>
+    <div class="iot-status-row" id="iot-chips-${sid}"></div>
+    <div class="buffer-row">
+      <span>Buffer SD offline (72h)</span>
+      <div class="buffer-track">
+        <div class="buffer-fill" id="buffer-fill-${sid}" style="width:5%"></div>
       </div>
+      <span id="buffer-val-${sid}">~4h</span>
+    </div>
+  </div>
 
-      <!-- Tuile 6 : Top consommateur -->
-      <div class="metric-box" style="grid-column: 1 / -1; border:1px solid rgba(255,181,71,0.15);">
-        <div class="metric-title" style="color:#ffb547;">🔥 Top Appareil</div>
-        <div style="font-size:14px; margin-top:5px; line-height:1.5; color:#fff;" id="kpi-top-${sid}">
-          — <br><span style="font-size:20px; font-weight:700; color:#ffb547;">— W</span>
+  <!-- TOP CONSOMMATEURS & COÛTS -->
+  <div class="analysis-section">
+    <div class="analysis-title">📊 Répartition par capteur</div>
+    <div id="breakdown-${sid}"></div>
+  </div>
+
+  <!-- ALERTES APPAREILS -->
+  <div class="analysis-section" style="border-color:rgba(255,62,94,0.12);">
+    <div class="analysis-title" style="color:var(--red);">🔔 Diagnostics & Alertes</div>
+    <div id="alerts-list-${sid}"></div>
+  </div>
+
+  <!-- SÉLECTEUR GRAPHIQUE -->
+  <div style="margin-top:20px;">
+    <div class="chart-controls">
+      <div class="chart-label">Analyse graphique ciblée</div>
+      <div style="display:flex; gap:8px; flex-wrap:wrap; align-items:center;">
+        <div class="period-tabs">
+          <button class="period-tab active" onclick="setPeriod('${sid}','24h',this)">24h</button>
+          <button class="period-tab" onclick="setPeriod('${sid}','7d',this)">7j</button>
+          <button class="period-tab" onclick="setPeriod('${sid}','30d',this)">30j</button>
         </div>
+        <select class="sensor-select" id="select-chart-${sid}"
+                onchange="triggerChartFilter('${sid}')">
+          <option value="ALL">Tous capteurs combinés</option>
+          ${sensorOptions}
+        </select>
       </div>
     </div>
+    <canvas id="chart-${sid}" style="max-height:200px;"></canvas>
+  </div>
 
-    <!-- ÉTATS RÉSEAU -->
-    <div class="analysis-section">
-      <div class="analysis-title">📡 États Réseau & Électrique</div>
-      <div class="data-row">
-        <span>Dernière émission IoT</span>
-        <span style="font-family:'Orbitron'; font-size:12px;" id="last-emit-${sid}">—</span>
-      </div>
-      <div class="data-row">
-        <span>Dernière coupure secteur</span>
-        <span style="color:#ff4c61;" id="last-cut-${sid}">—</span>
-      </div>
-    </div>
+  <!-- RAPPORT WHATSAPP -->
+  <button class="whatsapp-btn" onclick="triggerWeeklyReport('${sid}')">
+    📲 Envoyer rapport WhatsApp maintenant
+  </button>
 
-    <!-- TOP CONSOMMATEURS & COÛTS -->
-    <div class="analysis-section">
-      <div class="analysis-title">📊 Top Consommateurs & Coûts</div>
-      <div id="breakdown-${sid}"></div>
-    </div>
+  <!-- MODULE IA / PREMIUM -->
+  <div style="margin-top:12px;">
+    ${aiContent}
+  </div>
 
-    <!-- DIAGNOSTICS & ALERTES -->
-    <div class="analysis-section"
-         style="background:rgba(255,76,97,0.02); border:1px solid rgba(255,76,97,0.1);">
-      <div class="analysis-title" style="color:#ff4c61;">🔔 Diagnostics & Alertes Appareils</div>
-      <div id="alerts-list-${sid}">
-        <div style="color:#00c896; font-size:13px;">✔ Chargement…</div>
-      </div>
-    </div>
-
-    <!-- SÉLECTEUR GRAPHIQUE -->
-    <div class="sensor-selector-container">
-      <span class="metric-title">Analyse graphique ciblée :</span>
-      <select class="sensor-select" id="select-chart-${sid}"
-              onchange="triggerChartFilter('${sid}')">
-        <option value="ALL">Tous les capteurs réunis</option>
-        ${sensorOptions}
-      </select>
-    </div>
-
-    <!-- CANVAS CHART.JS (stable — jamais détruit si déjà créé) -->
-    <div style="margin-top:25px;">
-      <canvas id="chart-${sid}"></canvas>
-    </div>
-
-    <!-- MODULES AVANCÉS (IA / PDF) -->
-    <div class="analysis-section" style="margin-top:20px; background:rgba(255,255,255,0.01);">
-      <div class="analysis-title">✨ Modules Avancés</div>
-      ${aiBlock}
-    </div>
-
-  </div>`;
+</div>`;
 }
 
 /* =================================================================
-   MISE À JOUR IN-PLACE D'UNE CARTE EXISTANTE
-   (pas de innerHTML global — uniquement les valeurs changent)
+   MISE À JOUR IN-PLACE D'UNE CARTE
    ================================================================= */
-function updateSiteCard(site, sensors, telemetry, activeAlerts, tariff, aiEnabled) {
+function updateSiteCard(site, sensors, telemetry, activeAlerts) {
   const sid = site.id;
+  const sorted = [...telemetry].sort((a, b) =>
+    new Date(b.created_at) - new Date(a.created_at)
+  );
+  const latest = sorted[0] || null;
 
-  /* ---- Statut réseau ---- */
-  const latest  = telemetry[0] || null;
-  const { text: statusText, cssClass } = resolveStatus(latest);
-  const badge   = document.getElementById(`status-badge-${sid}`);
+  /* ---- Statut ---- */
+  const { text: statusText, cls } = resolveStatus(latest);
+  const badge = document.getElementById(`status-badge-${sid}`);
   if (badge) {
     badge.textContent = statusText;
-    safeSetClass(badge, ['green', 'orange', 'red'], cssClass);
+    badge.className = `status-badge ${cls}`;
   }
 
-  /* ---- Santé / disponibilité ---- */
+  /* ---- Chronomètre coupure ---- */
+  const timerEl = document.getElementById(`outage-timer-${sid}`);
+  if (timerEl) {
+    const isOutage = latest && latest.voltage < 50;
+    timerEl.classList.toggle('visible', isOutage);
+    if (isOutage) {
+      if (!outageTickers[sid]) {
+        const outageStart = new Date(latest.created_at).getTime();
+        outageTickers[sid] = setInterval(() => {
+          const elapsed = Math.floor((Date.now() - outageStart) / 1000);
+          const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+          const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+          const s = String(elapsed % 60).padStart(2, '0');
+          safeSetText(`outage-time-${sid}`, `${h}:${m}:${s}`);
+          // Coût groupe en cours
+          const kwhGroupe = (elapsed / 3600) * ((latest.power_w || 2000) / 1000);
+          const cout = Math.round(kwhGroupe * MOCK_TARIFF_GRP);
+          safeSetText(`outage-cost-${sid}`, `Coût groupe estimé : ${formatFcfa(cout)}`);
+        }, 1000);
+      }
+    } else {
+      if (outageTickers[sid]) {
+        clearInterval(outageTickers[sid]);
+        delete outageTickers[sid];
+      }
+    }
+  }
+
+  /* ---- Paramètres électriques temps réel ---- */
+  if (latest) {
+    const vEl = document.getElementById(`elec-v-${sid}`);
+    if (vEl) {
+      vEl.textContent = latest.voltage.toFixed(1);
+      vEl.style.color = (latest.voltage < 190 || latest.voltage > 250)
+        ? 'var(--red)' : 'var(--blue)';
+    }
+
+    const iEl = document.getElementById(`elec-i-${sid}`);
+    if (iEl) iEl.textContent = latest.current.toFixed(2);
+
+    const hzEl = document.getElementById(`elec-hz-${sid}`);
+    if (hzEl) {
+      hzEl.textContent = latest.frequency_hz ? latest.frequency_hz.toFixed(2) : '50.00';
+      hzEl.style.color = (latest.frequency_hz < 49 || latest.frequency_hz > 51)
+        ? 'var(--red)' : 'var(--amber)';
+    }
+
+    const pfEl = document.getElementById(`elec-pf-${sid}`);
+    if (pfEl) {
+      const pf = latest.power_factor || 0.87;
+      pfEl.textContent = pf.toFixed(2);
+      pfEl.style.color = pf < 0.7 ? 'var(--red)' : pf < 0.85 ? 'var(--amber)' : 'var(--purple)';
+    }
+  }
+
+  /* ---- Santé capteurs ---- */
   const onlineCount = sensors.filter(s => s.status === 'ONLINE').length;
   const totalCount  = sensors.length;
   const healthPct   = totalCount > 0 ? Math.round((onlineCount / totalCount) * 100) : 0;
-  let healthColor   = '#00c896';
-  if (healthPct < 70) healthColor = '#ffb547';
-  if (healthPct < 40) healthColor = '#ff4c61';
+  const healthColor = healthPct >= 70 ? 'var(--green)' : healthPct >= 40 ? 'var(--amber)' : 'var(--red)';
 
-  const healthEl = document.getElementById(`health-val-${sid}`);
-  if (healthEl) {
-    healthEl.textContent = `${healthPct}%`;
-    healthEl.style.color = healthColor;
-  }
-  safeSetText(`sensor-count-${sid}`, `${onlineCount}/${totalCount}`);
+  safeSetText(`health-label-${sid}`, `Santé ${onlineCount}/${totalCount} capteurs`);
+  safeSetText(`health-pct-${sid}`, `${healthPct}%`);
+  const fillEl = document.getElementById(`health-fill-${sid}`);
+  if (fillEl) { fillEl.style.width = `${healthPct}%`; fillEl.style.background = healthColor; }
 
-  /* ---- KPI Puissance instantanée ---- */
+  /* ---- KPI puissance ---- */
   const powerW = latest ? Math.round(latest.power_w) : 0;
+  const apparentW = latest ? Math.round(latest.apparent_power || latest.power_w * 1.15) : 0;
   safeSetText(`kpi-power-${sid}`, `${powerW} W`);
+  safeSetText(`kpi-apparent-${sid}`, `Apparente : ${apparentW} VA`);
 
-  /* ---- KPI Énergie consommée ---- */
-  const consumptionMapBySensor = {};
-  let lastPowerCutTime = 'Aucune coupure enregistrée';
-  let lastTransmissionTime = '—';
+  /* ---- KPI énergie & coût ---- */
+  const consumptionMap = {};
+  let totalKwh = 0, totalKwhSbee = 0, totalKwhGroupe = 0;
 
   telemetry.forEach(item => {
-    if (item.voltage < 50 && lastPowerCutTime === 'Aucune coupure enregistrée') {
-      lastPowerCutTime = new Date(item.created_at).toLocaleTimeString();
-    }
-    const kwh   = Number(item.kwh_total || 0);
     const sName = item.sensors ? item.sensors.name : 'Générique';
-    if (!consumptionMapBySensor[sName]) consumptionMapBySensor[sName] = { kwh: 0 };
-    if (kwh > consumptionMapBySensor[sName].kwh) consumptionMapBySensor[sName].kwh = kwh;
+    if (!consumptionMap[sName]) consumptionMap[sName] = { kwh: 0 };
+    const kwh = Number(item.kwh_total || 0);
+    if (kwh > consumptionMap[sName].kwh) consumptionMap[sName].kwh = kwh;
+    totalKwhSbee   = Math.max(totalKwhSbee,   Number(item.kwh_sbee   || 0));
+    totalKwhGroupe = Math.max(totalKwhGroupe,  Number(item.kwh_groupe || 0));
   });
+  Object.values(consumptionMap).forEach(v => { totalKwh += v.kwh; });
 
-  let totalKwh = 0;
-  Object.values(consumptionMapBySensor).forEach(v => { totalKwh += v.kwh; });
-
-  if (telemetry[0]) {
-    lastTransmissionTime = new Date(telemetry[0].created_at).toLocaleTimeString();
-  }
+  // Coût mois civil (approximation : ratio jours écoulés)
+  const dayOfMonth = new Date().getDate();
+  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
+  const monthRatio  = dayOfMonth / daysInMonth;
+  const kwhThisMonth = monthRatio > 0 ? (totalKwh / monthRatio) : totalKwh; // projection
+  const costSbee   = Math.round(totalKwhSbee   * MOCK_TARIFF);
+  const costGroupe = Math.round(totalKwhGroupe * MOCK_TARIFF_GRP);
+  const costTotal  = costSbee + costGroupe;
 
   safeSetText(`kpi-energy-${sid}`, formatEnergy(totalKwh));
-
-  /* ---- KPI Capteurs actifs ---- */
-  safeSetText(`kpi-sensors-${sid}`, totalCount);
-  safeSetText(`kpi-sensors-sub-${sid}`, `${onlineCount} ONLINE`);
-
-  /* ---- KPI Alertes actives ---- */
+  safeSetText(`kpi-cost-${sid}`,   formatFcfa(costTotal));
+  safeSetText(`kpi-kwh-month-${sid}`, `${totalKwh.toFixed(2)} kWh (mois en cours)`);
   safeSetText(`kpi-alerts-${sid}`, activeAlerts.length);
 
-  /* ---- KPI Coût cumulé ---- */
-  const estimatedCost = Math.round(totalKwh * tariff);
-  safeSetText(`kpi-cost-${sid}`, `${formatFcfa(estimatedCost)} F`);
+  /* ---- Top consommateur ---- */
+  const topSorted = [...telemetry].sort((a, b) => b.power_w - a.power_w);
+  const topRecord  = topSorted[0];
+  safeSetText(`kpi-top-name-${sid}`, topRecord?.sensors?.name || 'Inconnu');
+  safeSetText(`kpi-top-power-${sid}`, `${Math.round(topRecord?.power_w || 0)} W`);
 
-  /* ---- KPI Top Appareil ---- */
-  const telSortedByPower = [...telemetry].sort((a, b) => b.power_w - a.power_w);
-  const topRecord  = telSortedByPower[0];
-  const topName    = topRecord?.sensors?.name || 'Inconnu';
-  const topPower   = topRecord ? Math.round(topRecord.power_w) : 0;
-  const topEl      = document.getElementById(`kpi-top-${sid}`);
-  if (topEl) {
-    topEl.innerHTML = `${topName}<br><span style="font-size:20px; font-weight:700; color:#ffb547;">${topPower} W</span>`;
-  }
+  /* ---- Répartition SBEE vs Groupe ---- */
+  const sbeePct  = totalKwh > 0 ? Math.round((totalKwhSbee   / totalKwh) * 100) : 100;
+  const grpPct   = totalKwh > 0 ? Math.round((totalKwhGroupe / totalKwh) * 100) : 0;
+  safeSetText(`sbee-pct-${sid}`, sbeePct);
+  safeSetText(`groupe-pct-${sid}`, grpPct);
+  const sbeeBar  = document.getElementById(`sbee-bar-${sid}`);
+  const grpBar   = document.getElementById(`groupe-bar-${sid}`);
+  if (sbeeBar)  sbeeBar.style.width  = `${sbeePct}%`;
+  if (grpBar)   grpBar.style.width   = `${grpPct}%`;
+  safeSetText(`sbee-kwh-${sid}`,   totalKwhSbee.toFixed(2));
+  safeSetText(`sbee-cost-${sid}`,  formatFcfa(costSbee));
+  safeSetText(`grp-kwh-${sid}`,    totalKwhGroupe.toFixed(2));
+  safeSetText(`grp-cost-${sid}`,   formatFcfa(costGroupe));
+
+  // Surcoût groupe = différence entre kWh groupe facturé au tarif groupe vs tarif SBEE
+  const surchargeFcfa = Math.round(totalKwhGroupe * (MOCK_TARIFF_GRP - MOCK_TARIFF));
+  safeSetText(`groupe-premium-${sid}`, surchargeFcfa > 0 ? `+${formatFcfa(surchargeFcfa)}` : '0 F');
+
+  /* ---- Économie possible ---- */
+  // Si 0% groupe, économie = surcoût groupe
+  safeSetText(`savings-val-${sid}`, surchargeFcfa > 0 ? formatFcfa(surchargeFcfa * (daysInMonth / dayOfMonth)) : '0 F');
 
   /* ---- États réseau ---- */
-  safeSetText(`last-emit-${sid}`, lastTransmissionTime);
-  safeSetText(`last-cut-${sid}`, lastPowerCutTime);
+  safeSetText(`last-emit-${sid}`, latest ? formatTime(latest.created_at) : '—');
 
-  /* ---- Breakdown top consommateurs ---- */
-  const breakdownEl = document.getElementById(`breakdown-${sid}`);
-  if (breakdownEl) {
-    const sorted = Object.entries(consumptionMapBySensor)
-      .sort((a, b) => b[1].kwh - a[1].kwh)
-      .slice(0, 3);
+  const outageTelems = sorted.filter(t => !t.sbee_ok);
+  const lastCut = outageTelems[0];
+  safeSetText(`last-cut-${sid}`, lastCut ? formatTime(lastCut.created_at) : 'Aucune coupure enregistrée');
 
-    breakdownEl.innerHTML = sorted.map(([name, data]) => {
-      const cost    = Math.round(data.kwh * tariff);
-      const pct     = totalKwh > 0 ? Math.round((data.kwh / totalKwh) * 100) : 0;
-      return `<div class="data-row">
-        <span>📡 ${name} (${pct}%)</span>
-        <b>${formatFcfa(cost)} FCFA</b>
+  const outageEvents = sorted.filter(t => !t.sbee_ok).length;
+  safeSetText(`outage-count-${sid}`, outageEvents > 0 ? `${outageEvents} coupure(s)` : 'Aucune');
+  const outageMinTotal = Math.round(outageEvents * 5); // approx 5min par mesure
+  safeSetText(`outage-duration-${sid}`, outageEvents > 0 ? `~${outageMinTotal} min` : '—');
+
+  /* ---- Chips IoT ---- */
+  const chipsEl = document.getElementById(`iot-chips-${sid}`);
+  if (chipsEl) {
+    chipsEl.innerHTML = sensors.map(s => {
+      const sigPct = gsmSignalPct(s.gsm_signal);
+      const sigLabel = gsmSignalLabel(s.gsm_signal);
+      return `<div class="iot-chip">
+        <span class="iot-chip-dot" style="background:${s.status==='ONLINE'?'var(--green)':'var(--red)'}"></span>
+        <span>${s.name}</span>
+        <span style="color:var(--text-muted);">· fw ${s.firmware_v}</span>
+        <span style="color:${sigPct>60?'var(--green)':sigPct>30?'var(--amber)':'var(--red)'};">
+          📶 ${sigLabel}
+        </span>
       </div>`;
     }).join('');
   }
 
-  /* ---- Alertes appareils ---- */
-  const alertsListEl = document.getElementById(`alerts-list-${sid}`);
-  if (alertsListEl) {
+  /* ---- Buffer SD offline ---- */
+  // Simule ~5% d'utilisation du buffer 72h
+  const bufferPct = 5;
+  const bufFill = document.getElementById(`buffer-fill-${sid}`);
+  if (bufFill) bufFill.style.width = `${bufferPct}%`;
+  safeSetText(`buffer-val-${sid}`, `~${Math.round(bufferPct * 72 / 100 * 60)} min bufferiisés`);
+
+  /* ---- Breakdown capteurs ---- */
+  const breakdownEl = document.getElementById(`breakdown-${sid}`);
+  if (breakdownEl) {
+    const sorted2 = Object.entries(consumptionMap)
+      .sort((a, b) => b[1].kwh - a[1].kwh).slice(0, 4);
+
+    breakdownEl.innerHTML = sorted2.length === 0
+      ? '<div style="color:var(--text-muted); font-size:12px;">Aucune donnée</div>'
+      : sorted2.map(([name, data]) => {
+        const pct  = totalKwh > 0 ? Math.round((data.kwh / totalKwh) * 100) : 0;
+        const cost = Math.round(data.kwh * MOCK_TARIFF);
+        return `<div class="data-row">
+          <span class="data-row-label">📡 ${name} <span style="color:var(--text-muted);">(${pct}%)</span></span>
+          <span class="data-row-value">${formatFcfa(cost)}</span>
+        </div>`;
+      }).join('');
+  }
+
+  /* ---- Alertes ---- */
+  const alertsEl = document.getElementById(`alerts-list-${sid}`);
+  if (alertsEl) {
     if (activeAlerts.length === 0) {
-      alertsListEl.innerHTML = `<div style="color:#00c896; font-size:13px;">✔ Aucun dysfonctionnement détecté</div>`;
+      alertsEl.innerHTML = `<div style="color:var(--green); font-size:12px; padding:6px 0;">✔ Aucun dysfonctionnement détecté</div>`;
     } else {
-      alertsListEl.innerHTML = activeAlerts.map(alt => {
-        const lbl = alt.sensors ? alt.sensors.name : 'Général';
-        return `<div class="data-row" style="color:#ff4c61; border-bottom:1px solid rgba(255,76,97,0.1);">
-          <span>⚠️ <b>${lbl}</b> : ${alt.description || 'Seuil dépassé'}</span>
+      alertsEl.innerHTML = activeAlerts.map(alt => {
+        const icons = { SBEE_OUTAGE: '🔴', HIGH_VOLTAGE: '⚠️', LOW_VOLTAGE: '🟡', OVERCONSUMPTION: '🔥', DEVICE_OFFLINE: '📵' };
+        const icon  = icons[alt.type] || '⚠️';
+        const sName = alt.sensors ? alt.sensors.name : 'Général';
+        return `<div class="alert-item">
+          <span class="alert-icon">${icon}</span>
+          <div class="alert-content">
+            <div class="alert-label">${sName} — ${alt.type}</div>
+            <div class="alert-meta">${alt.description} · ${formatTime(alt.created_at)}</div>
+          </div>
+          <button class="alert-ack-btn" onclick="acknowledgeAlert(${alt.id},'${sid}')">Acquitter</button>
         </div>`;
       }).join('');
     }
   }
 
-  /* ---- IA message (si activée) ---- */
-  if (aiEnabled) {
-    const aiMsgEl = document.getElementById(`ai-msg-${sid}`);
-    if (aiMsgEl) {
-      aiMsgEl.textContent =
-        `Votre équipement "${topName}" surconsomme de 30% par rapport à sa classe énergétique nominale.`;
+  /* ---- IA message ---- */
+  if (canAccessAI) {
+    const aiEl = document.getElementById(`ai-msg-${sid}`);
+    if (aiEl) {
+      const topName = topRecord?.sensors?.name || 'Tableau';
+      aiEl.textContent = `"${topName}" consomme ${Math.round(topRecord?.power_w||0)}W soit ${sbeePct}% du total. Recommandation : planifier l'arrêt nocturne du groupe entre 22h et 6h pour économiser ~${formatFcfa(surchargeFcfa)} FCFA ce mois.`;
     }
   }
 
-  /* ---- Graphique : mise à jour stable (chart.update() sans destroy) ---- */
+  /* ---- Sidebar badge alertes total ---- */
+  const totalAlerts = Object.values(MOCK_ALERTS).flat().filter(a => !a.acknowledged).length;
+  safeSetText('sidebar-alert-count', totalAlerts > 0 ? totalAlerts : '');
+
+  /* ---- Graphique ---- */
   updateChart(sid, 'ALL');
 }
 
 /* =================================================================
-   GRAPHIQUES CHART.JS — LOGIQUE STABLE (pas de destroy)
+   GRAPHIQUES
    ================================================================= */
-
-/**
- * Crée le graphique si inexistant, sinon met à jour ses données.
- * Filtre selon la valeur du select (targetSensorId = "ALL" ou ID capteur).
- */
 function updateChart(siteId, targetSensorId) {
-  const rawTelemetry = cachedTelemetryBySite[siteId] || [];
+  const rawData = cachedTelemetry[siteId] || [];
   const ctx = document.getElementById(`chart-${siteId}`);
-  if (!ctx || rawTelemetry.length === 0) return;
+  if (!ctx || rawData.length === 0) return;
 
-  /* Filtrage côté client (pas de requête Supabase) */
-  let dataset = rawTelemetry;
+  let dataset = rawData;
   if (targetSensorId !== 'ALL') {
-    dataset = rawTelemetry.filter(t => t.sensor_id === targetSensorId);
+    dataset = rawData.filter(t => t.sensor_id === targetSensorId);
   }
 
-  const displayPoints = [...dataset].slice(0, 12).reverse();
-  const labels = displayPoints.map(item =>
-    new Date(item.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+  const points = [...dataset].sort((a, b) =>
+    new Date(a.created_at) - new Date(b.created_at)
+  ).slice(-24);
+
+  const labels  = points.map(t =>
+    new Date(t.created_at).toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' })
   );
-  const values = displayPoints.map(item => item.power_w);
+  const powerData = points.map(t => Math.round(t.power_w));
+  const voltData  = points.map(t => Math.round(t.voltage));
 
   if (charts[siteId]) {
-    /* ✅ Mise à jour in-place — AUCUN destroy, AUCUN flash */
-    charts[siteId].data.labels                  = labels;
-    charts[siteId].data.datasets[0].data        = values;
-    charts[siteId].data.datasets[0].label       =
-      targetSensorId === 'ALL' ? 'Puissance Totale Combinée (W)' : 'Puissance Appareil (W)';
-    charts[siteId].update('none'); // 'none' = pas d'animation sur update (fluide)
+    charts[siteId].data.labels = labels;
+    charts[siteId].data.datasets[0].data = powerData;
+    charts[siteId].data.datasets[1].data = voltData;
+    charts[siteId].data.datasets[0].label = targetSensorId === 'ALL'
+      ? 'Puissance totale (W)' : 'Puissance (W)';
+    charts[siteId].update('none');
   } else {
-    /* Premier rendu : création unique */
     charts[siteId] = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
-        datasets: [{
-          label: targetSensorId === 'ALL' ? 'Puissance Totale Combinée (W)' : 'Puissance Appareil (W)',
-          data: values,
-          borderColor: '#00c896',
-          backgroundColor: 'rgba(0, 200, 150, 0.08)',
-          fill: true,
-          tension: 0.35,
-          pointRadius: 3,
-          pointHoverRadius: 6,
-        }]
+        datasets: [
+          {
+            label: 'Puissance (W)',
+            data: powerData,
+            borderColor: '#00dca0',
+            backgroundColor: 'rgba(0,220,160,0.06)',
+            fill: true,
+            tension: 0.35,
+            pointRadius: 2,
+            yAxisID: 'yPower',
+          },
+          {
+            label: 'Tension (V)',
+            data: voltData,
+            borderColor: '#3b82f6',
+            backgroundColor: 'transparent',
+            fill: false,
+            tension: 0.35,
+            pointRadius: 2,
+            borderDash: [4, 4],
+            yAxisID: 'yVoltage',
+          }
+        ]
       },
       options: {
         responsive: true,
-        animation: { duration: 400 },
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 500 },
         plugins: {
-          legend: { labels: { color: '#ffffff', font: { family: 'Poppins' } } }
+          legend: {
+            labels: {
+              color: '#94a3b8',
+              font: { family: 'Syne', size: 11 },
+              usePointStyle: true,
+              pointStyleWidth: 8,
+            }
+          }
         },
         scales: {
-          x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } },
-          y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.03)' } }
+          x: {
+            ticks: { color: '#64748b', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.03)' }
+          },
+          yPower: {
+            position: 'left',
+            ticks: { color: '#00dca0', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.03)' }
+          },
+          yVoltage: {
+            position: 'right',
+            ticks: { color: '#3b82f6', font: { size: 10 } },
+            grid: { display: false },
+            min: 150, max: 260,
+          }
         }
       }
     });
   }
 }
 
-/* Handler select déroulant */
 function triggerChartFilter(siteId) {
   const dropdown = document.getElementById(`select-chart-${siteId}`);
   if (dropdown) updateChart(siteId, dropdown.value);
 }
 
+function setPeriod(siteId, period, btn) {
+  document.querySelectorAll(`#card-${siteId} .period-tab`).forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  // En prod : recharger les données selon la période
+  triggerChartFilter(siteId);
+}
+
 /* =================================================================
-   CHARGEMENT / RAFRAÎCHISSEMENT DES DONNÉES
-   (ne reconstruit PAS le DOM si la carte existe déjà)
+   ACTIONS
+   ================================================================= */
+function acknowledgeAlert(alertId, siteId) {
+  const alerts = MOCK_ALERTS[siteId];
+  if (alerts) {
+    const alert = alerts.find(a => a.id === alertId);
+    if (alert) alert.acknowledged = true;
+  }
+  loadDashboard();
+}
+
+function triggerWeeklyReport(siteId) {
+  // En prod : appel Edge Function Supabase weekly-report
+  alert('📲 Rapport envoyé sur WhatsApp !\n\n(En production, cela déclenchera l\'Edge Function Supabase qui envoie le rapport formaté via Twilio WhatsApp API.)');
+}
+
+function exportPDF(siteId) {
+  alert('📥 Export PDF en cours…\n\n(Fonctionnalité Plan Business requise)');
+}
+
+/* =================================================================
+   CHARGEMENT PRINCIPAL (Supabase en prod, mock en démo)
    ================================================================= */
 async function loadDashboard() {
-  const user = await getUser();
-  if (!user) return;
-
-  /* Tarif SBEE de l'utilisateur */
-  const { data: userSettings } = await supabaseClient
-    .from('settings').select('tariff').eq('user_id', user.id).single();
-  const tariff = userSettings?.tariff || 91;
-
-  /* Récupération des sites */
-  const { data: sites, error: sitesError } = await supabaseClient
-    .from('sites').select('*').eq('user_id', user.id);
-
-  if (sitesError || !sites) { console.error(sitesError); return; }
-
-  /* Feature flag multi-site */
-  let filteredSites = canAccessMultiSite ? sites : sites.slice(0, 1);
-
   const container = document.getElementById('sitesContainer');
 
-  if (filteredSites.length === 0) {
-    container.innerHTML = `
-      <div class="site-card">
-        <h2>Aucun site enregistré</h2>
-        <p style="margin-top:20px; color:#94a3b8;">Ajoutez un site depuis le menu pour commencer le suivi.</p>
-      </div>`;
-    return;
-  }
+  // En prod: récupérer depuis Supabase
+  // const { data: sites } = await supabaseClient.from('sites').select('*').eq('user_id', user.id);
+  const sites = canAccessMultiSite ? MOCK_SITES : MOCK_SITES.slice(0, 1);
 
-  /* Feature flag IA */
-  const aiEnabled = await hasFeature('ai');
-
-  /* Boucle sur les sites filtrés */
-  for (const site of filteredSites) {
+  for (const site of sites) {
     const sid = site.id;
+    const sensors   = MOCK_SENSORS[sid]   || [];
+    const telemetry = MOCK_TELEMETRY[sid] || [];
+    const alerts    = (MOCK_ALERTS[sid]   || []).filter(a => !a.acknowledged);
 
-    /* 1. Capteurs */
-    const { data: allSensors } = await supabaseClient
-      .from('sensors').select('*').eq('site_id', sid);
-    let activeSensors = allSensors || [];
-    if (!canAccessMultiSensor && activeSensors.length > 1) {
-      activeSensors = activeSensors.slice(0, 1);
-    }
-    const sensorIds = activeSensors.map(s => s.id);
+    cachedTelemetry[sid] = telemetry;
 
-    /* 2. Télémétrie */
-    let telemetry = [];
-    if (sensorIds.length > 0) {
-      const { data } = await supabaseClient
-        .from('telemetry')
-        .select('*, sensors(name)')
-        .in('sensor_id', sensorIds)
-        .order('created_at', { ascending: false });
-      telemetry = data || [];
-    }
-    cachedTelemetryBySite[sid] = telemetry; // mise en cache pour le filtre graphique
+    const activeSensors = canAccessMultiSensor ? sensors : sensors.slice(0, 1);
 
-    /* 3. Alertes actives */
-    let activeAlerts = [];
-    if (sensorIds.length > 0) {
-      const { data } = await supabaseClient
-        .from('alerts')
-        .select('*, sensors(name)')
-        .in('sensor_id', sensorIds)
-        .eq('status', 'ACTIVE');
-      activeAlerts = data || [];
-    }
-
-    /* ——————————————————————————————————————————————————
-       Décision CRITIQUE : 1er rendu OU mise à jour ?
-       —————————————————————————————————————————————————— */
     if (!renderedSites.has(sid)) {
-      /* Premier rendu : on injecte la carte dans le DOM */
-      if (telemetry.length === 0) {
-        container.innerHTML += `
-          <div class="site-card" id="card-${sid}">
-            <h2>🏢 ${site.name}</h2>
-            <p style="margin-top:20px; color:#94a3b8;">Aucune donnée disponible pour ce site.</p>
-          </div>`;
-      } else {
-        container.innerHTML += buildSiteCardHTML(site, activeSensors, aiEnabled);
-      }
+      if (container) container.innerHTML += buildSiteCardHTML(site, activeSensors);
       renderedSites.add(sid);
-
-      /* Mise à jour immédiate des valeurs après injection */
-      if (telemetry.length > 0) {
-        updateSiteCard(site, activeSensors, telemetry, activeAlerts, tariff, aiEnabled);
-        updateChart(sid, 'ALL');
-      }
-
-    } else {
-      /* Rafraîchissement : mise à jour in-place UNIQUEMENT */
-      if (telemetry.length > 0) {
-        updateSiteCard(site, activeSensors, telemetry, activeAlerts, tariff, aiEnabled);
-        /* Le graphique est mis à jour via updateChart dans updateSiteCard */
-      }
     }
+
+    // Mise à jour in-place après rendu
+    setTimeout(() => {
+      updateSiteCard(site, activeSensors, telemetry, alerts);
+    }, 50);
   }
 }
 
 /* =================================================================
-   REALTIME SUPABASE — DEBOUNCE 15s (privilégie mise à jour locale)
+   REALTIME (debounce 15s)
    ================================================================= */
 function scheduleReload() {
   clearTimeout(realtimeTimeout);
-  realtimeTimeout = setTimeout(() => {
-    loadDashboard(); // appel complet mais mise à jour in-place = pas de clignotement
-  }, 15000);
+  realtimeTimeout = setTimeout(() => loadDashboard(), 15000);
 }
 
+/* En prod:
 function startRealtime() {
-  supabaseClient
-    .channel('dashboard-live')
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'telemetry' }, () => {
-      scheduleReload();
-    })
-    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alerts' }, () => {
-      scheduleReload();
-    })
+  supabaseClient.channel('dashboard-live')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'telemetry' }, scheduleReload)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alerts' },   scheduleReload)
     .subscribe();
 }
+*/
 
 /* =================================================================
-   EXPORT PDF (placeholder)
-   ================================================================= */
-async function exportPDF() {
-  alert('Export PDF bientôt disponible');
-}
-
-/* =================================================================
-   INITIALISATION
+   INIT
    ================================================================= */
 async function initDashboard() {
-  canAccessMultiSite   = await canUseMultiSite();
-  canAccessMultiSensor = await canUseMultiSensor();
-
-  if (!canAccessMultiSite && !canAccessMultiSensor) {
-    showFreeBanner();
-  }
+  // En prod: lire depuis feature-access.js
+  // canAccessMultiSite   = await canUseMultiSite();
+  // canAccessMultiSensor = await canUseMultiSensor();
+  // canAccessAI          = await hasFeature('ai');
 
   await loadDashboard();
-  startRealtime();
+  // startRealtime();
+
+  // Rafraîchissement simulé toutes les 30s (en prod: realtime Supabase)
+  setInterval(() => loadDashboard(), 30000);
 }
-</script>
 
-<script src="js/feature-access.js"></script>
-<script>
-  initDashboard();
+initDashboard();
 </script>
-
 </body>
 </html>
