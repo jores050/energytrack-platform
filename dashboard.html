@@ -3,1349 +3,1558 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Dashboard EnergyTrack</title>
+<title>Dashboard — EnergyTrack</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700;900&family=Syne:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;500;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 
 <style>
-/* =====================================================================
-   VARIABLES & RESET
-   ===================================================================== */
+/* ===================================================================
+   VARIABLES GLOBALES
+   =================================================================== */
 :root {
-  --bg:          #080d14;
-  --bg-card:     #0d1520;
-  --bg-deep:     #060b10;
-  --bg-panel:    #111b28;
-  --border:      rgba(255,255,255,0.06);
-  --border-glow: rgba(0, 220, 160, 0.2);
-
-  --green:       #00dca0;
-  --green-dim:   rgba(0, 220, 160, 0.12);
-  --green-glow:  rgba(0, 220, 160, 0.25);
-  --amber:       #f5a623;
-  --amber-dim:   rgba(245, 166, 35, 0.12);
-  --red:         #ff3e5e;
-  --red-dim:     rgba(255, 62, 94, 0.12);
-  --blue:        #3b82f6;
-  --blue-dim:    rgba(59, 130, 246, 0.12);
-  --purple:      #a855f7;
-  --purple-dim:  rgba(168, 85, 247, 0.12);
-
-  --text:        #e2e8f0;
-  --text-muted:  #64748b;
-  --text-dim:    #94a3b8;
-
-  --font-display: 'Orbitron', monospace;
-  --font-body:    'Syne', sans-serif;
-  --font-mono:    'JetBrains Mono', monospace;
-
-  --radius:      20px;
-  --radius-sm:   12px;
-  --sidebar-w:   240px;
+  --bg-deep:        #080f1c;
+  --bg-card:        #0f1829;
+  --bg-inset:       #0a1020;
+  --accent-green:   #00d4a0;
+  --accent-amber:   #f5a623;
+  --accent-red:     #ff4d6a;
+  --accent-blue:    #3b82f6;
+  --text-primary:   #e8f0fe;
+  --text-secondary: #7a8fac;
+  --text-muted:     #3d5270;
+  --border-subtle:  rgba(255,255,255,0.04);
+  --border-accent:  rgba(0,212,160,0.18);
+  --shadow-card:    0 8px 40px rgba(0,0,0,0.45);
+  --radius-card:    24px;
+  --radius-box:     14px;
+  --radius-pill:    999px;
+  --font-display:   'Orbitron', monospace;
+  --font-body:      'DM Sans', sans-serif;
+  --transition:     0.25s cubic-bezier(0.4,0,0.2,1);
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html, body {
-  background: var(--bg);
-  color: var(--text);
+
+body {
   font-family: var(--font-body);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* =====================================================================
-   ÉCRAN DE CHARGEMENT GLOBAL
-   ===================================================================== */
-#loading-screen {
-  position: fixed; inset: 0;
-  background: var(--bg);
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  z-index: 9999;
-  gap: 20px;
-  transition: opacity 0.4s;
-}
-#loading-screen.hidden { opacity: 0; pointer-events: none; }
-.loader-logo {
-  font-family: var(--font-display);
-  font-size: 22px;
-  color: var(--green);
-  letter-spacing: 3px;
-}
-.loader-bar {
-  width: 200px; height: 2px;
-  background: rgba(255,255,255,0.06);
-  border-radius: 999px;
-  overflow: hidden;
-}
-.loader-fill {
-  height: 100%;
-  background: var(--green);
-  border-radius: 999px;
-  width: 0%;
-  transition: width 0.4s ease;
-  box-shadow: 0 0 8px var(--green-glow);
-}
-.loader-msg { font-size: 12px; color: var(--text-muted); font-family: var(--font-mono); }
-
-/* =====================================================================
-   ÉCRAN D'ERREUR / AUTH
-   ===================================================================== */
-#error-screen {
-  display: none;
-  position: fixed; inset: 0;
-  background: var(--bg);
-  align-items: center; justify-content: center;
-  z-index: 9998;
-  flex-direction: column;
-  gap: 16px;
-  padding: 32px;
-  text-align: center;
-}
-#error-screen.visible { display: flex; }
-.error-icon { font-size: 48px; }
-.error-title { font-family: var(--font-display); font-size: 18px; color: var(--red); letter-spacing: 1px; }
-.error-msg   { font-size: 13px; color: var(--text-muted); max-width: 400px; line-height: 1.7; }
-.error-btn   {
-  padding: 12px 28px; border-radius: var(--radius-sm);
-  background: var(--green); color: #000;
-  font-family: var(--font-body); font-weight: 700;
-  font-size: 13px; cursor: pointer; border: none;
-}
-
-/* =====================================================================
-   LAYOUT
-   ===================================================================== */
-.app-shell { display: flex; min-height: 100vh; }
-
-/* =====================================================================
-   SIDEBAR
-   ===================================================================== */
-.sidebar {
-  width: var(--sidebar-w);
   background: var(--bg-deep);
-  border-right: 1px solid var(--border);
-  display: flex; flex-direction: column;
-  padding: 28px 0;
-  position: fixed;
-  top: 0; left: 0; bottom: 0;
-  z-index: 100;
+  color: var(--text-primary);
+  min-height: 100vh;
 }
-.logo {
-  font-family: var(--font-display);
-  font-size: 15px; font-weight: 700;
-  color: var(--green);
-  letter-spacing: 2px;
-  padding: 0 24px 28px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 16px;
-}
-.logo span { color: var(--text-muted); font-weight: 400; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 11px 24px;
-  font-size: 13px; font-weight: 500;
-  color: var(--text-muted);
-  text-decoration: none;
-  border-left: 3px solid transparent;
-  transition: all 0.2s; letter-spacing: 0.3px;
-}
-.nav-item:hover { color: var(--text); background: rgba(255,255,255,0.03); }
-.nav-item.active { color: var(--green); border-left-color: var(--green); background: var(--green-dim); }
-.nav-item .nav-icon { font-size: 15px; width: 20px; text-align: center; }
-.nav-badge {
-  margin-left: auto;
-  background: var(--amber-dim); color: var(--amber);
-  font-size: 10px; font-weight: 700;
-  padding: 2px 7px; border-radius: 999px;
-  font-family: var(--font-mono);
-}
-.sidebar-footer { margin-top: auto; padding: 16px 24px 0; border-top: 1px solid var(--border); }
 
-/* Infos utilisateur sidebar */
-.user-info {
-  display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-sm);
-  margin-bottom: 10px;
+/* ===================================================================
+   GRILLE SITES
+   =================================================================== */
+.site-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(460px, 1fr));
+  gap: 28px;
+  margin-top: 28px;
 }
-.user-avatar {
-  width: 32px; height: 32px; border-radius: 50%;
-  background: var(--green-dim);
-  border: 1px solid rgba(0,220,160,0.3);
-  display: flex; align-items: center; justify-content: center;
-  font-size: 13px; font-weight: 700; color: var(--green);
-  flex-shrink: 0;
-}
-.user-name  { font-size: 12px; font-weight: 600; color: var(--text); }
-.user-email { font-size: 10px; color: var(--text-muted); margin-top: 1px; }
-.plan-badge {
-  background: var(--amber-dim);
-  border: 1px solid rgba(245,166,35,0.2);
-  padding: 8px 14px; border-radius: var(--radius-sm);
-  font-size: 11px; font-weight: 600;
-  color: var(--amber); font-family: var(--font-display);
-  letter-spacing: 1px;
-}
-.plan-badge.trial { background: var(--purple-dim); border-color: rgba(168,85,247,0.2); color: var(--purple); }
-.plan-badge.expired { background: var(--red-dim); border-color: rgba(255,62,94,0.2); color: var(--red); }
 
-/* =====================================================================
-   MAIN
-   ===================================================================== */
-.main { margin-left: var(--sidebar-w); flex: 1; padding: 32px 36px; max-width: calc(100vw - var(--sidebar-w)); }
-
-/* =====================================================================
-   TOP BAR
-   ===================================================================== */
-.topbar { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 32px; gap: 20px; flex-wrap: wrap; }
-.topbar-title h1 { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--text); letter-spacing: 1px; }
-.topbar-title p  { margin-top: 8px; color: var(--text-muted); font-size: 13px; display: flex; align-items: center; gap: 8px; }
-.live-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--green); display: inline-block;
-  animation: pulse-dot 1.6s ease-in-out infinite;
+/* ===================================================================
+   CARTE SITE
+   =================================================================== */
+.site-card {
+  background: linear-gradient(160deg, #121e32 0%, #0c1522 100%);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-card);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+  transition: transform var(--transition), box-shadow var(--transition);
+  animation: cardIn 0.4s ease both;
 }
-@keyframes pulse-dot {
-  0%,100% { opacity:0.4; transform:scale(1); }
-  50%      { opacity:1;   transform:scale(1.15); box-shadow: 0 0 6px var(--green); }
+.site-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 60px rgba(0,0,0,0.55);
 }
-.topbar-actions { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; }
-.btn { padding: 10px 18px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; border: none; font-family: var(--font-body); transition: all 0.2s; letter-spacing: 0.3px; }
-.btn-primary { background: var(--green); color: #000; }
-.btn-primary:hover { background: #00f5b0; box-shadow: 0 0 20px var(--green-glow); }
-.btn-ghost  { background: transparent; border: 1px solid var(--border); color: var(--text-dim); }
-.btn-ghost:hover { border-color: var(--green); color: var(--green); }
-.btn-danger { background: transparent; border: 1px solid rgba(255,62,94,0.3); color: var(--red); }
-.btn-danger:hover { background: var(--red-dim); }
 
-/* =====================================================================
-   BANNIÈRE PLAN / ÉTAT ABONNEMENT
-   ===================================================================== */
-.plan-banner {
-  background: linear-gradient(135deg, rgba(245,166,35,0.08), rgba(13,21,32,0.6));
-  border: 1px solid rgba(245,166,35,0.25);
-  border-radius: var(--radius);
-  padding: 18px 24px;
-  display: flex; align-items: center; justify-content: space-between;
-  gap: 16px; margin-bottom: 28px; flex-wrap: wrap;
+/* ===================================================================
+   EN-TÊTE + BADGE STATUS
+   =================================================================== */
+.site-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
 }
-.plan-banner.trial-banner { border-color: rgba(168,85,247,0.25); background: linear-gradient(135deg, rgba(168,85,247,0.06), rgba(13,21,32,0.6)); }
-.plan-banner.expired-banner { border-color: rgba(255,62,94,0.3); background: linear-gradient(135deg, rgba(255,62,94,0.06), rgba(13,21,32,0.6)); }
-.plan-banner-text { font-size: 13px; color: var(--text-dim); }
-.plan-banner-text strong { color: var(--amber); }
-
-/* =====================================================================
-   MESSAGE D'ÉTAT (aucun capteur, livraison en attente, etc.)
-   ===================================================================== */
-.state-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 48px 32px;
-  text-align: center;
-  display: flex; flex-direction: column; align-items: center; gap: 16px;
-}
-.state-card-icon  { font-size: 48px; }
-.state-card-title { font-family: var(--font-display); font-size: 16px; color: var(--text); letter-spacing: 1px; }
-.state-card-desc  { font-size: 13px; color: var(--text-muted); max-width: 480px; line-height: 1.7; }
-.state-card-step  { display: flex; gap: 12px; align-items: flex-start; text-align: left; background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 14px 18px; width: 100%; max-width: 440px; }
-.step-num  { font-family: var(--font-display); font-size: 14px; font-weight: 700; color: var(--green); flex-shrink: 0; }
-.step-text { font-size: 12px; color: var(--text-dim); line-height: 1.6; }
-
-/* =====================================================================
-   SITE GRID & CARDS
-   ===================================================================== */
-.site-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 28px; }
-.site-card { background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius); padding: 28px; animation: card-in 0.4s ease both; transition: border-color 0.3s; }
-.site-card:hover { border-color: var(--border-glow); }
-@keyframes card-in { from { opacity:0; transform:translateY(16px); } to { opacity:1; transform:translateY(0); } }
-
-.card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 24px; gap: 12px; }
-.card-title    { font-size: 15px; font-weight: 700; color: var(--text); }
-.card-subtitle { margin-top: 4px; font-size: 12px; color: var(--text-muted); }
+.site-header h2 { font-size: 17px; font-weight: 600; letter-spacing: 0.2px; }
+.site-city { font-size: 12px; color: var(--text-secondary); margin-top: 5px; }
 
 .status-badge {
-  padding: 6px 14px; border-radius: 999px;
-  font-size: 11px; font-weight: 700;
-  font-family: var(--font-display); letter-spacing: 0.8px;
-  white-space: nowrap; transition: all 0.4s;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 13px;
+  border-radius: var(--radius-pill);
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  transition: background var(--transition), color var(--transition);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
-.status-green  { background: var(--green-dim);  color: var(--green); border: 1px solid rgba(0,220,160,0.2); }
-.status-orange { background: var(--amber-dim);  color: var(--amber); border: 1px solid rgba(245,166,35,0.2); }
-.status-red    { background: var(--red-dim);    color: var(--red);   border: 1px solid rgba(255,62,94,0.2); }
-
-/* Barre santé */
-.health-bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 12px; color: var(--text-muted); }
-.health-bar-track { flex:1; height:4px; background:rgba(255,255,255,0.06); border-radius:999px; overflow:hidden; }
-.health-bar-fill  { height:100%; border-radius:999px; transition: width 0.6s ease, background 0.4s; }
-
-/* Paramètres électriques */
-.elec-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; margin-bottom: 12px; }
-.elec-box  { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 13px 10px; text-align: center; }
-.elec-label { font-size: 10px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.6px; text-transform: uppercase; }
-.elec-value { font-family: var(--font-display); font-size: 16px; font-weight: 700; margin-top: 6px; transition: color 0.4s; }
-.elec-unit  { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
-
-/* KPI grid */
-.metrics-grid { display: grid; grid-template-columns: repeat(2,1fr); gap: 12px; margin-bottom: 12px; }
-.metric-box { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; transition: border-color 0.3s; }
-.metric-box.accent-green { border-color: rgba(0,220,160,0.15); }
-.metric-box.accent-amber { border-color: rgba(245,166,35,0.15); }
-.metric-box.accent-red   { border-color: rgba(255,62,94,0.15); }
-.metric-box.span-full    { grid-column: 1 / -1; }
-.metric-label { font-size: 10px; font-weight: 600; color: var(--text-muted); letter-spacing: 0.8px; text-transform: uppercase; margin-bottom: 10px; }
-.metric-value { font-family: var(--font-mono); font-size: 22px; font-weight: 500; color: var(--text); line-height: 1; transition: color 0.4s; }
-.metric-value.large { font-size: 28px; }
-.metric-sub   { margin-top: 6px; font-size: 11px; color: var(--text-muted); }
-
-/* Chronomètre coupure */
-.outage-timer { background: var(--red-dim); border: 1px solid rgba(255,62,94,0.25); border-radius: var(--radius-sm); padding: 12px 16px; display: flex; align-items: center; gap: 12px; margin-bottom: 12px; font-size: 12px; display: none; }
-.outage-timer.visible { display: flex; }
-.outage-time-display  { font-family: var(--font-display); font-size: 20px; font-weight: 700; color: var(--red); font-variant-numeric: tabular-nums; }
-.outage-cost-live     { font-family: var(--font-mono); font-size: 12px; color: var(--amber); }
-
-/* Section analyse */
-.analysis-section { background: var(--bg-panel); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 16px; margin-bottom: 12px; }
-.analysis-title   { font-size: 10px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 12px; }
-.data-row         { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 8px 0; border-bottom: 1px solid var(--border); gap: 10px; }
-.data-row:last-child { border-bottom: none; padding-bottom: 0; }
-.data-row-label   { color: var(--text-dim); }
-.data-row-value   { font-family: var(--font-mono); font-size: 12px; }
-
-/* SBEE vs Groupe */
-.cost-split-bar { height: 8px; border-radius: 999px; background: var(--bg-deep); overflow: hidden; display: flex; margin: 8px 0; }
-.cost-split-sbee   { background: var(--green); transition: width 0.6s ease; }
-.cost-split-groupe { background: var(--amber); transition: width 0.6s ease; }
-.cost-split-legend { display: flex; gap: 16px; font-size: 11px; color: var(--text-muted); }
-.legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; margin-right: 5px; vertical-align: middle; }
-
-/* Économie */
-.savings-box {
-  background: linear-gradient(135deg, rgba(0,220,160,0.06), rgba(13,21,32,0.6));
-  border: 1px solid rgba(0,220,160,0.15);
-  border-radius: var(--radius-sm); padding: 14px 16px; margin-bottom: 12px;
-  display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;
+.status-badge::before {
+  content: '';
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: currentColor;
+  animation: pulse 1.6s ease infinite;
 }
-.savings-label { font-size: 11px; color: var(--text-muted); font-weight: 600; }
-.savings-value { font-family: var(--font-display); font-size: 18px; font-weight: 700; color: var(--green); }
-.savings-note  { font-size: 10px; color: var(--text-muted); }
+.badge-green  { background: rgba(0,212,160,0.12);  color: var(--accent-green); }
+.badge-orange { background: rgba(245,166,35,0.12); color: var(--accent-amber); }
+.badge-red    { background: rgba(255,77,106,0.12); color: var(--accent-red);   }
 
-/* IoT chips */
-.iot-status-row { display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
-.iot-chip { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; padding: 8px 12px; font-size: 11px; color: var(--text-dim); display: flex; align-items: center; gap: 6px; font-family: var(--font-mono); }
-.iot-chip-dot { width: 6px; height: 6px; border-radius: 50%; }
+/* ===================================================================
+   BARRE DISPONIBILITÉ
+   =================================================================== */
+.health-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 20px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+.health-track {
+  flex: 1;
+  height: 4px;
+  background: var(--bg-inset);
+  border-radius: 2px;
+  overflow: hidden;
+}
+.health-fill {
+  height: 100%;
+  border-radius: 2px;
+  transition: width 0.6s ease, background 0.4s;
+}
 
-/* Buffer */
-.buffer-row   { display: flex; align-items: center; gap: 10px; font-size: 11px; color: var(--text-muted); margin-bottom: 12px; }
-.buffer-track { flex:1; height:3px; background: var(--border); border-radius:999px; overflow:hidden; }
-.buffer-fill  { height:100%; background: var(--blue); border-radius:999px; transition: width 0.6s; }
+/* ===================================================================
+   KPI GRIDS
+   =================================================================== */
+.kpi-grid-3 {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.kpi-box {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-box);
+  padding: 14px 15px;
+  position: relative;
+  overflow: hidden;
+  transition: border-color var(--transition);
+}
+.kpi-box:hover { border-color: rgba(0,212,160,0.12); }
+.kpi-box::after {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 2px;
+  border-radius: 2px 2px 0 0;
+  background: transparent;
+  transition: background var(--transition);
+}
+.kpi-box.kg::after  { background: var(--accent-green); }
+.kpi-box.kb::after  { background: var(--accent-blue);  }
+.kpi-box.kr::after  { background: var(--accent-red);   }
+.kpi-box.ka::after  { background: var(--accent-amber); }
 
-/* Alertes */
-.alert-item  { display: flex; align-items: flex-start; gap: 10px; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 12px; }
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: color var(--transition);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* Coût total pleine largeur */
+.kpi-full {
+  background: linear-gradient(135deg, rgba(0,212,160,0.06) 0%, rgba(0,212,160,0.01) 100%);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-box);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.kpi-full .kpi-value { font-size: 26px; color: var(--accent-green); }
+
+/* ===================================================================
+   COÛTS SBEE / GROUPE
+   =================================================================== */
+.cost-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cost-box {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-box);
+  padding: 13px 15px;
+}
+.cost-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.cost-value {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cost-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+.c-green { color: var(--accent-green); }
+.c-amber { color: var(--accent-amber); }
+
+/* ===================================================================
+   BARRE RÉPARTITION kWh
+   =================================================================== */
+.split-wrap { margin-bottom: 14px; }
+.split-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.split-track {
+  height: 7px;
+  background: var(--bg-inset);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+.split-sbee   { background: var(--accent-green); height: 100%; border-radius: 4px 0 0 4px; transition: width 0.6s ease; }
+.split-groupe { background: var(--accent-amber); height: 100%; border-radius: 0 4px 4px 0; transition: width 0.6s ease; }
+
+/* ===================================================================
+   ROI
+   =================================================================== */
+.roi-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.07) 0%, rgba(59,130,246,0.01) 100%);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: var(--radius-box);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.roi-icon { font-size: 26px; flex-shrink: 0; }
+.roi-title { font-size: 10px; font-weight: 700; color: var(--accent-blue); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+.roi-value { font-size: 18px; font-weight: 700; color: var(--accent-blue); font-variant-numeric: tabular-nums; }
+.roi-desc  { font-size: 10px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4; }
+
+/* ===================================================================
+   INDICATEURS ÉLECTRIQUES
+   =================================================================== */
+.elec-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.elec-box {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  border: 1px solid var(--border-subtle);
+}
+.elec-label { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+.elec-value { font-size: 13px; font-weight: 700; font-family: var(--font-display); transition: color var(--transition); }
+
+/* ===================================================================
+   SECTIONS ANALYSE
+   =================================================================== */
+.analysis-section {
+  background: rgba(10,16,32,0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-box);
+  padding: 15px;
+  margin-bottom: 10px;
+}
+.analysis-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 10px;
+}
+.data-row:last-child { border-bottom: none; }
+.dr-label { color: var(--text-secondary); flex: 1; }
+.dr-value { font-weight: 600; text-align: right; white-space: nowrap; }
+
+/* ===================================================================
+   ALERTES
+   =================================================================== */
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
 .alert-item:last-child { border-bottom: none; }
-.alert-icon    { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
-.alert-content { flex: 1; }
-.alert-label   { font-weight: 600; color: var(--text); }
-.alert-meta    { color: var(--text-muted); margin-top: 2px; font-family: var(--font-mono); font-size: 11px; }
-.alert-ack-btn { font-size: 10px; padding: 4px 10px; border: 1px solid var(--border); background: transparent; color: var(--text-muted); border-radius: 6px; cursor: pointer; font-family: var(--font-body); white-space: nowrap; }
-.alert-ack-btn:hover { border-color: var(--green); color: var(--green); }
+.alert-sev {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.sev-critical { background: rgba(255,77,106,0.14);  color: var(--accent-red);   }
+.sev-warning  { background: rgba(245,166,35,0.14);  color: var(--accent-amber); }
+.sev-info     { background: rgba(59,130,246,0.14);  color: var(--accent-blue);  }
+.alert-body { flex: 1; min-width: 0; }
+.alert-device { font-size: 12px; font-weight: 600; }
+.alert-desc   { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.ack-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color var(--transition), color var(--transition);
+}
+.ack-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
 
-/* Chart controls */
-.chart-controls { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 10px; flex-wrap: wrap; }
-.chart-label { font-size: 11px; color: var(--text-muted); font-weight: 600; letter-spacing: 0.5px; }
-.period-tabs { display: flex; gap: 4px; }
-.period-tab  { padding: 5px 10px; border-radius: 6px; font-size: 10px; font-weight: 600; cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text-muted); font-family: var(--font-body); transition: all 0.2s; }
-.period-tab.active { background: var(--green-dim); border-color: var(--border-glow); color: var(--green); }
-.sensor-select { background: var(--bg-deep); border: 1px solid var(--border); border-radius: 8px; color: var(--text); padding: 7px 12px; font-family: var(--font-body); font-size: 12px; outline: none; cursor: pointer; transition: border-color 0.2s; }
-.sensor-select:focus { border-color: var(--green); }
+/* ===================================================================
+   STATUT IoT
+   =================================================================== */
+.sensor-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.iot-box {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+}
+.iot-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.iot-status { font-size: 10px; font-weight: 700; font-family: var(--font-display); }
+.iot-meta { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
 
-/* Premium lock */
-.premium-lock { background: rgba(245,166,35,0.04); border: 1px dashed rgba(245,166,35,0.2); border-radius: var(--radius-sm); padding: 16px; text-align: center; }
-.premium-lock-title { font-size: 12px; color: var(--amber); font-weight: 700; margin-bottom: 6px; }
-.premium-lock-desc  { font-size: 11px; color: var(--text-muted); }
+/* ===================================================================
+   GRAPHIQUE — CONTRÔLES
+   =================================================================== */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chart-select {
+  flex: 1;
+  min-width: 130px;
+  padding: 8px 11px;
+  background: var(--bg-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.chart-select:focus { border-color: var(--accent-green); }
 
-/* WhatsApp btn */
-.whatsapp-btn { width:100%; padding:11px; background:rgba(37,211,102,0.08); border:1px solid rgba(37,211,102,0.2); border-radius:var(--radius-sm); color:#25D366; font-size:12px; font-weight:700; cursor:pointer; font-family:var(--font-body); transition:all 0.2s; margin-top:10px; display:flex; align-items:center; justify-content:center; gap:8px; }
-.whatsapp-btn:hover { background:rgba(37,211,102,0.14); box-shadow:0 0 15px rgba(37,211,102,0.15); }
+.period-btns { display: flex; gap: 4px; }
+.period-btn {
+  padding: 7px 10px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.period-btn:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.period-btn.active {
+  background: rgba(0,212,160,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
 
-/* Skeleton */
-.skeleton { background: linear-gradient(90deg,#0d1520 25%,#111b28 50%,#0d1520 75%); background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:6px; }
-@keyframes shimmer { 0%{background-position:200% 0;} 100%{background-position:-200% 0;} }
+/* ===================================================================
+   PREMIUM BANNER
+   =================================================================== */
+.premium-banner {
+  background: linear-gradient(135deg, rgba(245,166,35,0.07) 0%, rgba(12,21,34,0.5) 100%);
+  border: 1px solid rgba(245,166,35,0.22);
+  padding: 20px 26px;
+  border-radius: var(--radius-card);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.plan-pills { display: flex; gap: 12px; flex-wrap: wrap; }
+.plan-pill {
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.plan-pill b { display: block; margin-bottom: 4px; }
+.plan-pill small { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+.plan-free { background: rgba(255,77,106,0.07);  border: 1px solid rgba(255,77,106,0.12); }
+.plan-pro  { background: rgba(0,212,160,0.07);   border: 1px solid rgba(0,212,160,0.15);  }
+.upgrade-btn {
+  padding: 12px 20px;
+  background: var(--accent-green);
+  border: none;
+  border-radius: 11px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  color: #060f1a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--transition), transform var(--transition);
+}
+.upgrade-btn:hover { opacity: 0.88; transform: scale(1.02); }
 
-/* =====================================================================
+/* ===================================================================
+   LOCKED BOX
+   =================================================================== */
+.locked-box {
+  background: var(--bg-inset);
+  border: 1px dashed rgba(245,166,35,0.15);
+  padding: 14px;
+  border-radius: var(--radius-box);
+  text-align: center;
+  margin-top: 10px;
+}
+.locked-box .lock-title { font-size: 11px; font-weight: 700; color: var(--accent-amber); margin-bottom: 4px; }
+.locked-box p { font-size: 11px; color: var(--text-secondary); }
+
+/* ===================================================================
+   LIVE DOT
+   =================================================================== */
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  display: inline-block;
+  margin-right: 7px;
+  animation: pulse 1.6s ease infinite;
+}
+
+/* ===================================================================
+   SKELETON
+   =================================================================== */
+.skeleton {
+  background: linear-gradient(90deg, #0f1829 25%, #162035 50%, #0f1829 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.25); }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes shimmer {
+  0%   { background-position:  200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===================================================================
    RESPONSIVE
-   ===================================================================== */
-@media (max-width: 900px) {
-  .sidebar { display: none; }
-  .main { margin-left: 0; padding: 20px; max-width: 100vw; }
-  .site-grid { grid-template-columns: 1fr; }
-  .elec-grid { grid-template-columns: repeat(2,1fr); }
+   =================================================================== */
+@media (max-width: 520px) {
+  .site-grid  { grid-template-columns: 1fr; }
+  .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .elec-grid  { grid-template-columns: repeat(2, 1fr); }
+  .cost-row   { grid-template-columns: 1fr; }
 }
 </style>
 </head>
+
 <body>
 
 <!-- ================================================================
-     LOADING SCREEN
+     SIDEBAR
      ================================================================ -->
-<div id="loading-screen">
-  <div class="loader-logo">Energy<span style="color:var(--text-muted);font-weight:400;">Track</span></div>
-  <div class="loader-bar"><div class="loader-fill" id="loader-fill"></div></div>
-  <div class="loader-msg" id="loader-msg">Connexion…</div>
+<div class="sidebar">
+  <div class="logo">Energy<span>Track</span></div>
+  <a class="nav-item active"          href="dashboard.html">🏠 Dashboard</a>
+  <a class="nav-item"                 href="consommation.html">⚡ Consommation</a>
+  <a class="nav-item"                 href="alertes.html">🔔 Alertes</a>
+  <a class="nav-item premium-feature" href="rapports.html">📊 Rapports</a>
+  <a class="nav-item premium-feature" href="sites.html">🏢 Multi-sites</a>
+  <a class="nav-item"                 href="capteurs.html">📡 Capteurs IoT</a>
+  <a class="nav-item premium-feature" href="ia.html">🤖 Analyse IA</a>
+  <a class="nav-item"                 href="parametres.html">⚙️ Paramètres</a>
 </div>
 
 <!-- ================================================================
-     ERROR SCREEN
+     MAIN
      ================================================================ -->
-<div id="error-screen">
-  <div class="error-icon" id="error-icon">⚠️</div>
-  <div class="error-title" id="error-title">Accès refusé</div>
-  <div class="error-msg"   id="error-msg">Une erreur est survenue.</div>
-  <button class="error-btn" id="error-btn" onclick="window.location.href='auth.html'">Se connecter</button>
+<div class="main" style="display:block;">
+
+  <div id="subscriptionBanner"></div>
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:6px;">
+    <div>
+      <h1 style="font-size:22px; font-weight:700; letter-spacing:-0.3px;">Dashboard EnergyTrack</h1>
+      <p style="margin-top:7px; color:var(--text-secondary); font-size:13px;">
+        <span class="live-dot"></span>Supervision énergétique multi-sites en temps réel.
+      </p>
+    </div>
+    <div style="font-size:11px; color:var(--text-muted); text-align:right; padding-top:4px;">
+      MAJ : <span id="lastRefreshTime" style="font-family:var(--font-display); color:var(--text-secondary); font-size:10px;">—</span>
+    </div>
+  </div>
+
+  <div class="site-grid" id="sitesContainer"></div>
+
 </div>
 
 <!-- ================================================================
-     APP SHELL
-     ================================================================ -->
-<div class="app-shell" id="app-shell" style="display:none;">
-
-  <!-- SIDEBAR -->
-  <aside class="sidebar">
-    <div class="logo">Energy<span>Track</span></div>
-
-    <a class="nav-item active" href="dashboard.html"><span class="nav-icon">🏠</span> Dashboard</a>
-    <a class="nav-item"        href="consommation.html"><span class="nav-icon">⚡</span> Consommation</a>
-    <a class="nav-item"        href="alertes.html">
-      <span class="nav-icon">🔔</span> Alertes
-      <span class="nav-badge" id="sidebar-alert-count"></span>
-    </a>
-    <a class="nav-item"        href="rapports.html"><span class="nav-icon">📊</span> Rapports</a>
-    <a class="nav-item"        href="sites.html"><span class="nav-icon">🏢</span> Multi-sites</a>
-    <a class="nav-item"        href="capteurs.html"><span class="nav-icon">📡</span> Capteurs IoT</a>
-    <a class="nav-item"        href="ia.html"><span class="nav-icon">🤖</span> Analyse IA</a>
-    <a class="nav-item"        href="parametres.html"><span class="nav-icon">⚙️</span> Paramètres</a>
-
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar" id="sb-avatar">—</div>
-        <div>
-          <div class="user-name"  id="sb-name">—</div>
-          <div class="user-email" id="sb-email">—</div>
-        </div>
-      </div>
-      <div class="plan-badge" id="sb-plan-badge">—</div>
-      <button class="btn btn-danger" style="width:100%;margin-top:8px;font-size:11px;" onclick="logout()">
-        Déconnexion
-      </button>
-    </div>
-  </aside>
-
-  <!-- MAIN -->
-  <main class="main">
-    <div class="topbar">
-      <div class="topbar-title">
-        <h1>Dashboard</h1>
-        <p><span class="live-dot"></span> Supervision énergétique temps réel · Cotonou, Bénin</p>
-      </div>
-      <div class="topbar-actions">
-        <button class="btn btn-ghost" onclick="triggerWeeklyReport()">📲 Rapport WhatsApp</button>
-        <button class="btn btn-primary" id="upgrade-btn" onclick="window.location.href='pricing.html'" style="display:none;">
-          🚀 Upgrader le plan
-        </button>
-      </div>
-    </div>
-
-    <!-- Bannière plan -->
-    <div class="plan-banner" id="plan-banner" style="display:none;">
-      <div class="plan-banner-text" id="plan-banner-text"></div>
-      <button class="btn btn-primary" onclick="window.location.href='pricing.html'">Voir les plans</button>
-    </div>
-
-    <!-- Contenu dynamique -->
-    <div id="main-content"></div>
-  </main>
-</div>
-
-<!-- ================================================================
-     JAVASCRIPT — SUPABASE + LOGIQUE COMPLÈTE
+     JAVASCRIPT
      ================================================================ -->
 <script>
-/* ─────────────────────────────────────────────────────────────────
-   INITIALISATION SUPABASE
-   ─────────────────────────────────────────────────────────────────*/
-const SUPABASE_URL = 'https://prvsatpdgybnevolzhhf.supabase.co';
-const SUPABASE_KEY = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
-const sb = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+/* =================================================================
+   CONSTANTES MÉTIER
+   ================================================================= */
+const TARIF_SBEE      = 91;    // FCFA/kWh réseau SBEE
+const TARIF_GROUPE    = 350;   // FCFA/kWh groupe électrogène
+const V_OUTAGE        = 50;    // V seuil coupure
+const V_LOW           = 190;   // V basse tension
+const V_HIGH          = 250;   // V surtension
+const P_MAX_W         = 5000;  // W surconsommation
+const OFFLINE_MIN     = 15;    // minutes avant DEVICE_OFFLINE
+const TELEMETRY_LIMIT = 200;   // lignes max — protège Supabase free tier
+const CHART_POINTS    = 14;    // points graphique
+const DEBOUNCE_MS     = 15000; // ms debounce realtime
 
-/* ─────────────────────────────────────────────────────────────────
+/* =================================================================
    ÉTAT GLOBAL
-   ─────────────────────────────────────────────────────────────────*/
-let currentUser     = null;
-let userProfile     = null;   // profiles table
-let userSub         = null;   // subscriptions row
-let currentPlan     = null;   // plans row (avec features jsonb)
-let userTariff      = 91;     // settings.tariff (FCFA/kWh)
+   ================================================================= */
+const charts        = {};   // instances Chart.js — jamais recréées
+const cachedData    = {};   // données par siteId
+const renderedSites = new Set();
+const alertCooldown = {};   // anti-flooding { key: timestamp }
+let realtimeTimeout = null;
+let canAccessMultiSite   = false;
+let canAccessMultiSensor = false;
+const activePeriod  = {};   // { siteId: period }
+const activeSensor  = {};   // { siteId: sensorId | 'ALL' }
 
-let charts         = {};
-let outageTickers  = {};
-let renderedSites  = new Set();
-let cachedTelemetry = {};
-let realtimeChannel = null;
-let reloadTimeout   = null;
-
-/* Feature flags calculés depuis plan.features */
-let canAI         = false;
-let canPDF        = false;
-let canMultiSite  = false;
-let canMultiSensor= false;
-
-/* ─────────────────────────────────────────────────────────────────
-   LOADER
-   ─────────────────────────────────────────────────────────────────*/
-function setLoader(msg, pct) {
-  document.getElementById('loader-msg').textContent  = msg;
-  document.getElementById('loader-fill').style.width = pct + '%';
+/* =================================================================
+   UTILITAIRES FORMATAGE
+   ================================================================= */
+function fmtEnergy(kwh) {
+  if (typeof kwh !== 'number' || isNaN(kwh)) return '—';
+  if (kwh < 1) return `${Math.round(kwh * 1000)} Wh`;
+  return `${kwh.toFixed(2)} kWh`;
 }
-function hideLoader() {
-  const ls = document.getElementById('loading-screen');
-  ls.classList.add('hidden');
-  setTimeout(() => ls.style.display = 'none', 400);
+function fmtFcfa(n) {
+  if (typeof n !== 'number' || isNaN(n) || n === 0) return '0';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
 }
-function showError(icon, title, msg, btnLabel = 'Se connecter', href = 'auth.html') {
-  document.getElementById('error-icon').textContent  = icon;
-  document.getElementById('error-title').textContent = title;
-  document.getElementById('error-msg').textContent   = msg;
-  const btn = document.getElementById('error-btn');
-  btn.textContent = btnLabel;
-  btn.onclick = () => window.location.href = href;
-  document.getElementById('error-screen').classList.add('visible');
-  hideLoader();
+function fmtV(v)  { return (typeof v === 'number' && !isNaN(v)) ? `${v.toFixed(1)} V`  : '—'; }
+function fmtA(i)  { return (typeof i === 'number' && !isNaN(i)) ? `${i.toFixed(2)} A`  : '—'; }
+function fmtPF(p) { return (typeof p === 'number' && !isNaN(p)) ? p.toFixed(2)          : '—'; }
+function fmtHz(f) { return (typeof f === 'number' && !isNaN(f)) ? `${f.toFixed(1)} Hz` : '—'; }
+function fmtMin(m) {
+  if (!m || m === 0) return '0 min';
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}h ${m%60}min`;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   UTILITAIRES
-   ─────────────────────────────────────────────────────────────────*/
-function fmt(n) {
-  if (n === null || n === undefined || isNaN(n)) return '—';
-  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f') + ' F';
-}
-function fmtKwh(kwh) {
-  if (kwh === null || kwh === undefined) return '—';
-  return parseFloat(kwh) < 1 ? `${Math.round(kwh*1000)} Wh` : `${parseFloat(kwh).toFixed(2)} kWh`;
-}
-function fmtTime(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-}
-function fmtDate(iso) {
-  if (!iso) return '—';
-  return new Date(iso).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' });
-}
-function setText(id, v) {
+function setText(id, val) {
   const el = document.getElementById(id);
-  if (el && el.textContent !== String(v)) el.textContent = v;
+  if (el && el.textContent !== String(val)) el.textContent = val;
 }
-function resolveStatus(latest) {
-  if (!latest) return { text: 'HORS LIGNE', cls: 'status-red' };
-  const v = parseFloat(latest.voltage);
-  if (v < 50) return { text: 'COUPURE SBEE', cls: 'status-red' };
-  if (latest.source === 'GROUPE') return { text: 'GROUPE ACTIF', cls: 'status-orange' };
-  return { text: 'SBEE OK', cls: 'status-green' };
-}
-function initials(email) {
-  if (!email) return '?';
-  return email[0].toUpperCase();
+function setStyle(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el && el.style[prop] !== val) el.style[prop] = val;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   INIT — POINT D'ENTRÉE
-   ─────────────────────────────────────────────────────────────────*/
-async function init() {
-  setLoader('Vérification de session…', 10);
+function resolveStatus(t) {
+  if (!t)                       return { text: 'HORS LIGNE',   cls: 'badge-red'    };
+  if (t.voltage < V_OUTAGE)     return { text: 'COUPURE SBEE', cls: 'badge-red'    };
+  if (t.source === 'GROUPE')    return { text: 'GROUPE ACTIF', cls: 'badge-orange' };
+  return                               { text: 'SBEE OK',       cls: 'badge-green'  };
+}
+function hColor(pct) {
+  if (pct >= 80) return 'var(--accent-green)';
+  if (pct >= 50) return 'var(--accent-amber)';
+  return 'var(--accent-red)';
+}
+function isOffline(sensor) {
+  if (!sensor.last_seen) return true;
+  return (Date.now() - new Date(sensor.last_seen).getTime()) / 60000 > OFFLINE_MIN;
+}
 
-  /* 1. Auth */
-  const { data: { session } } = await sb.auth.getSession();
-  if (!session) {
-    showError('🔐', 'Non authentifié', 'Vous devez être connecté pour accéder au dashboard. Veuillez vous identifier.');
-    return;
+/* =================================================================
+   FILTRAGE PAR PÉRIODE
+   ================================================================= */
+function filterByPeriod(telemetry, period) {
+  const now = Date.now();
+  let cutoff;
+  switch (period) {
+    case 'today': { cutoff = new Date(); cutoff.setHours(0,0,0,0); break; }
+    case '7d':    { cutoff = new Date(now - 7  * 86400000); break; }
+    case '30d':   { cutoff = new Date(now - 30 * 86400000); break; }
+    case 'month': { cutoff = new Date(); cutoff.setDate(1); cutoff.setHours(0,0,0,0); break; }
+    default:      { cutoff = new Date(now - 86400000); }
   }
-  currentUser = session.user;
-  setLoader('Chargement du profil…', 25);
-
-  /* 2. Profil */
-  const { data: profile } = await sb
-    .from('profiles')
-    .select('*')
-    .eq('id', currentUser.id)
-    .maybeSingle();
-  userProfile = profile;
-
-  /* 3. Tarif personnalisé */
-  const { data: settings } = await sb
-    .from('settings')
-    .select('tariff')
-    .eq('user_id', currentUser.id)
-    .maybeSingle();
-  if (settings?.tariff) userTariff = parseFloat(settings.tariff);
-
-  setLoader('Vérification de l\'abonnement…', 45);
-
-  /* 4. Abonnement */
-  await loadSubscription();
-  setLoader('Chargement des données…', 65);
-
-  /* 5. Parcours utilisateur : vérifier état du compte */
-  const step = getUserStep();
-  if (step !== 'dashboard') {
-    renderOnboardingState(step);
-    renderSidebar();
-    document.getElementById('app-shell').style.display = 'flex';
-    hideLoader();
-    return;
-  }
-
-  /* 6. Charger le dashboard */
-  await loadDashboard();
-  setLoader('Presque prêt…', 90);
-
-  /* 7. Realtime */
-  startRealtime();
-
-  renderSidebar();
-  document.getElementById('app-shell').style.display = 'flex';
-  hideLoader();
-
-  /* Rafraîchissement toutes les 60s */
-  setInterval(loadDashboard, 60000);
+  return telemetry.filter(t => new Date(t.created_at) >= cutoff);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   ABONNEMENT & PLAN
-   ─────────────────────────────────────────────────────────────────*/
-async function loadSubscription() {
-  const { data: sub } = await sb
-    .from('subscriptions')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .maybeSingle();
-  userSub = sub;
-
-  if (sub?.plan_id) {
-    const { data: plan } = await sb
-      .from('plans')
-      .select('*')
-      .eq('id', sub.plan_id)
-      .maybeSingle();
-    currentPlan = plan;
-    if (plan?.features) {
-      canAI          = plan.features.ai          === true;
-      canPDF         = plan.features.pdf         === true;
-      canMultiSite   = plan.features.multisite   === true;
-      canMultiSensor = plan.features.multisensor === true;
-    }
-  }
-}
-
-function subIsActive() {
-  if (!userSub) return false;
-  if (userSub.status !== 'active') return false;
-  if (userSub.expires_at && new Date(userSub.expires_at) < new Date()) return false;
-  return true;
-}
-function subIsTrial() { return userSub?.trial === true; }
-
-/* ─────────────────────────────────────────────────────────────────
-   PARCOURS UTILISATEUR (miroir de auth.js)
-   ─────────────────────────────────────────────────────────────────*/
-function getUserStep() {
-  if (!userProfile) return 'no-profile';
-  if (userProfile.sensor_configured)           return 'dashboard';
-  if (userProfile.delivery_status === 'delivered') return 'setup';
-  if (userProfile.payment_status  === 'paid')      return 'delivery';
-  if (userProfile.selected_sensor)                 return 'payment';
-  return 'no-sensor';
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   SIDEBAR
-   ─────────────────────────────────────────────────────────────────*/
-function renderSidebar() {
-  const email = currentUser.email || '';
-  const company = userProfile?.company || '';
-  const displayName = company || email.split('@')[0];
-
-  document.getElementById('sb-avatar').textContent = initials(email);
-  document.getElementById('sb-name').textContent   = displayName;
-  document.getElementById('sb-email').textContent  = email;
-
-  const badge = document.getElementById('sb-plan-badge');
-  if (!userSub) {
-    badge.textContent = 'AUCUN PLAN';
-    badge.className   = 'plan-badge expired';
-  } else if (!subIsActive()) {
-    badge.textContent = 'EXPIRÉ';
-    badge.className   = 'plan-badge expired';
-  } else if (subIsTrial()) {
-    badge.textContent = currentPlan?.name?.toUpperCase() || 'ESSAI';
-    badge.className   = 'plan-badge trial';
-  } else {
-    badge.textContent = currentPlan?.name?.toUpperCase() || userSub.plan?.toUpperCase() || 'ACTIF';
-    badge.className   = 'plan-badge';
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   BANNIÈRE PLAN
-   ─────────────────────────────────────────────────────────────────*/
-function renderPlanBanner() {
-  const banner  = document.getElementById('plan-banner');
-  const textEl  = document.getElementById('plan-banner-text');
-  const upgrBtn = document.getElementById('upgrade-btn');
-
-  if (!userSub || !subIsActive()) {
-    banner.className = 'plan-banner expired-banner';
-    banner.style.display = 'flex';
-    textEl.innerHTML = `<strong style="color:var(--red)">Aucun abonnement actif.</strong>
-      Souscrivez un plan pour activer la supervision complète et les alertes WhatsApp.`;
-    upgrBtn.style.display = 'inline-flex';
-    return;
-  }
-  if (subIsTrial()) {
-    const exp = userSub.expires_at ? fmtDate(userSub.expires_at) : '—';
-    banner.className = 'plan-banner trial-banner';
-    banner.style.display = 'flex';
-    textEl.innerHTML = `<strong style="color:var(--purple)">Période d'essai</strong> — expire le ${exp}.
-      Passez à un plan payant pour ne pas interrompre votre supervision.`;
-    upgrBtn.style.display = 'inline-flex';
-    return;
-  }
-  if (!canMultiSite) {
-    banner.style.display = 'flex';
-    textEl.innerHTML = `<strong>Plan ${currentPlan?.name || userSub.plan} actif.</strong>
-      Passez au plan supérieur pour débloquer multi-sites, multi-capteurs, exports PDF et IA prédictive.`;
-    upgrBtn.style.display = 'inline-flex';
-  } else {
-    banner.style.display = 'none';
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   ÉTAT ONBOARDING (capteur non configuré)
-   ─────────────────────────────────────────────────────────────────*/
-function renderOnboardingState(step) {
-  const content = document.getElementById('main-content');
-  const steps = {
-    'no-sensor': {
-      icon:'📦', title:'Choisissez votre capteur',
-      desc:`Votre compte est prêt. Sélectionnez votre capteur IoT EnergyTrack pour commencer la supervision de votre installation.`,
-      steps:[
-        ['01','Choisir votre capteur IoT dans la boutique'],
-        ['02','Procéder au paiement sécurisé'],
-        ['03','Attendre la livraison (2–5 jours à Cotonou)'],
-        ['04','Configurer le capteur sur votre tableau électrique'],
-      ],
-      btn:'Choisir un capteur', href:'shop.html'
-    },
-    'payment': {
-      icon:'💳', title:'Finaliser le paiement',
-      desc:`Votre capteur ${userProfile.selected_sensor} est sélectionné. Finalisez le paiement pour lancer la livraison.`,
-      steps:[['01','Payer votre capteur IoT'],['02','Livraison 2–5 jours'],['03','Configuration']],
-      btn:'Payer maintenant', href:'payment.html'
-    },
-    'delivery': {
-      icon:'🚚', title:'Livraison en cours',
-      desc:`Paiement confirmé. Votre capteur EnergyTrack est en route. Vous recevrez une notification WhatsApp dès qu'il sera livré.`,
-      steps:[['01','✅ Paiement confirmé'],['02','📦 Livraison en cours (2–5 jours)'],['03','Installation & configuration']],
-      btn:'Suivre ma commande', href:'delivery.html'
-    },
-    'setup': {
-      icon:'🔧', title:'Configurer votre capteur',
-      desc:`Votre capteur est livré ! Suivez le guide d'installation pour le connecter à votre tableau électrique.`,
-      steps:[['01','✅ Livraison confirmée'],['02','Installer le capteur (guide inclus)'],['03','Tester la connexion GSM']],
-      btn:'Guide d\'installation', href:'setup.html'
-    },
-    'no-profile': {
-      icon:'👤', title:'Profil incomplet',
-      desc:`Votre profil utilisateur est incomplet. Complétez votre inscription pour accéder au dashboard.`,
-      steps:[['01','Compléter votre profil'],['02','Choisir votre capteur']],
-      btn:'Compléter le profil', href:'profile.html'
-    },
+/* =================================================================
+   CALCULS MÉTIER COMPLETS
+   ================================================================= */
+function computeKPIs(telemetry) {
+  const r = {
+    totalKwh: 0, kwhSbee: 0, kwhGroupe: 0,
+    costSbee: 0, costGroupe: 0, costTotal: 0, economyPossible: 0,
+    outageCount: 0, outageTotalMin: 0,
+    lastPowerCutTime: 'Aucune coupure', lastTransmitTime: '—',
+    topSensorName: '—', topSensorPower: 0,
+    latestV: null, latestI: null, latestP: 0, latestPF: null,
+    latestFreq: null, latestSource: null,
+    consumptionBySensor: {},
   };
 
-  const s = steps[step];
-  if (!s) return;
+  if (!telemetry || telemetry.length === 0) return r;
 
-  renderPlanBanner();
-  content.innerHTML = `
-    <div class="state-card">
-      <div class="state-card-icon">${s.icon}</div>
-      <div class="state-card-title">${s.title}</div>
-      <div class="state-card-desc">${s.desc}</div>
-      ${s.steps.map(([n,t])=>`
-        <div class="state-card-step">
-          <span class="step-num">${n}</span>
-          <span class="step-text">${t}</span>
-        </div>`).join('')}
-      <button class="btn btn-primary" style="margin-top:8px;" onclick="window.location.href='${s.href}'">${s.btn}</button>
+  const latest = telemetry[0];
+  r.latestV      = latest.voltage;
+  r.latestI      = latest.current_a;
+  r.latestP      = latest.power_w || 0;
+  r.latestPF     = latest.power_factor;
+  r.latestFreq   = latest.frequency_hz;
+  r.latestSource = latest.source;
+  r.lastTransmitTime = new Date(latest.created_at).toLocaleTimeString('fr-FR', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+
+  /* Tri chronologique pour détecter transitions coupures */
+  const chrono = [...telemetry].sort((a,b) =>
+    new Date(a.created_at) - new Date(b.created_at)
+  );
+
+  let inOutage = false, outageStart = null;
+
+  chrono.forEach(item => {
+    const sName = item.sensors?.name || 'Général';
+    if (!r.consumptionBySensor[sName]) {
+      r.consumptionBySensor[sName] = { kwh: 0, kwhSbee: 0, kwhGroupe: 0 };
+    }
+
+    const kwh = Number(item.kwh_total || 0);
+    if (kwh > r.consumptionBySensor[sName].kwh) {
+      r.consumptionBySensor[sName].kwh = kwh;
+    }
+
+    if (item.source === 'GROUPE') {
+      const kG = Number(item.kwh_groupe || kwh);
+      if (kG > r.consumptionBySensor[sName].kwhGroupe)
+        r.consumptionBySensor[sName].kwhGroupe = kG;
+    } else {
+      const kS = Number(item.kwh_sbee || kwh);
+      if (kS > r.consumptionBySensor[sName].kwhSbee)
+        r.consumptionBySensor[sName].kwhSbee = kS;
+    }
+
+    /* Détection transitions coupure SBEE */
+    if (item.voltage < V_OUTAGE && !inOutage) {
+      inOutage = true;
+      outageStart = new Date(item.created_at);
+      r.outageCount++;
+      r.lastPowerCutTime = outageStart.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    } else if (item.voltage >= V_OUTAGE && inOutage) {
+      inOutage = false;
+      if (outageStart) {
+        r.outageTotalMin += Math.round((new Date(item.created_at) - outageStart) / 60000);
+      }
+    }
+  });
+
+  /* Agrégation globale */
+  Object.values(r.consumptionBySensor).forEach(v => {
+    r.totalKwh  += v.kwh;
+    r.kwhSbee   += v.kwhSbee;
+    r.kwhGroupe += v.kwhGroupe;
+  });
+
+  /* Inférence SBEE/Groupe si champs absents en base */
+  if (r.kwhSbee === 0 && r.kwhGroupe === 0 && r.totalKwh > 0) {
+    const gRatio = chrono.filter(t => t.source === 'GROUPE').length / chrono.length;
+    r.kwhGroupe = r.totalKwh * gRatio;
+    r.kwhSbee   = r.totalKwh * (1 - gRatio);
+  }
+
+  r.costSbee   = r.kwhSbee   * TARIF_SBEE;
+  r.costGroupe = r.kwhGroupe * TARIF_GROUPE;
+  r.costTotal  = r.costSbee + r.costGroupe;
+
+  /* Économie possible : coût réel vs si tout était sur SBEE */
+  r.economyPossible = Math.max(0, r.costTotal - (r.totalKwh * TARIF_SBEE));
+
+  /* Top consommateur (puissance instantanée) */
+  const byPow = [...telemetry].sort((a,b) => b.power_w - a.power_w);
+  if (byPow[0]) {
+    r.topSensorName  = byPow[0].sensors?.name || 'Général';
+    r.topSensorPower = Math.round(byPow[0].power_w || 0);
+  }
+
+  return r;
+}
+
+/* =================================================================
+   ALERTES LOCALES (seuils) — complément aux alertes Supabase
+   ================================================================= */
+function generateLocalAlerts(sensors, kpis) {
+  const alerts = [];
+
+  /* DEVICE_OFFLINE */
+  sensors.filter(s => isOffline(s)).forEach(s => {
+    alerts.push({
+      id: `offline-${s.id}`,
+      severity: 'warning',
+      sensors: { name: s.name || s.id },
+      description: `Aucune donnée depuis plus de ${OFFLINE_MIN} minutes`,
+      synthetic: true
+    });
+  });
+
+  /* LOW_VOLTAGE */
+  if (kpis.latestV !== null && kpis.latestV >= V_OUTAGE && kpis.latestV < V_LOW) {
+    alerts.push({
+      id: 'low-voltage',
+      severity: 'warning',
+      sensors: { name: 'Réseau SBEE' },
+      description: `Basse tension détectée : ${fmtV(kpis.latestV)} (seuil : ${V_LOW} V)`,
+      synthetic: true
+    });
+  }
+
+  /* HIGH_VOLTAGE */
+  if (kpis.latestV !== null && kpis.latestV > V_HIGH) {
+    alerts.push({
+      id: 'high-voltage',
+      severity: 'critical',
+      sensors: { name: 'Réseau SBEE' },
+      description: `Surtension détectée : ${fmtV(kpis.latestV)} — risque matériel`,
+      synthetic: true
+    });
+  }
+
+  /* OVERCONSUMPTION */
+  if (kpis.latestP > P_MAX_W) {
+    alerts.push({
+      id: 'overconsumption',
+      severity: 'warning',
+      sensors: { name: kpis.topSensorName },
+      description: `Surconsommation : ${Math.round(kpis.latestP)} W (seuil : ${P_MAX_W} W)`,
+      synthetic: true
+    });
+  }
+
+  /* HIGH_GROUPE_COST (>30% du total) */
+  const gPct = kpis.totalKwh > 0 ? (kpis.kwhGroupe / kpis.totalKwh) * 100 : 0;
+  if (gPct > 30) {
+    alerts.push({
+      id: 'high-groupe',
+      severity: 'warning',
+      sensors: { name: 'Groupe électrogène' },
+      description: `Consommation groupe : ${Math.round(gPct)}% du total — surcoût ${fmtFcfa(kpis.economyPossible)} FCFA`,
+      synthetic: true
+    });
+  }
+
+  return alerts;
+}
+
+/* =================================================================
+   AUTH
+   ================================================================= */
+async function getUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { window.location.href = 'auth.html'; return null; }
+  return user;
+}
+
+/* =================================================================
+   BANNIÈRE ABONNEMENT
+   ================================================================= */
+function showFreeBanner() {
+  const el = document.getElementById('subscriptionBanner');
+  if (el.children.length > 0) return;
+  el.innerHTML = `
+    <div class="premium-banner">
+      <div>
+        <div style="font-family:var(--font-display); font-size:11px; color:var(--accent-amber); margin-bottom:12px; letter-spacing:0.5px;">
+          PLAN ESSENTIAL ACTIF
+        </div>
+        <div class="plan-pills">
+          <div class="plan-pill plan-free">
+            <b>❌ Essential</b>
+            <small>1 site · 1 capteur<br>Pas d'IA, pas d'export</small>
+          </div>
+          <div class="plan-pill plan-pro">
+            <b>🚀 Business</b>
+            <small>∞ sites · ∞ capteurs<br>IA · PDF · Multi-capteurs</small>
+          </div>
+        </div>
+      </div>
+      <button class="upgrade-btn" onclick="window.location.href='pricing.html'">
+        🚀 Passer Business
+      </button>
     </div>`;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   CHARGEMENT DASHBOARD PRINCIPAL
-   ─────────────────────────────────────────────────────────────────*/
-async function loadDashboard() {
-  renderPlanBanner();
-
-  /* Sites de l'utilisateur */
-  const { data: allSites, error: sitesErr } = await sb
-    .from('sites')
-    .select('*')
-    .eq('user_id', currentUser.id)
-    .order('created_at');
-
-  if (sitesErr || !allSites?.length) {
-    renderOnboardingState('no-sensor');
-    return;
-  }
-
-  /* Restriction multi-site */
-  const sites = canMultiSite ? allSites : allSites.slice(0, 1);
-
-  const container = document.getElementById('main-content');
-  if (!container.querySelector('.site-grid')) {
-    container.innerHTML = `<div class="site-grid" id="sitesContainer"></div>`;
-  }
-
-  for (const site of sites) {
-    await loadSite(site);
-  }
-
-  /* Badge alertes sidebar */
-  const { count: alertCount } = await sb
-    .from('alerts')
-    .select('id', { count: 'exact', head: true })
-    .in('site_id', sites.map(s => s.id))
-    .eq('status', 'ACTIVE');
-  setText('sidebar-alert-count', alertCount > 0 ? alertCount : '');
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   CHARGEMENT D'UN SITE
-   ─────────────────────────────────────────────────────────────────*/
-async function loadSite(site) {
+/* =================================================================
+   HTML INITIAL D'UNE CARTE SITE
+   ================================================================= */
+function buildSiteCardHTML(site, sensors, aiEnabled) {
   const sid = site.id;
-
-  /* Capteurs du site */
-  const { data: allSensors } = await sb
-    .from('sensors')
-    .select('*')
-    .eq('site_id', sid)
-    .eq('status', 'ACTIVE');
-  const sensors = canMultiSensor
-    ? (allSensors || [])
-    : (allSensors || []).slice(0, 1);
-
-  /* Télémétrie (24 dernières mesures par capteur) */
-  const sensorIds = sensors.map(s => s.id);
-  let telemetry = [];
-  if (sensorIds.length) {
-    const { data: tele } = await sb
-      .from('telemetry')
-      .select('*, sensors(name)')
-      .in('sensor_id', sensorIds)
-      .order('created_at', { ascending: false })
-      .limit(24 * sensorIds.length);
-    telemetry = tele || [];
-  }
-  cachedTelemetry[sid] = telemetry;
-
-  /* Alertes actives */
-  const { data: alerts } = await sb
-    .from('alerts')
-    .select('*, sensors(name)')
-    .eq('site_id', sid)
-    .eq('status', 'ACTIVE')
-    .order('created_at', { ascending: false })
-    .limit(10);
-
-  /* Rendu HTML (1 seule fois) */
-  const grid = document.getElementById('sitesContainer');
-  if (grid && !renderedSites.has(sid)) {
-    grid.innerHTML += buildSiteCardHTML(site, sensors);
-    renderedSites.add(sid);
-    setTimeout(() => updateSiteCard(site, sensors, telemetry, alerts || []), 60);
-  } else {
-    updateSiteCard(site, sensors, telemetry, alerts || []);
-  }
-}
-
-/* ─────────────────────────────────────────────────────────────────
-   BUILD HTML D'UNE CARTE SITE
-   ─────────────────────────────────────────────────────────────────*/
-function buildSiteCardHTML(site, sensors) {
-  const sid = site.id;
-  const opts = sensors.map(s =>
-    `<option value="${s.id}">📡 ${s.name || s.sensor_name || s.id}</option>`
+  const sensorOpts = sensors.map(s =>
+    `<option value="${s.id}">🔌 ${s.name}</option>`
   ).join('');
 
-  const aiBlock = canAI
-    ? `<div style="background:linear-gradient(135deg,rgba(168,85,247,0.06),rgba(13,21,32,0.6));border:1px solid rgba(168,85,247,0.2);border-radius:var(--radius-sm);padding:14px 16px;">
-        <div style="font-size:11px;color:var(--purple);font-weight:700;margin-bottom:8px;letter-spacing:0.5px;">🤖 ANALYSE IA PRÉDICTIVE</div>
-        <div style="font-size:12px;color:var(--text-dim);line-height:1.6;" id="ai-msg-${sid}">Analyse en cours…</div>
-        ${canPDF ? `<button class="btn btn-ghost" style="margin-top:10px;width:100%;font-size:11px;" onclick="exportPDF('${sid}')">📥 Exporter PDF</button>` : ''}
-       </div>`
-    : `<div class="premium-lock">
-        <div class="premium-lock-title">🤖 Analyse IA & Exports PDF — Plan supérieur requis</div>
-        <div class="premium-lock-desc">Débloquez l'audit prédictif, la maintenance préventive et les exports PDF.</div>
-       </div>`;
+  const aiBlock = aiEnabled ? `
+    <div style="font-size:12px; color:var(--accent-green); line-height:1.5;">
+      🤖 <b>IA active :</b> <span id="ai-msg-${sid}">Analyse en cours…</span>
+    </div>
+    <button onclick="exportPDF('${sid}')"
+      style="width:100%; padding:10px; margin-top:10px; background:var(--bg-inset);
+             border:1px solid var(--accent-green); color:var(--accent-green); border-radius:9px;
+             cursor:pointer; font-weight:700; font-family:var(--font-body); font-size:12px;">
+      📥 Exporter rapport PDF
+    </button>` : `
+    <div class="locked-box">
+      <div class="lock-title">🤖 Analyse IA & PDF verrouillés</div>
+      <p>Passez au Plan Business pour activer l'audit prédictif et les exports PDF.</p>
+    </div>`;
 
   return `
-<div class="site-card" id="card-${sid}">
-  <div class="card-header">
-    <div>
-      <div class="card-title">🏢 ${site.name}</div>
-      <div class="card-subtitle">📍 ${site.city || site.address || 'Cotonou, Bénin'}</div>
-    </div>
-    <div class="status-badge status-green" id="status-badge-${sid}">SBEE OK</div>
-  </div>
+  <div class="site-card" id="card-${sid}">
 
-  <div class="health-bar-row">
-    <span id="health-label-${sid}" style="min-width:145px;">Capteurs —</span>
-    <div class="health-bar-track"><div class="health-bar-fill" id="health-fill-${sid}" style="width:0%;background:var(--green);"></div></div>
-    <span id="health-pct-${sid}" style="min-width:32px;text-align:right;">—</span>
-  </div>
+    <!-- EN-TÊTE -->
+    <div class="site-header">
+      <div>
+        <h2>🏢 ${site.name}</h2>
+        <div class="site-city">📍 ${site.city || 'Cotonou'}</div>
+      </div>
+      <div class="status-badge badge-green" id="status-badge-${sid}">SBEE OK</div>
+    </div>
 
-  <div class="outage-timer" id="outage-timer-${sid}">
-    <span style="font-size:18px;">🔴</span>
-    <div>
-      <div style="font-size:11px;color:var(--red);font-weight:600;margin-bottom:4px;">COUPURE EN COURS</div>
-      <div class="outage-time-display" id="outage-time-${sid}">00:00:00</div>
-      <div class="outage-cost-live" id="outage-cost-${sid}">Coût groupe : — F</div>
+    <!-- DISPONIBILITÉ -->
+    <div class="health-row">
+      <span>📡 <b id="sensor-count-${sid}">—</b> capteurs</span>
+      <div class="health-track">
+        <div class="health-fill" id="health-fill-${sid}" style="width:0%;"></div>
+      </div>
+      <span>🟢 <b id="health-pct-${sid}">—%</b></span>
     </div>
-  </div>
 
-  <div class="elec-grid">
-    <div class="elec-box"><div class="elec-label">Tension</div><div class="elec-value" id="elec-v-${sid}" style="color:var(--blue);">—</div><div class="elec-unit">V (AC)</div></div>
-    <div class="elec-box"><div class="elec-label">Courant</div><div class="elec-value" id="elec-i-${sid}" style="color:var(--green);">—</div><div class="elec-unit">A (RMS)</div></div>
-    <div class="elec-box"><div class="elec-label">Source</div><div class="elec-value" id="elec-src-${sid}" style="color:var(--amber);font-size:12px;">—</div><div class="elec-unit">réseau actif</div></div>
-    <div class="elec-box"><div class="elec-label">Temp.</div><div class="elec-value" id="elec-temp-${sid}" style="color:var(--purple);">—</div><div class="elec-unit">°C capteur</div></div>
-  </div>
-
-  <div class="metrics-grid">
-    <div class="metric-box accent-green">
-      <div class="metric-label">⚡ Puissance instantanée</div>
-      <div class="metric-value large" id="kpi-power-${sid}">— W</div>
-      <div class="metric-sub" id="kpi-battery-${sid}">Batterie : —</div>
-    </div>
-    <div class="metric-box accent-amber">
-      <div class="metric-label">💰 Coût estimé (cumul)</div>
-      <div class="metric-value large" id="kpi-cost-${sid}" style="color:var(--amber);">—</div>
-      <div class="metric-sub" id="kpi-kwh-${sid}">— kWh cumulés</div>
-    </div>
-    <div class="metric-box">
-      <div class="metric-label">🔋 Énergie cumulée</div>
-      <div class="metric-value" id="kpi-energy-${sid}">—</div>
-      <div class="metric-sub">Depuis démarrage capteur</div>
-    </div>
-    <div class="metric-box accent-red">
-      <div class="metric-label">⚠️ Alertes actives</div>
-      <div class="metric-value" id="kpi-alerts-${sid}" style="color:var(--red);">—</div>
-      <div class="metric-sub">Non résolues</div>
-    </div>
-    <div class="metric-box span-full" style="background:rgba(0,220,160,0.04);border-color:rgba(0,220,160,0.12);">
-      <div class="metric-label">🔥 Capteur actif principal</div>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:6px;">
-        <span id="kpi-top-name-${sid}" style="font-size:13px;font-weight:600;">—</span>
-        <span class="metric-value" id="kpi-top-power-${sid}" style="color:var(--amber);font-size:20px;">— W</span>
+    <!-- KPI 3 tuiles -->
+    <div class="kpi-grid-3">
+      <div class="kpi-box kg">
+        <div class="kpi-label">⚡ Puissance inst.</div>
+        <div class="kpi-value" id="kpi-power-${sid}">— W</div>
+        <div class="kpi-sub"   id="kpi-source-${sid}">Source : —</div>
+      </div>
+      <div class="kpi-box kb">
+        <div class="kpi-label">🔋 Énergie</div>
+        <div class="kpi-value" id="kpi-energy-${sid}">—</div>
+        <div class="kpi-sub"   id="kpi-energy-sub-${sid}">—</div>
+      </div>
+      <div class="kpi-box kr">
+        <div class="kpi-label">⚠️ Alertes</div>
+        <div class="kpi-value" id="kpi-alerts-${sid}" style="color:var(--accent-red);">—</div>
+        <div class="kpi-sub"   id="kpi-outages-${sid}">— coupures</div>
       </div>
     </div>
-  </div>
 
-  <div class="analysis-section">
-    <div class="analysis-title">⚡ Répartition SBEE vs Groupe</div>
-    <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;">
-      <span>Réseau SBEE (<span id="sbee-pct-${sid}">—</span>%)</span>
-      <span>Groupe (<span id="groupe-pct-${sid}">—</span>%)</span>
+    <!-- COÛT TOTAL (full width) -->
+    <div class="kpi-full">
+      <div>
+        <div class="kpi-label">💰 Coût cumulé (période)</div>
+        <div class="kpi-value" id="kpi-cost-total-${sid}">— F</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="kpi-label" style="color:var(--accent-amber);">🔥 Top appareil</div>
+        <div style="font-size:13px; font-weight:700;" id="kpi-top-name-${sid}">—</div>
+        <div style="font-size:17px; font-weight:700; color:var(--accent-amber);" id="kpi-top-power-${sid}">— W</div>
+      </div>
     </div>
-    <div class="cost-split-bar">
-      <div class="cost-split-sbee"   id="sbee-bar-${sid}"   style="width:0%"></div>
-      <div class="cost-split-groupe" id="groupe-bar-${sid}" style="width:0%"></div>
-    </div>
-    <div class="cost-split-legend">
-      <span><span class="legend-dot" style="background:var(--green)"></span>SBEE (<span id="sbee-kwh-${sid}">—</span> kWh · <span id="sbee-cost-${sid}">—</span>)</span>
-      <span><span class="legend-dot" style="background:var(--amber)"></span>Groupe (<span id="grp-kwh-${sid}">—</span> kWh · <span id="grp-cost-${sid}">—</span>)</span>
-    </div>
-    <div class="data-row" style="margin-top:10px;">
-      <span class="data-row-label">Surcoût groupe (vs réseau)</span>
-      <span class="data-row-value" id="groupe-premium-${sid}" style="color:var(--red);">—</span>
-    </div>
-  </div>
 
-  <div class="savings-box">
-    <div>
-      <div class="savings-label">💡 ÉCONOMIE POSSIBLE (si 0% groupe)</div>
-      <div class="savings-note">En arrêtant le groupe hors heures d'ouverture</div>
+    <!-- COÛTS SBEE vs GROUPE -->
+    <div class="cost-row">
+      <div class="cost-box">
+        <div class="cost-label c-green">💡 Réseau SBEE</div>
+        <div class="kpi-sub" id="kwh-sbee-${sid}">— kWh</div>
+        <div class="cost-value c-green" id="cost-sbee-${sid}">— F</div>
+        <div class="cost-meta">à ${TARIF_SBEE} FCFA/kWh</div>
+      </div>
+      <div class="cost-box">
+        <div class="cost-label c-amber">⛽ Groupe élect.</div>
+        <div class="kpi-sub" id="kwh-groupe-${sid}">— kWh</div>
+        <div class="cost-value c-amber" id="cost-groupe-${sid}">— F</div>
+        <div class="cost-meta">à ${TARIF_GROUPE} FCFA/kWh</div>
+      </div>
     </div>
-    <div>
-      <div class="savings-value" id="savings-val-${sid}">— F</div>
-      <div class="savings-note" style="text-align:right;">/mois estimé</div>
+
+    <!-- BARRE RÉPARTITION -->
+    <div class="split-wrap">
+      <div class="split-labels">
+        <span id="split-lbl-sbee-${sid}">SBEE —%</span>
+        <span id="split-lbl-grp-${sid}">Groupe —%</span>
+      </div>
+      <div class="split-track">
+        <div class="split-sbee"   id="split-sbee-${sid}"  style="width:50%;"></div>
+        <div class="split-groupe" id="split-grp-${sid}"   style="width:50%;"></div>
+      </div>
     </div>
-  </div>
 
-  <div class="analysis-section">
-    <div class="analysis-title">📡 États réseau & capteurs</div>
-    <div class="data-row"><span class="data-row-label">Dernière émission IoT</span><span class="data-row-value" id="last-emit-${sid}">—</span></div>
-    <div class="data-row"><span class="data-row-label">Dernière coupure SBEE</span><span class="data-row-value" id="last-cut-${sid}" style="color:var(--red);">—</span></div>
-    <div class="data-row"><span class="data-row-label">Coupures détectées (historique)</span><span class="data-row-value" id="outage-count-${sid}">—</span></div>
-    <div class="data-row"><span class="data-row-label">Tarif appliqué SBEE</span><span class="data-row-value" id="tariff-${sid}">${userTariff} FCFA/kWh</span></div>
-  </div>
-
-  <div class="analysis-section">
-    <div class="analysis-title">🔌 Statut capteurs IoT</div>
-    <div class="iot-status-row" id="iot-chips-${sid}"></div>
-    <div class="buffer-row">
-      <span>Buffer SD offline (72h)</span>
-      <div class="buffer-track"><div class="buffer-fill" id="buffer-fill-${sid}" style="width:4%"></div></div>
-      <span id="buffer-val-${sid}">~4h</span>
+    <!-- ROI -->
+    <div class="roi-box">
+      <div class="roi-icon">💡</div>
+      <div>
+        <div class="roi-title">Économie possible (si 0% groupe)</div>
+        <div class="roi-value" id="roi-val-${sid}">— F</div>
+        <div class="roi-desc"  id="roi-desc-${sid}">Calculé sur la période sélectionnée.</div>
+      </div>
     </div>
-  </div>
 
-  <div class="analysis-section" style="border-color:rgba(255,62,94,0.12);">
-    <div class="analysis-title" style="color:var(--red);">🔔 Diagnostics & Alertes</div>
-    <div id="alerts-list-${sid}"></div>
-  </div>
-
-  <div style="margin-top:20px;">
-    <div class="chart-controls">
-      <div class="chart-label">Analyse graphique</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;">
-        <div class="period-tabs">
-          <button class="period-tab active" onclick="setPeriod('${sid}','24h',this)">24h</button>
-          <button class="period-tab" onclick="setPeriod('${sid}','7d',this)">7j</button>
-          <button class="period-tab" onclick="setPeriod('${sid}','30d',this)">30j</button>
+    <!-- INDICATEURS ÉLECTRIQUES -->
+    <div class="analysis-section">
+      <div class="analysis-title">🔬 Indicateurs électriques temps réel</div>
+      <div class="elec-grid">
+        <div class="elec-box">
+          <div class="elec-label">Tension</div>
+          <div class="elec-value" id="elec-v-${sid}">—</div>
         </div>
-        <select class="sensor-select" id="select-chart-${sid}" onchange="triggerChartFilter('${sid}')">
-          <option value="ALL">Tous capteurs combinés</option>
-          ${opts}
-        </select>
+        <div class="elec-box">
+          <div class="elec-label">Courant</div>
+          <div class="elec-value" id="elec-i-${sid}">—</div>
+        </div>
+        <div class="elec-box">
+          <div class="elec-label">Fact. Puis.</div>
+          <div class="elec-value" id="elec-pf-${sid}">—</div>
+        </div>
+        <div class="elec-box">
+          <div class="elec-label">Fréquence</div>
+          <div class="elec-value" id="elec-hz-${sid}">—</div>
+        </div>
       </div>
     </div>
-    <canvas id="chart-${sid}" style="max-height:200px;"></canvas>
-  </div>
 
-  <button class="whatsapp-btn" onclick="triggerWeeklyReport('${sid}')">
-    📲 Envoyer rapport WhatsApp maintenant
-  </button>
+    <!-- RÉSEAU & COUPURES -->
+    <div class="analysis-section">
+      <div class="analysis-title">📡 Réseau & Coupures SBEE</div>
+      <div class="data-row">
+        <span class="dr-label">Dernière émission IoT</span>
+        <span class="dr-value" style="font-family:var(--font-display); font-size:11px;" id="last-emit-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Dernière coupure SBEE</span>
+        <span class="dr-value" style="color:var(--accent-red);" id="last-cut-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Durée totale coupures</span>
+        <span class="dr-value" style="color:var(--accent-amber);" id="outage-dur-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Nombre de coupures</span>
+        <span class="dr-value" id="outage-cnt-${sid}">—</span>
+      </div>
+    </div>
 
-  <div style="margin-top:12px;">${aiBlock}</div>
-</div>`;
+    <!-- RÉPARTITION PAR APPAREIL -->
+    <div class="analysis-section">
+      <div class="analysis-title">📊 Répartition par appareil</div>
+      <div id="breakdown-${sid}">
+        <div class="skeleton" style="height:38px; margin-bottom:7px;"></div>
+        <div class="skeleton" style="height:38px;"></div>
+      </div>
+    </div>
+
+    <!-- ALERTES (avec badge sévérité + bouton Acquitter) -->
+    <div class="analysis-section" style="border-color:rgba(255,77,106,0.07);">
+      <div class="analysis-title" style="color:var(--accent-red);">🔔 Diagnostics & Alertes</div>
+      <div id="alerts-list-${sid}">
+        <div class="skeleton" style="height:34px;"></div>
+      </div>
+    </div>
+
+    <!-- STATUT CAPTEURS IoT -->
+    <div class="analysis-section">
+      <div class="analysis-title">🛰️ Statut capteurs IoT</div>
+      <div class="sensor-status-grid" id="iot-grid-${sid}">
+        <div class="skeleton" style="height:54px;"></div>
+        <div class="skeleton" style="height:54px;"></div>
+      </div>
+    </div>
+
+    <!-- GRAPHIQUE -->
+    <div style="margin-top:18px;">
+      <div class="chart-controls">
+        <select class="chart-select" id="sel-sensor-${sid}"
+                onchange="onSensorChange('${sid}')">
+          <option value="ALL">Tous les capteurs</option>
+          ${sensorOpts}
+        </select>
+        <div class="period-btns" id="period-btns-${sid}">
+          <button class="period-btn active" onclick="setPeriod('${sid}','today',this)">Auj.</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','7d',this)">7j</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','30d',this)">30j</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','month',this)">Mois</button>
+        </div>
+      </div>
+      <canvas id="chart-${sid}" style="max-height:230px;"></canvas>
+    </div>
+
+    <!-- MODULES AVANCÉS -->
+    <div class="analysis-section" style="margin-top:14px; background:rgba(255,255,255,0.007);">
+      <div class="analysis-title">✨ Modules Avancés</div>
+      ${aiBlock}
+    </div>
+
+  </div>`;
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   MISE À JOUR IN-PLACE D'UNE CARTE
-   ─────────────────────────────────────────────────────────────────*/
-function updateSiteCard(site, sensors, telemetry, activeAlerts) {
-  const sid = site.id;
-  const sorted = [...telemetry].sort((a,b) => new Date(b.created_at)-new Date(a.created_at));
-  const latest = sorted[0] || null;
+/* =================================================================
+   MISE À JOUR IN-PLACE — zéro reconstruction DOM
+   ================================================================= */
+function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
+  const sid    = site.id;
+  const period = activePeriod[sid] || 'today';
+  const filt   = filterByPeriod(telemetry, period);
+  const kpis   = computeKPIs(filt);
 
-  /* Statut */
-  const { text: statusText, cls } = resolveStatus(latest);
+  /* ── Status badge ─────────────────────────────────────── */
+  const { text: stText, cls: stCls } = resolveStatus(filt[0] || telemetry[0] || null);
   const badge = document.getElementById(`status-badge-${sid}`);
-  if (badge) { badge.textContent = statusText; badge.className = `status-badge ${cls}`; }
+  if (badge) { badge.textContent = stText; badge.className = `status-badge ${stCls}`; }
 
-  /* Chronomètre coupure */
-  const timerEl = document.getElementById(`outage-timer-${sid}`);
-  if (timerEl) {
-    const isOutage = latest && parseFloat(latest.voltage) < 50;
-    timerEl.classList.toggle('visible', isOutage);
-    if (isOutage && !outageTickers[sid]) {
-      const t0 = new Date(latest.created_at).getTime();
-      outageTickers[sid] = setInterval(() => {
-        const el = Math.floor((Date.now()-t0)/1000);
-        const h = String(Math.floor(el/3600)).padStart(2,'0');
-        const m = String(Math.floor((el%3600)/60)).padStart(2,'0');
-        const s = String(el%60).padStart(2,'0');
-        setText(`outage-time-${sid}`, `${h}:${m}:${s}`);
-        const kwh = (el/3600) * ((parseFloat(latest.power_w)||2000)/1000);
-        setText(`outage-cost-${sid}`, `Coût groupe estimé : ${fmt(kwh * 350)}`);
-      }, 1000);
-    } else if (!isOutage && outageTickers[sid]) {
-      clearInterval(outageTickers[sid]);
-      delete outageTickers[sid];
-    }
-  }
-
-  /* Paramètres électriques */
-  if (latest) {
-    const vEl = document.getElementById(`elec-v-${sid}`);
-    if (vEl) {
-      const v = parseFloat(latest.voltage);
-      vEl.textContent = isNaN(v) ? '—' : v.toFixed(1);
-      vEl.style.color = (v<190||v>250) ? 'var(--red)' : 'var(--blue)';
-    }
-    const iEl = document.getElementById(`elec-i-${sid}`);
-    if (iEl) iEl.textContent = latest.current ? parseFloat(latest.current).toFixed(2) : '—';
-
-    const srcEl = document.getElementById(`elec-src-${sid}`);
-    if (srcEl) {
-      srcEl.textContent = latest.source || 'SBEE';
-      srcEl.style.color = latest.source === 'GROUPE' ? 'var(--amber)' : 'var(--green)';
-    }
-    const tempEl = document.getElementById(`elec-temp-${sid}`);
-    if (tempEl) {
-      const t = parseFloat(latest.temperature);
-      tempEl.textContent = isNaN(t) ? '—' : t.toFixed(1);
-      tempEl.style.color = t > 45 ? 'var(--red)' : t > 35 ? 'var(--amber)' : 'var(--purple)';
-    }
-  }
-
-  /* Santé capteurs */
-  const online = sensors.filter(s => s.status === 'ACTIVE').length;
+  /* ── Disponibilité ────────────────────────────────────── */
+  const online = sensors.filter(s => !isOffline(s)).length;
   const total  = sensors.length;
-  const hPct   = total > 0 ? Math.round((online/total)*100) : 0;
-  const hColor = hPct>=70?'var(--green)':hPct>=40?'var(--amber)':'var(--red)';
-  setText(`health-label-${sid}`, `Santé ${online}/${total} capteurs`);
-  setText(`health-pct-${sid}`, `${hPct}%`);
-  const fillEl = document.getElementById(`health-fill-${sid}`);
-  if (fillEl) { fillEl.style.width = `${hPct}%`; fillEl.style.background = hColor; }
+  const pct    = total > 0 ? Math.round((online / total) * 100) : 0;
+  const hc     = hColor(pct);
+  setText(`sensor-count-${sid}`, `${online}/${total}`);
+  setText(`health-pct-${sid}`,   `${pct}%`);
+  setStyle(`health-pct-${sid}`,  'color', hc);
+  const fill = document.getElementById(`health-fill-${sid}`);
+  if (fill) { fill.style.width = `${pct}%`; fill.style.background = hc; }
 
-  /* KPI puissance */
-  const power = latest ? Math.round(parseFloat(latest.power_w)||0) : 0;
-  setText(`kpi-power-${sid}`, `${power} W`);
-  const batt = latest?.battery_percent;
-  setText(`kpi-battery-${sid}`, batt !== null && batt !== undefined ? `Batterie : ${Math.round(batt)}%` : 'Alimentation directe');
+  /* ── KPI puissance ────────────────────────────────────── */
+  setText(`kpi-power-${sid}`,   `${Math.round(kpis.latestP)} W`);
+  setText(`kpi-source-${sid}`,  `Source : ${kpis.latestSource || '—'}`);
 
-  /* KPI énergie & coût — on prend la dernière valeur kWh_total par capteur */
-  let totalKwh = 0, totalKwhSbee = 0, totalKwhGroupe = 0;
-  const byCaptor = {};
-  sorted.forEach(item => {
-    const sId = item.sensor_id;
-    if (!byCaptor[sId] || new Date(item.created_at) > new Date(byCaptor[sId].created_at)) {
-      byCaptor[sId] = item;
-    }
-    // Répartition par source
-    if (item.source === 'GROUPE') totalKwhGroupe = Math.max(totalKwhGroupe, parseFloat(item.kwh_total)||0);
-    else totalKwhSbee = Math.max(totalKwhSbee, parseFloat(item.kwh_total)||0);
-  });
-  Object.values(byCaptor).forEach(r => { totalKwh += parseFloat(r.kwh_total)||0; });
+  /* ── KPI énergie ──────────────────────────────────────── */
+  setText(`kpi-energy-${sid}`,     fmtEnergy(kpis.totalKwh));
+  const gPct = kpis.totalKwh > 0 ? Math.round((kpis.kwhGroupe/kpis.totalKwh)*100) : 0;
+  setText(`kpi-energy-sub-${sid}`, `${gPct}% groupe`);
 
-  const costSbee   = Math.round(totalKwhSbee   * userTariff);
-  const costGroupe = Math.round(totalKwhGroupe * 350); // tarif groupe fixe
-  const costTotal  = costSbee + costGroupe;
+  /* ── KPI alertes + coupures ───────────────────────────── */
+  const localAlerts = generateLocalAlerts(sensors, kpis);
+  const allAlerts   = [...localAlerts, ...dbAlerts];
+  setText(`kpi-alerts-${sid}`,  allAlerts.length);
+  setText(`kpi-outages-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
 
-  setText(`kpi-energy-${sid}`, fmtKwh(totalKwh));
-  setText(`kpi-cost-${sid}`,   fmt(costTotal));
-  setText(`kpi-kwh-${sid}`,    `${totalKwh.toFixed(2)} kWh cumulés`);
-  setText(`kpi-alerts-${sid}`, activeAlerts.length);
+  /* ── Coût total ───────────────────────────────────────── */
+  setText(`kpi-cost-total-${sid}`, `${fmtFcfa(kpis.costTotal)} F`);
 
-  /* Top capteur */
-  const topSorted = sorted.slice().sort((a,b)=>(parseFloat(b.power_w)||0)-(parseFloat(a.power_w)||0));
-  const top = topSorted[0];
-  setText(`kpi-top-name-${sid}`,  top?.sensors?.name || sensors[0]?.name || '—');
-  setText(`kpi-top-power-${sid}`, `${Math.round(parseFloat(top?.power_w)||0)} W`);
+  /* ── Top appareil ─────────────────────────────────────── */
+  setText(`kpi-top-name-${sid}`,  kpis.topSensorName);
+  setText(`kpi-top-power-${sid}`, `${kpis.topSensorPower} W`);
 
-  /* Répartition */
-  const sbeePct = totalKwh>0 ? Math.round((totalKwhSbee/totalKwh)*100) : 100;
-  const grpPct  = 100 - sbeePct;
-  setText(`sbee-pct-${sid}`,    sbeePct);
-  setText(`groupe-pct-${sid}`,  grpPct);
-  const sbeeBar = document.getElementById(`sbee-bar-${sid}`);
-  const grpBar  = document.getElementById(`groupe-bar-${sid}`);
-  if (sbeeBar) sbeeBar.style.width = `${sbeePct}%`;
-  if (grpBar)  grpBar.style.width  = `${grpPct}%`;
-  setText(`sbee-kwh-${sid}`,  totalKwhSbee.toFixed(2));
-  setText(`sbee-cost-${sid}`, fmt(costSbee));
-  setText(`grp-kwh-${sid}`,   totalKwhGroupe.toFixed(2));
-  setText(`grp-cost-${sid}`,  fmt(costGroupe));
+  /* ── Coûts SBEE / Groupe ──────────────────────────────── */
+  setText(`kwh-sbee-${sid}`,    `${kpis.kwhSbee.toFixed(2)} kWh`);
+  setText(`cost-sbee-${sid}`,   `${fmtFcfa(kpis.costSbee)} F`);
+  setText(`kwh-groupe-${sid}`,  `${kpis.kwhGroupe.toFixed(2)} kWh`);
+  setText(`cost-groupe-${sid}`, `${fmtFcfa(kpis.costGroupe)} F`);
 
-  const surcharge = Math.round(totalKwhGroupe * (350 - userTariff));
-  setText(`groupe-premium-${sid}`, surcharge>0 ? `+${fmt(surcharge)}` : '0 F');
+  /* ── Barre répartition ────────────────────────────────── */
+  const pSbee = kpis.totalKwh > 0 ? Math.round((kpis.kwhSbee/kpis.totalKwh)*100) : 50;
+  const pGrp  = 100 - pSbee;
+  const bSbee = document.getElementById(`split-sbee-${sid}`);
+  const bGrp  = document.getElementById(`split-grp-${sid}`);
+  if (bSbee) bSbee.style.width = `${pSbee}%`;
+  if (bGrp)  bGrp.style.width  = `${pGrp}%`;
+  setText(`split-lbl-sbee-${sid}`, `SBEE ${pSbee}%`);
+  setText(`split-lbl-grp-${sid}`,  `Groupe ${pGrp}%`);
 
-  /* Économie possible */
-  const dayOfMonth  = new Date().getDate();
-  const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth()+1, 0).getDate();
-  const projected   = dayOfMonth > 0 ? Math.round(surcharge * (daysInMonth/dayOfMonth)) : surcharge;
-  setText(`savings-val-${sid}`, surcharge>0 ? fmt(projected) : '0 F');
+  /* ── ROI ──────────────────────────────────────────────── */
+  setText(`roi-val-${sid}`,  `${fmtFcfa(kpis.economyPossible)} F`);
+  setText(`roi-desc-${sid}`,
+    kpis.economyPossible > 0
+      ? `Si le groupe était éteint la nuit, vous économiseriez ~${fmtFcfa(kpis.economyPossible)} FCFA sur la période.`
+      : `Aucune surconsommation groupe détectée. Bonne gestion !`
+  );
 
-  /* États réseau */
-  setText(`last-emit-${sid}`,    latest ? fmtTime(latest.created_at) : '—');
-  const outageRows = sorted.filter(t => parseFloat(t.voltage)<50);
-  setText(`last-cut-${sid}`,    outageRows[0] ? fmtTime(outageRows[0].created_at) : 'Aucune coupure');
-  setText(`outage-count-${sid}`, outageRows.length > 0 ? `${outageRows.length} relevé(s) hors tension` : '—');
+  /* ── Indicateurs électriques ──────────────────────────── */
+  setText(`elec-v-${sid}`,  fmtV(kpis.latestV));
+  setText(`elec-i-${sid}`,  fmtA(kpis.latestI));
+  setText(`elec-pf-${sid}`, fmtPF(kpis.latestPF));
+  setText(`elec-hz-${sid}`, fmtHz(kpis.latestFreq));
 
-  /* Chips IoT */
-  const chipsEl = document.getElementById(`iot-chips-${sid}`);
-  if (chipsEl) {
-    chipsEl.innerHTML = sensors.length === 0
-      ? '<span style="color:var(--text-muted);font-size:12px;">Aucun capteur actif</span>'
-      : sensors.map(s => {
-          const isOnline = s.status === 'ACTIVE';
-          const dotColor = isOnline ? 'var(--green)' : 'var(--red)';
-          const label = s.name || s.sensor_name || s.id.slice(0,8);
-          const cls   = s.sensor_class || s.type || '';
-          return `<div class="iot-chip">
-            <span class="iot-chip-dot" style="background:${dotColor}"></span>
-            <span>${label}</span>
-            ${cls ? `<span style="color:var(--text-muted);">· ${cls}</span>` : ''}
+  const vEl = document.getElementById(`elec-v-${sid}`);
+  if (vEl) {
+    if      (!kpis.latestV || kpis.latestV < V_OUTAGE) vEl.style.color = 'var(--accent-red)';
+    else if  (kpis.latestV < V_LOW)                    vEl.style.color = 'var(--accent-amber)';
+    else if  (kpis.latestV > V_HIGH)                   vEl.style.color = 'var(--accent-red)';
+    else                                                vEl.style.color = 'var(--accent-green)';
+  }
+  const pfEl = document.getElementById(`elec-pf-${sid}`);
+  if (pfEl && kpis.latestPF !== null) {
+    pfEl.style.color = kpis.latestPF < 0.85
+      ? 'var(--accent-amber)' : 'var(--text-primary)';
+  }
+
+  /* ── Réseau / coupures ────────────────────────────────── */
+  setText(`last-emit-${sid}`, kpis.lastTransmitTime);
+  setText(`last-cut-${sid}`,  kpis.lastPowerCutTime);
+  setText(`outage-dur-${sid}`, fmtMin(kpis.outageTotalMin));
+  setText(`outage-cnt-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
+
+  /* ── Breakdown par appareil ───────────────────────────── */
+  const brkEl = document.getElementById(`breakdown-${sid}`);
+  if (brkEl) {
+    const entries = Object.entries(kpis.consumptionBySensor)
+      .sort((a,b) => b[1].kwh - a[1].kwh)
+      .slice(0, 5);
+
+    brkEl.innerHTML = entries.length === 0
+      ? `<div style="font-size:12px; color:var(--text-muted); padding:8px 0;">Aucune donnée disponible.</div>`
+      : entries.map(([name, d]) => {
+          const cost = Math.round(d.kwhSbee * TARIF_SBEE + d.kwhGroupe * TARIF_GROUPE);
+          const pct  = kpis.totalKwh > 0 ? Math.round((d.kwh / kpis.totalKwh) * 100) : 0;
+          return `<div class="data-row">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:600; margin-bottom:4px;">
+                📡 ${name} <span style="color:var(--text-muted); font-weight:400;">${pct}%</span>
+              </div>
+              <div style="height:3px; background:var(--bg-deep); border-radius:2px; overflow:hidden;">
+                <div style="width:${Math.max(2,pct)}%; height:100%; background:var(--accent-green); border-radius:2px;"></div>
+              </div>
+            </div>
+            <div style="text-align:right; margin-left:12px; flex-shrink:0;">
+              <div style="font-size:12px; font-weight:700;">${fmtFcfa(cost)} F</div>
+              <div style="font-size:10px; color:var(--text-muted);">${fmtEnergy(d.kwh)}</div>
+            </div>
           </div>`;
         }).join('');
   }
 
-  /* Alertes */
+  /* ── Alertes (sévérité + bouton Acquitter) ────────────── */
   const alertsEl = document.getElementById(`alerts-list-${sid}`);
   if (alertsEl) {
-    if (!activeAlerts.length) {
-      alertsEl.innerHTML = `<div style="color:var(--green);font-size:12px;padding:6px 0;">✔ Aucun dysfonctionnement détecté</div>`;
+    if (allAlerts.length === 0) {
+      alertsEl.innerHTML = `
+        <div style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--accent-green); padding:6px 0;">
+          ✔ Aucun dysfonctionnement détecté
+        </div>`;
     } else {
-      const icons = { SBEE_OUTAGE:'🔴', HIGH_VOLTAGE:'⚠️', LOW_VOLTAGE:'🟡', OVERCONSUMPTION:'🔥', DEVICE_OFFLINE:'📵' };
-      alertsEl.innerHTML = activeAlerts.map(alt => {
-        const ico   = icons[alt.type] || '⚠️';
-        const sName = alt.sensors?.name || 'Général';
-        return `<div class="alert-item">
-          <span class="alert-icon">${ico}</span>
-          <div class="alert-content">
-            <div class="alert-label">${sName} — ${alt.type}</div>
-            <div class="alert-meta">${alt.message || ''} · ${fmtTime(alt.created_at)}</div>
+      alertsEl.innerHTML = allAlerts.map(a => {
+        const sev    = a.severity || 'warning';
+        const sevCls = sev === 'critical' ? 'sev-critical' : sev === 'info' ? 'sev-info' : 'sev-warning';
+        const lbl    = a.sensors?.name || 'Général';
+        const ack    = a.synthetic ? '' :
+          `<button class="ack-btn" onclick="acknowledgeAlert('${a.id}','${sid}')">✓ Lu</button>`;
+        return `<div class="alert-item" id="alert-item-${a.id}">
+          <span class="alert-sev ${sevCls}">${sev}</span>
+          <div class="alert-body">
+            <div class="alert-device">${lbl}</div>
+            <div class="alert-desc">${a.description || 'Seuil dépassé'}</div>
           </div>
-          <button class="alert-ack-btn" onclick="ackAlert('${alt.id}','${sid}')">Acquitter</button>
+          ${ack}
         </div>`;
       }).join('');
     }
   }
 
-  /* IA */
-  if (canAI) {
+  /* ── Statut IoT (firmware, last_seen, online/offline) ─── */
+  const iotGrid = document.getElementById(`iot-grid-${sid}`);
+  if (iotGrid) {
+    iotGrid.innerHTML = sensors.slice(0, 4).map(s => {
+      const off   = isOffline(s);
+      const seen  = s.last_seen
+        ? new Date(s.last_seen).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })
+        : '—';
+      return `<div class="iot-box">
+        <div class="iot-label">${s.name || s.id}</div>
+        <div class="iot-status" style="color:${off ? 'var(--accent-red)' : 'var(--accent-green)'};">
+          ${off ? '⚠ OFFLINE' : '● ONLINE'}
+        </div>
+        <div class="iot-meta">${s.firmware_v ? `v${s.firmware_v}` : '—'} · ${seen}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── IA ───────────────────────────────────────────────── */
+  if (aiEnabled) {
     const aiEl = document.getElementById(`ai-msg-${sid}`);
     if (aiEl) {
-      const topName  = top?.sensors?.name || 'Tableau principal';
-      aiEl.textContent = surcharge > 0
-        ? `"${topName}" consomme ${Math.round(parseFloat(top?.power_w)||0)}W — source ${top?.source||'SBEE'}. Surcoût groupe ce mois : ${fmt(surcharge)}. Recommandation : arrêt groupe entre 22h–6h pour économiser ~${fmt(projected)} FCFA.`
-        : `Aucun surcoût groupe détecté. Consommation totale ${fmtKwh(totalKwh)} à ${userTariff} FCFA/kWh = ${fmt(costTotal)} ce mois.`;
+      aiEl.textContent = gPct > 30
+        ? `L'appareil "${kpis.topSensorName}" représente ${gPct}% de consommation groupe — potentiel d'économie : ${fmtFcfa(kpis.economyPossible)} FCFA.`
+        : `Consommation équilibrée. Facteur de puissance : ${fmtPF(kpis.latestPF)} (optimal > 0.9).`;
     }
   }
 
-  /* Graphique */
-  updateChart(sid, 'ALL');
+  /* ── Graphique (in-place, pas de destroy) ─────────────── */
+  updateChart(sid);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   GRAPHIQUES
-   ─────────────────────────────────────────────────────────────────*/
-function updateChart(siteId, targetSensorId) {
-  const raw = cachedTelemetry[siteId] || [];
-  const ctx = document.getElementById(`chart-${siteId}`);
-  if (!ctx || !raw.length) return;
+/* =================================================================
+   CHART.JS — JAMAIS destroy(), toujours .update()
+   ================================================================= */
+function updateChart(siteId) {
+  const allTel = cachedData[siteId]?.telemetry || [];
+  const ctx    = document.getElementById(`chart-${siteId}`);
+  if (!ctx) return;
 
-  let dataset = targetSensorId === 'ALL' ? raw : raw.filter(t => t.sensor_id === targetSensorId);
-  const points = [...dataset]
-    .sort((a,b) => new Date(a.created_at)-new Date(b.created_at))
-    .slice(-24);
+  const period   = activePeriod[siteId] || 'today';
+  const sensorId = activeSensor[siteId] || 'ALL';
 
-  const labels    = points.map(t => new Date(t.created_at).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'}));
-  const powerData = points.map(t => Math.round(parseFloat(t.power_w)||0));
-  const voltData  = points.map(t => Math.round(parseFloat(t.voltage)||0));
+  let data = filterByPeriod(allTel, period);
+  if (sensorId !== 'ALL') data = data.filter(t => t.sensor_id === sensorId);
+
+  const chrono = [...data].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+
+  /* Decimation automatique si trop de points */
+  let pts = chrono;
+  if (chrono.length > CHART_POINTS * 3) {
+    const step = Math.floor(chrono.length / CHART_POINTS);
+    pts = chrono.filter((_,i) => i % step === 0).slice(-CHART_POINTS);
+  } else {
+    pts = chrono.slice(-CHART_POINTS);
+  }
+
+  const labels    = pts.map(t => new Date(t.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }));
+  const powerData = pts.map(t => t.power_w   || 0);
+  const voltData  = pts.map(t => t.voltage   || 0);
 
   if (charts[siteId]) {
-    charts[siteId].data.labels = labels;
-    charts[siteId].data.datasets[0].data = powerData;
-    charts[siteId].data.datasets[1].data = voltData;
-    charts[siteId].update('none');
+    /* ✅ Mise à jour in-place — aucun flash, aucune perte */
+    const c = charts[siteId];
+    c.data.labels             = labels;
+    c.data.datasets[0].data   = powerData;
+    c.data.datasets[1].data   = voltData;
+    c.data.datasets[0].label  = sensorId === 'ALL' ? 'Puissance totale (W)' : 'Puissance appareil (W)';
+    c.update('none');
   } else {
+    /* Premier rendu */
     charts[siteId] = new Chart(ctx, {
       type: 'line',
       data: {
         labels,
         datasets: [
-          { label:'Puissance (W)', data:powerData, borderColor:'#00dca0', backgroundColor:'rgba(0,220,160,0.06)', fill:true, tension:0.35, pointRadius:2, yAxisID:'yPower' },
-          { label:'Tension (V)',   data:voltData,  borderColor:'#3b82f6', backgroundColor:'transparent', fill:false, tension:0.35, pointRadius:2, borderDash:[4,4], yAxisID:'yVoltage' }
+          {
+            label: 'Puissance totale (W)',
+            data: powerData,
+            borderColor: 'rgba(0,212,160,0.85)',
+            backgroundColor: 'rgba(0,212,160,0.05)',
+            fill: true, tension: 0.38,
+            pointRadius: 2, pointHoverRadius: 5,
+            yAxisID: 'yP',
+          },
+          {
+            label: 'Tension (V)',
+            data: voltData,
+            borderColor: 'rgba(59,130,246,0.65)',
+            backgroundColor: 'transparent',
+            fill: false, tension: 0.38,
+            pointRadius: 1, pointHoverRadius: 4,
+            borderDash: [4,3],
+            yAxisID: 'yV',
+          }
         ]
       },
       options: {
-        responsive:true,
-        interaction:{mode:'index',intersect:false},
-        animation:{duration:400},
-        plugins:{
-          legend:{labels:{color:'#94a3b8',font:{family:'Syne',size:11},usePointStyle:true,pointStyleWidth:8}}
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 320 },
+        plugins: {
+          legend: {
+            labels: { color: '#7a8fac', font: { family: 'DM Sans', size: 11 }, boxWidth: 12 }
+          },
+          tooltip: {
+            backgroundColor: '#0f1829',
+            titleColor: '#e8f0fe',
+            bodyColor: '#7a8fac',
+            borderColor: 'rgba(255,255,255,0.04)',
+            borderWidth: 1,
+          }
         },
-        scales:{
-          x:{ticks:{color:'#64748b',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
-          yPower:{position:'left',ticks:{color:'#00dca0',font:{size:10}},grid:{color:'rgba(255,255,255,0.03)'}},
-          yVoltage:{position:'right',ticks:{color:'#3b82f6',font:{size:10}},grid:{display:false},min:150,max:260}
+        scales: {
+          yP: {
+            type: 'linear', position: 'left',
+            ticks: { color: '#7a8fac', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.025)' },
+          },
+          yV: {
+            type: 'linear', position: 'right',
+            ticks: { color: 'rgba(59,130,246,0.55)', font: { size: 10 } },
+            grid: { drawOnChartArea: false },
+            min: 0,
+          },
+          x: {
+            ticks: { color: '#7a8fac', font: { size: 10 }, maxRotation: 0 },
+            grid: { color: 'rgba(255,255,255,0.018)' },
+          }
         }
       }
     });
   }
 }
 
-function triggerChartFilter(siteId) {
-  const sel = document.getElementById(`select-chart-${siteId}`);
-  if (sel) updateChart(siteId, sel.value);
+/* Handlers contrôles graphique */
+function onSensorChange(siteId) {
+  const el = document.getElementById(`sel-sensor-${siteId}`);
+  if (el) activeSensor[siteId] = el.value;
+  updateChart(siteId);
 }
 function setPeriod(siteId, period, btn) {
-  document.querySelectorAll(`#card-${siteId} .period-tab`).forEach(t=>t.classList.remove('active'));
-  btn.classList.add('active');
-  // En prod: recharger selon période (limit différent, filtrage date)
-  triggerChartFilter(siteId);
+  activePeriod[siteId] = period;
+  /* Mise à jour boutons */
+  const wrap = document.getElementById(`period-btns-${siteId}`);
+  if (wrap) wrap.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  /* Recalcul complet avec nouvelle période */
+  const c = cachedData[siteId];
+  if (c) updateSiteCard(c.site, c.sensors, c.telemetry, c.alerts, c.aiEnabled);
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   ACTIONS
-   ─────────────────────────────────────────────────────────────────*/
-async function ackAlert(alertId, siteId) {
-  await sb.from('alerts').update({ status: 'RESOLVED' }).eq('id', alertId);
-  // Recharger le site
-  const { data: site } = await sb.from('sites').select('*').eq('id', siteId).single();
-  if (site) await loadSite(site);
+/* =================================================================
+   ACQUITTEMENT ALERTE
+   ================================================================= */
+async function acknowledgeAlert(alertId, siteId) {
+  const itemEl = document.getElementById(`alert-item-${alertId}`);
+  if (itemEl) { itemEl.style.opacity = '0.35'; itemEl.style.pointerEvents = 'none'; }
+  try {
+    await supabaseClient
+      .from('alerts')
+      .update({ acknowledged: true, notified_at: new Date().toISOString() })
+      .eq('id', alertId);
+    setTimeout(() => { if (itemEl) itemEl.remove(); }, 500);
+  } catch (e) {
+    console.error('Erreur acquittement:', e);
+    if (itemEl) { itemEl.style.opacity = '1'; itemEl.style.pointerEvents = 'auto'; }
+  }
 }
 
-function triggerWeeklyReport(siteId) {
-  alert('📲 Rapport WhatsApp envoyé !\n\n(En production, déclenche l\'Edge Function Supabase qui envoie le rapport via Twilio WhatsApp API au numéro associé au profil.)');
+/* =================================================================
+   CHARGEMENT DONNÉES
+   ================================================================= */
+async function loadDashboard() {
+  const user = await getUser();
+  if (!user) return;
+
+  const { data: userSettings } = await supabaseClient
+    .from('settings').select('tariff').eq('user_id', user.id).single();
+
+  const { data: sites, error } = await supabaseClient
+    .from('sites').select('*').eq('user_id', user.id);
+  if (error || !sites) { console.error(error); return; }
+
+  const filteredSites = canAccessMultiSite ? sites : sites.slice(0, 1);
+  const container     = document.getElementById('sitesContainer');
+  const aiEnabled     = await hasFeature('ai');
+
+  /* Cas liste vide */
+  if (filteredSites.length === 0) {
+    if (!renderedSites.has('__empty__')) {
+      container.insertAdjacentHTML('beforeend', `
+        <div class="site-card" id="card-__empty__">
+          <h2>Aucun site enregistré</h2>
+          <p style="margin-top:16px; color:var(--text-secondary); font-size:13px;">
+            Ajoutez un site depuis le menu Paramètres pour commencer le suivi.
+          </p>
+        </div>`);
+      renderedSites.add('__empty__');
+    }
+    return;
+  }
+
+  /* Nettoyage cartes orphelines (sites supprimés) */
+  renderedSites.forEach(existingSid => {
+    if (existingSid === '__empty__') return;
+    if (!filteredSites.some(s => s.id === existingSid)) {
+      const card = document.getElementById(`card-${existingSid}`);
+      if (card) card.remove();
+      renderedSites.delete(existingSid);
+      delete cachedData[existingSid];
+      if (charts[existingSid]) { charts[existingSid].destroy(); delete charts[existingSid]; }
+    }
+  });
+
+  /* Boucle sites */
+  for (const site of filteredSites) {
+    const sid = site.id;
+
+    /* Capteurs */
+    const { data: rawSensors } = await supabaseClient
+      .from('sensors').select('*').eq('site_id', sid);
+    let sensors = rawSensors || [];
+    if (!canAccessMultiSensor && sensors.length > 1) sensors = sensors.slice(0, 1);
+    const sensorIds = sensors.map(s => s.id);
+
+    /* Télémétrie — LIMIT obligatoire */
+    let telemetry = [];
+    if (sensorIds.length > 0) {
+      const { data } = await supabaseClient
+        .from('telemetry')
+        .select('*, sensors(name)')
+        .in('sensor_id', sensorIds)
+        .order('created_at', { ascending: false })
+        .limit(TELEMETRY_LIMIT);    // ← CORRECTIF CRITIQUE : protège Supabase free tier
+      telemetry = data || [];
+    }
+
+    /* Alertes DB (non acquittées) */
+    let dbAlerts = [];
+    if (sensorIds.length > 0) {
+      const { data } = await supabaseClient
+        .from('alerts')
+        .select('*, sensors(name)')
+        .in('sensor_id', sensorIds)
+        .eq('status', 'ACTIVE')
+        .eq('acknowledged', false);
+      dbAlerts = data || [];
+    }
+
+    /* Mise en cache */
+    cachedData[sid] = { site, sensors, telemetry, alerts: dbAlerts, aiEnabled };
+
+    /* ── DÉCISION : 1er rendu vs mise à jour in-place ── */
+    if (!renderedSites.has(sid)) {
+      if (telemetry.length === 0) {
+        container.insertAdjacentHTML('beforeend', `
+          <div class="site-card" id="card-${sid}">
+            <h2>🏢 ${site.name}</h2>
+            <p style="margin-top:16px; color:var(--text-secondary); font-size:13px;">
+              Aucune donnée disponible pour ce site.
+            </p>
+          </div>`);
+      } else {
+        container.insertAdjacentHTML('beforeend', buildSiteCardHTML(site, sensors, aiEnabled));
+      }
+      renderedSites.add(sid);
+      activePeriod[sid] = 'today';
+      activeSensor[sid] = 'ALL';
+      if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
+      /* updateSiteCard appelle updateChart — pas de doublon */
+
+    } else {
+      /* Mise à jour in-place uniquement */
+      if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
+    }
+  }
+
+  /* Timestamp MAJ */
+  setText('lastRefreshTime',
+    new Date().toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit', second:'2-digit' })
+  );
 }
 
-function exportPDF(siteId) {
-  alert('📥 Export PDF en cours…\n\n(Fonctionnalité réservée aux plans avec PDF activé.)');
+/* =================================================================
+   REALTIME — debounce 15s
+   ================================================================= */
+function scheduleReload() {
+  clearTimeout(realtimeTimeout);
+  realtimeTimeout = setTimeout(loadDashboard, DEBOUNCE_MS);
 }
-
-/* ─────────────────────────────────────────────────────────────────
-   REALTIME SUPABASE
-   ─────────────────────────────────────────────────────────────────*/
 function startRealtime() {
-  if (realtimeChannel) realtimeChannel.unsubscribe();
-  realtimeChannel = sb.channel('dashboard-live')
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'telemetry' }, scheduleReload)
-    .on('postgres_changes', { event:'INSERT', schema:'public', table:'alerts' },    scheduleReload)
+  supabaseClient
+    .channel('et-dashboard-v2')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'telemetry' }, scheduleReload)
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'alerts'   }, scheduleReload)
+    .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'alerts'   }, scheduleReload)
     .subscribe();
 }
-function scheduleReload() {
-  clearTimeout(reloadTimeout);
-  reloadTimeout = setTimeout(loadDashboard, 5000);
+
+/* =================================================================
+   EXPORT PDF
+   ================================================================= */
+async function exportPDF(siteId) {
+  alert('Export PDF : fonctionnalité en cours de développement.');
 }
 
-/* ─────────────────────────────────────────────────────────────────
-   DÉCONNEXION
-   ─────────────────────────────────────────────────────────────────*/
-async function logout() {
-  if (realtimeChannel) realtimeChannel.unsubscribe();
-  Object.values(outageTickers).forEach(clearInterval);
-  await sb.auth.signOut();
-  localStorage.clear();
-  window.location.href = 'auth.html';
+/* =================================================================
+   INIT
+   ================================================================= */
+async function initDashboard() {
+  canAccessMultiSite   = await canUseMultiSite();
+  canAccessMultiSensor = await canUseMultiSensor();
+  if (!canAccessMultiSite && !canAccessMultiSensor) showFreeBanner();
+  await loadDashboard();
+  startRealtime();
 }
-
-/* ─────────────────────────────────────────────────────────────────
-   DÉMARRAGE
-   ─────────────────────────────────────────────────────────────────*/
-init().catch(err => {
-  console.error('Init error:', err);
-  showError('💥', 'Erreur inattendue', `Une erreur technique est survenue : ${err.message}. Réessayez ou contactez le support.`, 'Réessayer', '');
-  document.getElementById('error-btn').onclick = () => window.location.reload();
-});
 </script>
+
+<script src="js/feature-access.js"></script>
+<script>initDashboard();</script>
+
 </body>
 </html>
