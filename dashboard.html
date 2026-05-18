@@ -166,4 +166,1698 @@ body {
 .kpi-box.kg::after  { background: var(--accent-green); }
 .kpi-box.kb::after  { background: var(--accent-blue);  }
 .kpi-box.kr::after  { background: var(--accent-red);   }
-.kpi-box.ka::after  { background:
+.kpi-box.ka::after  { background: var(--accent-amber); }
+
+.kpi-label {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-muted);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.kpi-value {
+  font-size: 19px;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--text-primary);
+  transition: color var(--transition);
+  font-variant-numeric: tabular-nums;
+}
+.kpi-sub {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 5px;
+}
+
+/* Coût total pleine largeur */
+.kpi-full {
+  background: linear-gradient(135deg, rgba(0,212,160,0.06) 0%, rgba(0,212,160,0.01) 100%);
+  border: 1px solid var(--border-accent);
+  border-radius: var(--radius-box);
+  padding: 16px 20px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 12px;
+}
+.kpi-full .kpi-value { font-size: 26px; color: var(--accent-green); }
+
+/* ===================================================================
+   COÛTS SBEE / GROUPE
+   =================================================================== */
+.cost-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.cost-box {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-box);
+  padding: 13px 15px;
+}
+.cost-label {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 6px;
+}
+.cost-value {
+  font-size: 17px;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+.cost-meta { font-size: 10px; color: var(--text-muted); margin-top: 4px; }
+.c-green { color: var(--accent-green); }
+.c-amber { color: var(--accent-amber); }
+
+/* ===================================================================
+   BARRE RÉPARTITION kWh
+   =================================================================== */
+.split-wrap { margin-bottom: 14px; }
+.split-labels {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-bottom: 5px;
+}
+.split-track {
+  height: 7px;
+  background: var(--bg-inset);
+  border-radius: 4px;
+  overflow: hidden;
+  display: flex;
+}
+.split-sbee   { background: var(--accent-green); height: 100%; border-radius: 4px 0 0 4px; transition: width 0.6s ease; }
+.split-groupe { background: var(--accent-amber); height: 100%; border-radius: 0 4px 4px 0; transition: width 0.6s ease; }
+
+/* ===================================================================
+   ROI
+   =================================================================== */
+.roi-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.07) 0%, rgba(59,130,246,0.01) 100%);
+  border: 1px solid rgba(59,130,246,0.15);
+  border-radius: var(--radius-box);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.roi-icon { font-size: 26px; flex-shrink: 0; }
+.roi-title { font-size: 10px; font-weight: 700; color: var(--accent-blue); letter-spacing: 0.5px; text-transform: uppercase; margin-bottom: 4px; }
+.roi-value { font-size: 18px; font-weight: 700; color: var(--accent-blue); font-variant-numeric: tabular-nums; }
+.roi-desc  { font-size: 10px; color: var(--text-secondary); margin-top: 3px; line-height: 1.4; }
+
+/* ===================================================================
+   INDICATEURS ÉLECTRIQUES
+   =================================================================== */
+.elec-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 7px;
+}
+.elec-box {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+  border: 1px solid var(--border-subtle);
+}
+.elec-label { font-size: 9px; font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; color: var(--text-muted); margin-bottom: 5px; }
+.elec-value { font-size: 13px; font-weight: 700; font-family: var(--font-display); transition: color var(--transition); }
+
+/* ===================================================================
+   SECTIONS ANALYSE
+   =================================================================== */
+.analysis-section {
+  background: rgba(10,16,32,0.6);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-box);
+  padding: 15px;
+  margin-bottom: 10px;
+}
+.analysis-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--text-secondary);
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  margin-bottom: 12px;
+}
+.data-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  padding: 7px 0;
+  border-bottom: 1px solid var(--border-subtle);
+  gap: 10px;
+}
+.data-row:last-child { border-bottom: none; }
+.dr-label { color: var(--text-secondary); flex: 1; }
+.dr-value { font-weight: 600; text-align: right; white-space: nowrap; }
+
+/* ===================================================================
+   ALERTES
+   =================================================================== */
+.alert-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--border-subtle);
+}
+.alert-item:last-child { border-bottom: none; }
+.alert-sev {
+  flex-shrink: 0;
+  padding: 2px 7px;
+  border-radius: 4px;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-top: 1px;
+}
+.sev-critical { background: rgba(255,77,106,0.14);  color: var(--accent-red);   }
+.sev-warning  { background: rgba(245,166,35,0.14);  color: var(--accent-amber); }
+.sev-info     { background: rgba(59,130,246,0.14);  color: var(--accent-blue);  }
+.alert-body { flex: 1; min-width: 0; }
+.alert-device { font-size: 12px; font-weight: 600; }
+.alert-desc   { font-size: 11px; color: var(--text-secondary); margin-top: 2px; }
+.ack-btn {
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--text-muted);
+  color: var(--text-muted);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 10px;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: border-color var(--transition), color var(--transition);
+}
+.ack-btn:hover { border-color: var(--accent-green); color: var(--accent-green); }
+
+/* ===================================================================
+   STATUT IoT
+   =================================================================== */
+.sensor-status-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 8px;
+}
+.iot-box {
+  background: var(--bg-inset);
+  border-radius: 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--border-subtle);
+}
+.iot-label { font-size: 10px; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 4px; }
+.iot-status { font-size: 10px; font-weight: 700; font-family: var(--font-display); }
+.iot-meta { font-size: 10px; color: var(--text-muted); margin-top: 2px; }
+
+/* ===================================================================
+   GRAPHIQUE — CONTRÔLES
+   =================================================================== */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+.chart-select {
+  flex: 1;
+  min-width: 130px;
+  padding: 8px 11px;
+  background: var(--bg-inset);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+  border-radius: 9px;
+  font-family: var(--font-body);
+  font-size: 12px;
+  cursor: pointer;
+  outline: none;
+  transition: border-color var(--transition);
+}
+.chart-select:focus { border-color: var(--accent-green); }
+
+.period-btns { display: flex; gap: 4px; }
+.period-btn {
+  padding: 7px 10px;
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  cursor: pointer;
+  font-family: var(--font-body);
+  transition: all var(--transition);
+}
+.period-btn:hover  { border-color: var(--accent-green); color: var(--accent-green); }
+.period-btn.active {
+  background: rgba(0,212,160,0.1);
+  border-color: var(--accent-green);
+  color: var(--accent-green);
+}
+
+/* ===================================================================
+   PREMIUM BANNER
+   =================================================================== */
+.premium-banner {
+  background: linear-gradient(135deg, rgba(245,166,35,0.07) 0%, rgba(12,21,34,0.5) 100%);
+  border: 1px solid rgba(245,166,35,0.22);
+  padding: 20px 26px;
+  border-radius: var(--radius-card);
+  margin-bottom: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.plan-pills { display: flex; gap: 12px; flex-wrap: wrap; }
+.plan-pill {
+  padding: 11px 16px;
+  border-radius: 10px;
+  font-size: 12px;
+}
+.plan-pill b { display: block; margin-bottom: 4px; }
+.plan-pill small { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
+.plan-free { background: rgba(255,77,106,0.07);  border: 1px solid rgba(255,77,106,0.12); }
+.plan-pro  { background: rgba(0,212,160,0.07);   border: 1px solid rgba(0,212,160,0.15);  }
+.upgrade-btn {
+  padding: 12px 20px;
+  background: var(--accent-green);
+  border: none;
+  border-radius: 11px;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 13px;
+  color: #060f1a;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: opacity var(--transition), transform var(--transition);
+}
+.upgrade-btn:hover { opacity: 0.88; transform: scale(1.02); }
+
+/* ===================================================================
+   LOCKED BOX
+   =================================================================== */
+.locked-box {
+  background: var(--bg-inset);
+  border: 1px dashed rgba(245,166,35,0.15);
+  padding: 14px;
+  border-radius: var(--radius-box);
+  text-align: center;
+  margin-top: 10px;
+}
+.locked-box .lock-title { font-size: 11px; font-weight: 700; color: var(--accent-amber); margin-bottom: 4px; }
+.locked-box p { font-size: 11px; color: var(--text-secondary); }
+
+/* ===================================================================
+   LIVE DOT
+   =================================================================== */
+.live-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent-green);
+  display: inline-block;
+  margin-right: 7px;
+  animation: pulse 1.6s ease infinite;
+}
+
+/* ===================================================================
+   SKELETON
+   =================================================================== */
+.skeleton {
+  background: linear-gradient(90deg, #0f1829 25%, #162035 50%, #0f1829 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.5s infinite;
+  border-radius: 8px;
+}
+
+/* ===================================================================
+   ANIMATIONS
+   =================================================================== */
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.25); }
+}
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+@keyframes shimmer {
+  0%   { background-position:  200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ===================================================================
+   RESPONSIVE
+   =================================================================== */
+@media (max-width: 520px) {
+  .site-grid  { grid-template-columns: 1fr; }
+  .kpi-grid-3 { grid-template-columns: repeat(2, 1fr); }
+  .elec-grid  { grid-template-columns: repeat(2, 1fr); }
+  .cost-row   { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+
+<body>
+
+<!-- ================================================================
+     SIDEBAR
+     ================================================================ -->
+<div class="sidebar">
+  <div class="logo">Energy<span>Track</span></div>
+  <a class="nav-item active"          href="dashboard.html">🏠 Dashboard</a>
+  <a class="nav-item"                 href="consommation.html">⚡ Consommation</a>
+  <a class="nav-item"                 href="alertes.html">🔔 Alertes</a>
+  <a class="nav-item premium-feature" href="rapports.html">📊 Rapports</a>
+  <a class="nav-item premium-feature" href="sites.html">🏢 Multi-sites</a>
+  <a class="nav-item"                 href="capteurs.html">📡 Capteurs IoT</a>
+  <a class="nav-item premium-feature" href="ia.html">🤖 Analyse IA</a>
+  <a class="nav-item"                 href="parametres.html">⚙️ Paramètres</a>
+</div>
+
+<!-- ================================================================
+     MAIN
+     ================================================================ -->
+<div class="main" style="display:block;">
+
+  <div id="subscriptionBanner"></div>
+
+  <div style="display:flex; justify-content:space-between; align-items:flex-start; flex-wrap:wrap; gap:14px; margin-bottom:6px;">
+    <div>
+      <h1 style="font-size:22px; font-weight:700; letter-spacing:-0.3px;">Dashboard EnergyTrack</h1>
+      <p style="margin-top:7px; color:var(--text-secondary); font-size:13px;">
+        <span class="live-dot"></span>Supervision énergétique multi-sites en temps réel.
+      </p>
+    </div>
+    <div style="font-size:11px; color:var(--text-muted); text-align:right; padding-top:4px;">
+      MAJ : <span id="lastRefreshTime" style="font-family:var(--font-display); color:var(--text-secondary); font-size:10px;">—</span>
+    </div>
+  </div>
+
+  <div class="site-grid" id="sitesContainer"></div>
+
+</div>
+
+<!-- ================================================================
+     JAVASCRIPT
+     ================================================================ -->
+<script>
+/* =================================================================
+   CONSTANTES MÉTIER — valeurs par défaut (fallback si DB vide)
+   Les tarifs et seuils RÉELS viennent de la base de données :
+     - tarif_sbee   → table settings (user)  + site.config (par site)
+     - tarif_groupe → table settings (user)  + site.config (par site)
+     - power_max    → site.config.power_max
+     - v_low/v_high → site.config.v_low / site.config.v_high
+   ================================================================= */
+const DEFAULT_TARIF_SBEE   = 91;    // FCFA/kWh fallback
+const DEFAULT_TARIF_GROUPE = 350;   // FCFA/kWh fallback
+const DEFAULT_V_OUTAGE     = 50;    // V seuil coupure (fixe — physique)
+const DEFAULT_V_LOW        = 190;   // V basse tension fallback
+const DEFAULT_V_HIGH       = 250;   // V surtension fallback
+const DEFAULT_P_MAX_W      = 5000;  // W surconsommation fallback
+const OFFLINE_MIN          = 15;    // minutes avant DEVICE_OFFLINE
+const TELEMETRY_LIMIT      = 200;   // lignes max — protège Supabase free tier
+const CHART_POINTS         = 14;    // points graphique
+const SYNC_FULL_MS         = 60000; // resync complète toutes les 60s
+const DEBOUNCE_ALERT       = 500;   // debounce alerte realtime (ms)
+
+/* Config résolue par site — alimentée depuis la DB à chaque loadDashboard */
+const siteConfig = {};
+/*
+  siteConfig[siteId] = {
+    tarifSbee:   number,   // depuis settings.tariff_sbee  || site.config.tarif_sbee
+    tarifGroupe: number,   // depuis settings.tariff_groupe || site.config.tarif_groupe
+    vLow:        number,
+    vHigh:       number,
+    pMaxW:       number,
+  }
+*/
+
+/** Retourne la config résolue d'un site, avec fallback sur les défauts */
+function getSiteConfig(siteId) {
+  return siteConfig[siteId] || {
+    tarifSbee:   DEFAULT_TARIF_SBEE,
+    tarifGroupe: DEFAULT_TARIF_GROUPE,
+    vLow:        DEFAULT_V_LOW,
+    vHigh:       DEFAULT_V_HIGH,
+    pMaxW:       DEFAULT_P_MAX_W,
+  };
+}
+
+/** Construit et stocke la config d'un site depuis les données DB */
+function buildSiteConfig(siteId, userSettings, siteRow) {
+  const cfg = siteRow?.config || {};
+  siteConfig[siteId] = {
+    tarifSbee:   Number(userSettings?.tariff_sbee   || cfg.tarif_sbee   || DEFAULT_TARIF_SBEE),
+    tarifGroupe: Number(userSettings?.tariff_groupe || cfg.tarif_groupe || DEFAULT_TARIF_GROUPE),
+    vLow:        Number(cfg.v_low   || DEFAULT_V_LOW),
+    vHigh:       Number(cfg.v_high  || DEFAULT_V_HIGH),
+    pMaxW:       Number(cfg.power_max || DEFAULT_P_MAX_W),
+  };
+}
+
+/* =================================================================
+   ÉTAT GLOBAL
+   ================================================================= */
+const charts        = {};   // instances Chart.js — jamais recréées
+const cachedData    = {};   // données par siteId { site, sensors, telemetry, alerts, aiEnabled }
+const sensorIndex   = {};   // index rapide sensor_id → siteId pour le Realtime
+const renderedSites = new Set();
+const alertCooldown = {};   // anti-flooding alertes locales { key: timestamp }
+let syncFullTimer   = null; // timer resync complète 60s
+let alertDebounceTimer = null;
+let canAccessMultiSite   = false;
+let canAccessMultiSensor = false;
+const activePeriod  = {};   // { siteId: period }
+const activeSensor  = {};   // { siteId: sensorId | 'ALL' }
+
+/* =================================================================
+   UTILITAIRES FORMATAGE
+   ================================================================= */
+function fmtEnergy(kwh) {
+  if (typeof kwh !== 'number' || isNaN(kwh)) return '—';
+  if (kwh < 1) return `${Math.round(kwh * 1000)} Wh`;
+  return `${kwh.toFixed(2)} kWh`;
+}
+function fmtFcfa(n) {
+  if (typeof n !== 'number' || isNaN(n) || n === 0) return '0';
+  return Math.round(n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
+}
+function fmtV(v)  { return (typeof v === 'number' && !isNaN(v)) ? `${v.toFixed(1)} V`  : '—'; }
+function fmtA(i)  { return (typeof i === 'number' && !isNaN(i)) ? `${i.toFixed(2)} A`  : '—'; }
+function fmtPF(p) { return (typeof p === 'number' && !isNaN(p)) ? p.toFixed(2)          : '—'; }
+function fmtHz(f) { return (typeof f === 'number' && !isNaN(f)) ? `${f.toFixed(1)} Hz` : '—'; }
+function fmtMin(m) {
+  if (!m || m === 0) return '0 min';
+  return m < 60 ? `${m} min` : `${Math.floor(m/60)}h ${m%60}min`;
+}
+
+function setText(id, val) {
+  const el = document.getElementById(id);
+  if (el && el.textContent !== String(val)) el.textContent = val;
+}
+function setStyle(id, prop, val) {
+  const el = document.getElementById(id);
+  if (el && el.style[prop] !== val) el.style[prop] = val;
+}
+
+function resolveStatus(t) {
+  if (!t)                                    return { text: 'HORS LIGNE',   cls: 'badge-red'    };
+  if (t.voltage < DEFAULT_V_OUTAGE)          return { text: 'COUPURE SBEE', cls: 'badge-red'    };
+  if (t.source === 'GROUPE')                 return { text: 'GROUPE ACTIF', cls: 'badge-orange' };
+  return                                            { text: 'SBEE OK',       cls: 'badge-green'  };
+}
+function hColor(pct) {
+  if (pct >= 80) return 'var(--accent-green)';
+  if (pct >= 50) return 'var(--accent-amber)';
+  return 'var(--accent-red)';
+}
+function isOffline(sensor) {
+  if (!sensor.last_seen) return true;
+  return (Date.now() - new Date(sensor.last_seen).getTime()) / 60000 > OFFLINE_MIN;
+}
+
+/* =================================================================
+   FILTRAGE PAR PÉRIODE
+   ================================================================= */
+function filterByPeriod(telemetry, period) {
+  const now = Date.now();
+  let cutoff;
+  switch (period) {
+    case 'today': { cutoff = new Date(); cutoff.setHours(0,0,0,0); break; }
+    case '7d':    { cutoff = new Date(now - 7  * 86400000); break; }
+    case '30d':   { cutoff = new Date(now - 30 * 86400000); break; }
+    case 'month': { cutoff = new Date(); cutoff.setDate(1); cutoff.setHours(0,0,0,0); break; }
+    default:      { cutoff = new Date(now - 86400000); }
+  }
+  return telemetry.filter(t => new Date(t.created_at) >= cutoff);
+}
+
+/* =================================================================
+   CALCULS MÉTIER COMPLETS
+   ================================================================= */
+function computeKPIs(telemetry, cfg) {
+  /* cfg = getSiteConfig(siteId) — tarifs et seuils depuis la DB */
+  const tarifSbee   = cfg?.tarifSbee   ?? DEFAULT_TARIF_SBEE;
+  const tarifGroupe = cfg?.tarifGroupe ?? DEFAULT_TARIF_GROUPE;
+
+  const r = {
+    totalKwh: 0, kwhSbee: 0, kwhGroupe: 0,
+    costSbee: 0, costGroupe: 0, costTotal: 0, economyPossible: 0,
+    outageCount: 0, outageTotalMin: 0,
+    lastPowerCutTime: 'Aucune coupure', lastTransmitTime: '—',
+    topSensorName: '—', topSensorPower: 0,
+    latestV: null, latestI: null, latestP: 0, latestPF: null,
+    latestFreq: null, latestSource: null,
+    consumptionBySensor: {},
+    tarifSbee, tarifGroupe,   // exposés pour l'affichage des labels
+  };
+
+  if (!telemetry || telemetry.length === 0) return r;
+
+  const latest = telemetry[0];
+  r.latestV      = latest.voltage;
+  r.latestI      = latest.current_a;
+  r.latestP      = latest.power_w || 0;
+  r.latestPF     = latest.power_factor;
+  r.latestFreq   = latest.frequency_hz;
+  r.latestSource = latest.source;
+  r.lastTransmitTime = new Date(latest.created_at).toLocaleTimeString('fr-FR', {
+    hour: '2-digit', minute: '2-digit', second: '2-digit'
+  });
+
+  /* Tri chronologique pour détecter transitions coupures */
+  const chrono = [...telemetry].sort((a,b) =>
+    new Date(a.created_at) - new Date(b.created_at)
+  );
+
+  let inOutage = false, outageStart = null;
+
+  chrono.forEach(item => {
+    const sName = item.sensors?.name || 'Général';
+    if (!r.consumptionBySensor[sName]) {
+      r.consumptionBySensor[sName] = { kwh: 0, kwhSbee: 0, kwhGroupe: 0 };
+    }
+
+    const kwh = Number(item.kwh_total || 0);
+    if (kwh > r.consumptionBySensor[sName].kwh) {
+      r.consumptionBySensor[sName].kwh = kwh;
+    }
+
+    if (item.source === 'GROUPE') {
+      const kG = Number(item.kwh_groupe || kwh);
+      if (kG > r.consumptionBySensor[sName].kwhGroupe)
+        r.consumptionBySensor[sName].kwhGroupe = kG;
+    } else {
+      const kS = Number(item.kwh_sbee || kwh);
+      if (kS > r.consumptionBySensor[sName].kwhSbee)
+        r.consumptionBySensor[sName].kwhSbee = kS;
+    }
+
+    /* Détection transitions coupure SBEE */
+    if (item.voltage < DEFAULT_V_OUTAGE && !inOutage) {
+      inOutage = true;
+      outageStart = new Date(item.created_at);
+      r.outageCount++;
+      r.lastPowerCutTime = outageStart.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
+    } else if (item.voltage >= DEFAULT_V_OUTAGE && inOutage) {
+      inOutage = false;
+      if (outageStart) {
+        r.outageTotalMin += Math.round((new Date(item.created_at) - outageStart) / 60000);
+      }
+    }
+  });
+
+  /* Agrégation globale */
+  Object.values(r.consumptionBySensor).forEach(v => {
+    r.totalKwh  += v.kwh;
+    r.kwhSbee   += v.kwhSbee;
+    r.kwhGroupe += v.kwhGroupe;
+  });
+
+  /* Inférence SBEE/Groupe si champs absents en base */
+  if (r.kwhSbee === 0 && r.kwhGroupe === 0 && r.totalKwh > 0) {
+    const gRatio = chrono.filter(t => t.source === 'GROUPE').length / chrono.length;
+    r.kwhGroupe = r.totalKwh * gRatio;
+    r.kwhSbee   = r.totalKwh * (1 - gRatio);
+  }
+
+  r.costSbee   = r.kwhSbee   * tarifSbee;
+  r.costGroupe = r.kwhGroupe * tarifGroupe;
+  r.costTotal  = r.costSbee + r.costGroupe;
+
+  /* Économie possible : coût réel vs si tout était sur SBEE */
+  r.economyPossible = Math.max(0, r.costTotal - (r.totalKwh * tarifSbee));
+
+  /* Top consommateur (puissance instantanée) */
+  const byPow = [...telemetry].sort((a,b) => b.power_w - a.power_w);
+  if (byPow[0]) {
+    r.topSensorName  = byPow[0].sensors?.name || 'Général';
+    r.topSensorPower = Math.round(byPow[0].power_w || 0);
+  }
+
+  return r;
+}
+
+/* =================================================================
+   ALERTES LOCALES (seuils) — complément aux alertes Supabase
+   Reçoit cfg = getSiteConfig(siteId) pour utiliser les seuils DB
+   ================================================================= */
+function generateLocalAlerts(sensors, kpis, cfg) {
+  const vLow  = cfg?.vLow  ?? DEFAULT_V_LOW;
+  const vHigh = cfg?.vHigh ?? DEFAULT_V_HIGH;
+  const pMaxW = cfg?.pMaxW ?? DEFAULT_P_MAX_W;
+  const alerts = [];
+
+  /* DEVICE_OFFLINE */
+  sensors.filter(s => isOffline(s)).forEach(s => {
+    alerts.push({
+      id: `offline-${s.id}`,
+      severity: 'warning',
+      sensors: { name: s.name || s.id },
+      description: `Aucune donnée depuis plus de ${OFFLINE_MIN} minutes`,
+      synthetic: true
+    });
+  });
+
+  /* LOW_VOLTAGE */
+  if (kpis.latestV !== null && kpis.latestV >= DEFAULT_V_OUTAGE && kpis.latestV < vLow) {
+    alerts.push({
+      id: 'low-voltage',
+      severity: 'warning',
+      sensors: { name: 'Réseau SBEE' },
+      description: `Basse tension détectée : ${fmtV(kpis.latestV)} (seuil : ${vLow} V)`,
+      synthetic: true
+    });
+  }
+
+  /* HIGH_VOLTAGE */
+  if (kpis.latestV !== null && kpis.latestV > vHigh) {
+    alerts.push({
+      id: 'high-voltage',
+      severity: 'critical',
+      sensors: { name: 'Réseau SBEE' },
+      description: `Surtension détectée : ${fmtV(kpis.latestV)} — risque matériel (seuil : ${vHigh} V)`,
+      synthetic: true
+    });
+  }
+
+  /* OVERCONSUMPTION */
+  if (kpis.latestP > pMaxW) {
+    alerts.push({
+      id: 'overconsumption',
+      severity: 'warning',
+      sensors: { name: kpis.topSensorName },
+      description: `Surconsommation : ${Math.round(kpis.latestP)} W (seuil : ${pMaxW} W)`,
+      synthetic: true
+    });
+  }
+
+  /* HIGH_GROUPE_COST (>30% du total) */
+  const gPct = kpis.totalKwh > 0 ? (kpis.kwhGroupe / kpis.totalKwh) * 100 : 0;
+  if (gPct > 30) {
+    alerts.push({
+      id: 'high-groupe',
+      severity: 'warning',
+      sensors: { name: 'Groupe électrogène' },
+      description: `Consommation groupe : ${Math.round(gPct)}% du total — surcoût ${fmtFcfa(kpis.economyPossible)} FCFA`,
+      synthetic: true
+    });
+  }
+
+  return alerts;
+}
+
+/* =================================================================
+   AUTH
+   ================================================================= */
+async function getUser() {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) { window.location.href = 'auth.html'; return null; }
+  return user;
+}
+
+/* =================================================================
+   BANNIÈRE ABONNEMENT
+   ================================================================= */
+function showFreeBanner() {
+  const el = document.getElementById('subscriptionBanner');
+  if (el.children.length > 0) return;
+  el.innerHTML = `
+    <div class="premium-banner">
+      <div>
+        <div style="font-family:var(--font-display); font-size:11px; color:var(--accent-amber); margin-bottom:12px; letter-spacing:0.5px;">
+          PLAN ESSENTIAL ACTIF
+        </div>
+        <div class="plan-pills">
+          <div class="plan-pill plan-free">
+            <b>❌ Essential</b>
+            <small>1 site · 1 capteur<br>Pas d'IA, pas d'export</small>
+          </div>
+          <div class="plan-pill plan-pro">
+            <b>🚀 Business</b>
+            <small>∞ sites · ∞ capteurs<br>IA · PDF · Multi-capteurs</small>
+          </div>
+        </div>
+      </div>
+      <button class="upgrade-btn" onclick="window.location.href='pricing.html'">
+        🚀 Passer Business
+      </button>
+    </div>`;
+}
+
+/* =================================================================
+   HTML INITIAL D'UNE CARTE SITE
+   ================================================================= */
+function buildSiteCardHTML(site, sensors, aiEnabled) {
+  const sid = site.id;
+  const sensorOpts = sensors.map(s =>
+    `<option value="${s.id}">🔌 ${s.name}</option>`
+  ).join('');
+
+  const aiBlock = aiEnabled ? `
+    <div style="font-size:12px; color:var(--accent-green); line-height:1.5;">
+      🤖 <b>IA active :</b> <span id="ai-msg-${sid}">Analyse en cours…</span>
+    </div>
+    <button onclick="exportPDF('${sid}')"
+      style="width:100%; padding:10px; margin-top:10px; background:var(--bg-inset);
+             border:1px solid var(--accent-green); color:var(--accent-green); border-radius:9px;
+             cursor:pointer; font-weight:700; font-family:var(--font-body); font-size:12px;">
+      📥 Exporter rapport PDF
+    </button>` : `
+    <div class="locked-box">
+      <div class="lock-title">🤖 Analyse IA & PDF verrouillés</div>
+      <p>Passez au Plan Business pour activer l'audit prédictif et les exports PDF.</p>
+    </div>`;
+
+  return `
+  <div class="site-card" id="card-${sid}">
+
+    <!-- EN-TÊTE -->
+    <div class="site-header">
+      <div>
+        <h2>🏢 ${site.name}</h2>
+        <div class="site-city">📍 ${site.city || 'Cotonou'}</div>
+      </div>
+      <div class="status-badge badge-green" id="status-badge-${sid}">SBEE OK</div>
+    </div>
+
+    <!-- DISPONIBILITÉ -->
+    <div class="health-row">
+      <span>📡 <b id="sensor-count-${sid}">—</b> capteurs</span>
+      <div class="health-track">
+        <div class="health-fill" id="health-fill-${sid}" style="width:0%;"></div>
+      </div>
+      <span>🟢 <b id="health-pct-${sid}">—%</b></span>
+    </div>
+
+    <!-- KPI 3 tuiles -->
+    <div class="kpi-grid-3">
+      <div class="kpi-box kg">
+        <div class="kpi-label">⚡ Puissance inst.</div>
+        <div class="kpi-value" id="kpi-power-${sid}">— W</div>
+        <div class="kpi-sub"   id="kpi-source-${sid}">Source : —</div>
+      </div>
+      <div class="kpi-box kb">
+        <div class="kpi-label">🔋 Énergie</div>
+        <div class="kpi-value" id="kpi-energy-${sid}">—</div>
+        <div class="kpi-sub"   id="kpi-energy-sub-${sid}">—</div>
+      </div>
+      <div class="kpi-box kr">
+        <div class="kpi-label">⚠️ Alertes</div>
+        <div class="kpi-value" id="kpi-alerts-${sid}" style="color:var(--accent-red);">—</div>
+        <div class="kpi-sub"   id="kpi-outages-${sid}">— coupures</div>
+      </div>
+    </div>
+
+    <!-- COÛT TOTAL (full width) -->
+    <div class="kpi-full">
+      <div>
+        <div class="kpi-label">💰 Coût cumulé (période)</div>
+        <div class="kpi-value" id="kpi-cost-total-${sid}">— F</div>
+      </div>
+      <div style="text-align:right;">
+        <div class="kpi-label" style="color:var(--accent-amber);">🔥 Top appareil</div>
+        <div style="font-size:13px; font-weight:700;" id="kpi-top-name-${sid}">—</div>
+        <div style="font-size:17px; font-weight:700; color:var(--accent-amber);" id="kpi-top-power-${sid}">— W</div>
+      </div>
+    </div>
+
+    <!-- COÛTS SBEE vs GROUPE -->
+    <div class="cost-row">
+      <div class="cost-box">
+        <div class="cost-label c-green">💡 Réseau SBEE</div>
+        <div class="kpi-sub" id="kwh-sbee-${sid}">— kWh</div>
+        <div class="cost-value c-green" id="cost-sbee-${sid}">— F</div>
+        <div class="cost-meta" id="tarif-sbee-lbl-${sid}">à — FCFA/kWh</div>
+      </div>
+      <div class="cost-box">
+        <div class="cost-label c-amber">⛽ Groupe élect.</div>
+        <div class="kpi-sub" id="kwh-groupe-${sid}">— kWh</div>
+        <div class="cost-value c-amber" id="cost-groupe-${sid}">— F</div>
+        <div class="cost-meta" id="tarif-groupe-lbl-${sid}">à — FCFA/kWh</div>
+      </div>
+    </div>
+
+    <!-- BARRE RÉPARTITION -->
+    <div class="split-wrap">
+      <div class="split-labels">
+        <span id="split-lbl-sbee-${sid}">SBEE —%</span>
+        <span id="split-lbl-grp-${sid}">Groupe —%</span>
+      </div>
+      <div class="split-track">
+        <div class="split-sbee"   id="split-sbee-${sid}"  style="width:50%;"></div>
+        <div class="split-groupe" id="split-grp-${sid}"   style="width:50%;"></div>
+      </div>
+    </div>
+
+    <!-- ROI -->
+    <div class="roi-box">
+      <div class="roi-icon">💡</div>
+      <div>
+        <div class="roi-title">Économie possible (si 0% groupe)</div>
+        <div class="roi-value" id="roi-val-${sid}">— F</div>
+        <div class="roi-desc"  id="roi-desc-${sid}">Calculé sur la période sélectionnée.</div>
+      </div>
+    </div>
+
+    <!-- INDICATEURS ÉLECTRIQUES -->
+    <div class="analysis-section">
+      <div class="analysis-title">🔬 Indicateurs électriques temps réel</div>
+      <div class="elec-grid">
+        <div class="elec-box">
+          <div class="elec-label">Tension</div>
+          <div class="elec-value" id="elec-v-${sid}">—</div>
+        </div>
+        <div class="elec-box">
+          <div class="elec-label">Courant</div>
+          <div class="elec-value" id="elec-i-${sid}">—</div>
+        </div>
+        <div class="elec-box">
+          <div class="elec-label">Fact. Puis.</div>
+          <div class="elec-value" id="elec-pf-${sid}">—</div>
+        </div>
+        <div class="elec-box">
+          <div class="elec-label">Fréquence</div>
+          <div class="elec-value" id="elec-hz-${sid}">—</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RÉSEAU & COUPURES -->
+    <div class="analysis-section">
+      <div class="analysis-title">📡 Réseau & Coupures SBEE</div>
+      <div class="data-row">
+        <span class="dr-label">Dernière émission IoT</span>
+        <span class="dr-value" style="font-family:var(--font-display); font-size:11px;" id="last-emit-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Dernière coupure SBEE</span>
+        <span class="dr-value" style="color:var(--accent-red);" id="last-cut-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Durée totale coupures</span>
+        <span class="dr-value" style="color:var(--accent-amber);" id="outage-dur-${sid}">—</span>
+      </div>
+      <div class="data-row">
+        <span class="dr-label">Nombre de coupures</span>
+        <span class="dr-value" id="outage-cnt-${sid}">—</span>
+      </div>
+    </div>
+
+    <!-- RÉPARTITION PAR APPAREIL -->
+    <div class="analysis-section">
+      <div class="analysis-title">📊 Répartition par appareil</div>
+      <div id="breakdown-${sid}">
+        <div class="skeleton" style="height:38px; margin-bottom:7px;"></div>
+        <div class="skeleton" style="height:38px;"></div>
+      </div>
+    </div>
+
+    <!-- ALERTES (avec badge sévérité + bouton Acquitter) -->
+    <div class="analysis-section" style="border-color:rgba(255,77,106,0.07);">
+      <div class="analysis-title" style="color:var(--accent-red);">🔔 Diagnostics & Alertes</div>
+      <div id="alerts-list-${sid}">
+        <div class="skeleton" style="height:34px;"></div>
+      </div>
+    </div>
+
+    <!-- STATUT CAPTEURS IoT -->
+    <div class="analysis-section">
+      <div class="analysis-title">🛰️ Statut capteurs IoT</div>
+      <div class="sensor-status-grid" id="iot-grid-${sid}">
+        <div class="skeleton" style="height:54px;"></div>
+        <div class="skeleton" style="height:54px;"></div>
+      </div>
+    </div>
+
+    <!-- GRAPHIQUE -->
+    <div style="margin-top:18px;">
+      <div class="chart-controls">
+        <select class="chart-select" id="sel-sensor-${sid}"
+                onchange="onSensorChange('${sid}')">
+          <option value="ALL">Tous les capteurs</option>
+          ${sensorOpts}
+        </select>
+        <div class="period-btns" id="period-btns-${sid}">
+          <button class="period-btn active" onclick="setPeriod('${sid}','today',this)">Auj.</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','7d',this)">7j</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','30d',this)">30j</button>
+          <button class="period-btn"        onclick="setPeriod('${sid}','month',this)">Mois</button>
+        </div>
+      </div>
+      <canvas id="chart-${sid}" style="max-height:230px;"></canvas>
+    </div>
+
+    <!-- MODULES AVANCÉS -->
+    <div class="analysis-section" style="margin-top:14px; background:rgba(255,255,255,0.007);">
+      <div class="analysis-title">✨ Modules Avancés</div>
+      ${aiBlock}
+    </div>
+
+  </div>`;
+}
+
+/* =================================================================
+   MISE À JOUR IN-PLACE — zéro reconstruction DOM
+   ================================================================= */
+function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
+  const sid    = site.id;
+  const cfg    = getSiteConfig(sid);           // ← tarifs et seuils depuis la DB
+  const period = activePeriod[sid] || 'today';
+  const filt   = filterByPeriod(telemetry, period);
+  const kpis   = computeKPIs(filt, cfg);       // ← cfg transmis
+
+  /* ── Status badge ─────────────────────────────────────── */
+  const { text: stText, cls: stCls } = resolveStatus(filt[0] || telemetry[0] || null);
+  const badge = document.getElementById(`status-badge-${sid}`);
+  if (badge) { badge.textContent = stText; badge.className = `status-badge ${stCls}`; }
+
+  /* ── Disponibilité ────────────────────────────────────── */
+  const online = sensors.filter(s => !isOffline(s)).length;
+  const total  = sensors.length;
+  const pct    = total > 0 ? Math.round((online / total) * 100) : 0;
+  const hc     = hColor(pct);
+  setText(`sensor-count-${sid}`, `${online}/${total}`);
+  setText(`health-pct-${sid}`,   `${pct}%`);
+  setStyle(`health-pct-${sid}`,  'color', hc);
+  const fill = document.getElementById(`health-fill-${sid}`);
+  if (fill) { fill.style.width = `${pct}%`; fill.style.background = hc; }
+
+  /* ── KPI puissance ────────────────────────────────────── */
+  setText(`kpi-power-${sid}`,   `${Math.round(kpis.latestP)} W`);
+  setText(`kpi-source-${sid}`,  `Source : ${kpis.latestSource || '—'}`);
+
+  /* ── KPI énergie ──────────────────────────────────────── */
+  setText(`kpi-energy-${sid}`,     fmtEnergy(kpis.totalKwh));
+  const gPct = kpis.totalKwh > 0 ? Math.round((kpis.kwhGroupe/kpis.totalKwh)*100) : 0;
+  setText(`kpi-energy-sub-${sid}`, `${gPct}% groupe`);
+
+  /* ── KPI alertes + coupures ───────────────────────────── */
+  const localAlerts = generateLocalAlerts(sensors, kpis, cfg); // ← cfg transmis
+  const allAlerts   = [...localAlerts, ...dbAlerts];
+  setText(`kpi-alerts-${sid}`,  allAlerts.length);
+  setText(`kpi-outages-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
+
+  /* ── Coût total ───────────────────────────────────────── */
+  setText(`kpi-cost-total-${sid}`, `${fmtFcfa(kpis.costTotal)} F`);
+
+  /* ── Top appareil ─────────────────────────────────────── */
+  setText(`kpi-top-name-${sid}`,  kpis.topSensorName);
+  setText(`kpi-top-power-${sid}`, `${kpis.topSensorPower} W`);
+
+  /* ── Coûts SBEE / Groupe ──────────────────────────────── */
+  setText(`kwh-sbee-${sid}`,    `${kpis.kwhSbee.toFixed(2)} kWh`);
+  setText(`cost-sbee-${sid}`,   `${fmtFcfa(kpis.costSbee)} F`);
+  setText(`kwh-groupe-${sid}`,  `${kpis.kwhGroupe.toFixed(2)} kWh`);
+  setText(`cost-groupe-${sid}`, `${fmtFcfa(kpis.costGroupe)} F`);
+
+  /* ── Labels tarifs dynamiques (depuis DB, pas des constantes) ── */
+  setText(`tarif-sbee-lbl-${sid}`,   `à ${cfg.tarifSbee} FCFA/kWh`);
+  setText(`tarif-groupe-lbl-${sid}`, `à ${cfg.tarifGroupe} FCFA/kWh`);
+
+  /* ── Barre répartition ────────────────────────────────── */
+  const pSbee = kpis.totalKwh > 0 ? Math.round((kpis.kwhSbee/kpis.totalKwh)*100) : 50;
+  const pGrp  = 100 - pSbee;
+  const bSbee = document.getElementById(`split-sbee-${sid}`);
+  const bGrp  = document.getElementById(`split-grp-${sid}`);
+  if (bSbee) bSbee.style.width = `${pSbee}%`;
+  if (bGrp)  bGrp.style.width  = `${pGrp}%`;
+  setText(`split-lbl-sbee-${sid}`, `SBEE ${pSbee}%`);
+  setText(`split-lbl-grp-${sid}`,  `Groupe ${pGrp}%`);
+
+  /* ── ROI ──────────────────────────────────────────────── */
+  setText(`roi-val-${sid}`,  `${fmtFcfa(kpis.economyPossible)} F`);
+  setText(`roi-desc-${sid}`,
+    kpis.economyPossible > 0
+      ? `Si le groupe était éteint la nuit, vous économiseriez ~${fmtFcfa(kpis.economyPossible)} FCFA sur la période.`
+      : `Aucune surconsommation groupe détectée. Bonne gestion !`
+  );
+
+  /* ── Indicateurs électriques ──────────────────────────── */
+  setText(`elec-v-${sid}`,  fmtV(kpis.latestV));
+  setText(`elec-i-${sid}`,  fmtA(kpis.latestI));
+  setText(`elec-pf-${sid}`, fmtPF(kpis.latestPF));
+  setText(`elec-hz-${sid}`, fmtHz(kpis.latestFreq));
+
+  /* Couleur tension selon seuils DB (cfg.vLow / cfg.vHigh) */
+  const vEl = document.getElementById(`elec-v-${sid}`);
+  if (vEl) {
+    if      (!kpis.latestV || kpis.latestV < DEFAULT_V_OUTAGE) vEl.style.color = 'var(--accent-red)';
+    else if  (kpis.latestV < cfg.vLow)                         vEl.style.color = 'var(--accent-amber)';
+    else if  (kpis.latestV > cfg.vHigh)                        vEl.style.color = 'var(--accent-red)';
+    else                                                        vEl.style.color = 'var(--accent-green)';
+  }
+  const pfEl = document.getElementById(`elec-pf-${sid}`);
+  if (pfEl && kpis.latestPF !== null) {
+    pfEl.style.color = kpis.latestPF < 0.85
+      ? 'var(--accent-amber)' : 'var(--text-primary)';
+  }
+
+  /* ── Réseau / coupures ────────────────────────────────── */
+  setText(`last-emit-${sid}`, kpis.lastTransmitTime);
+  setText(`last-cut-${sid}`,  kpis.lastPowerCutTime);
+  setText(`outage-dur-${sid}`, fmtMin(kpis.outageTotalMin));
+  setText(`outage-cnt-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
+
+  /* ── Breakdown par appareil (coûts calculés avec tarifs DB) ── */
+  const brkEl = document.getElementById(`breakdown-${sid}`);
+  if (brkEl) {
+    const entries = Object.entries(kpis.consumptionBySensor)
+      .sort((a,b) => b[1].kwh - a[1].kwh)
+      .slice(0, 5);
+
+    brkEl.innerHTML = entries.length === 0
+      ? `<div style="font-size:12px; color:var(--text-muted); padding:8px 0;">Aucune donnée disponible.</div>`
+      : entries.map(([name, d]) => {
+          /* ← tarifs DB, plus TARIF_SBEE/TARIF_GROUPE hardcodés */
+          const cost = Math.round(d.kwhSbee * cfg.tarifSbee + d.kwhGroupe * cfg.tarifGroupe);
+          const pct  = kpis.totalKwh > 0 ? Math.round((d.kwh / kpis.totalKwh) * 100) : 0;
+          return `<div class="data-row">
+            <div style="flex:1; min-width:0;">
+              <div style="font-size:12px; font-weight:600; margin-bottom:4px;">
+                📡 ${name} <span style="color:var(--text-muted); font-weight:400;">${pct}%</span>
+              </div>
+              <div style="height:3px; background:var(--bg-deep); border-radius:2px; overflow:hidden;">
+                <div style="width:${Math.max(2,pct)}%; height:100%; background:var(--accent-green); border-radius:2px;"></div>
+              </div>
+            </div>
+            <div style="text-align:right; margin-left:12px; flex-shrink:0;">
+              <div style="font-size:12px; font-weight:700;">${fmtFcfa(cost)} F</div>
+              <div style="font-size:10px; color:var(--text-muted);">${fmtEnergy(d.kwh)}</div>
+            </div>
+          </div>`;
+        }).join('');
+  }
+
+  /* ── Alertes (sévérité + bouton Acquitter) ────────────── */
+  const alertsEl = document.getElementById(`alerts-list-${sid}`);
+  if (alertsEl) {
+    if (allAlerts.length === 0) {
+      alertsEl.innerHTML = `
+        <div data-no-issue style="display:flex; align-items:center; gap:8px; font-size:12px; color:var(--accent-green); padding:6px 0;">
+          ✔ Aucun dysfonctionnement détecté
+        </div>`;
+    } else {
+      alertsEl.innerHTML = allAlerts.map(a => {
+        const sev    = a.severity || 'warning';
+        const sevCls = sev === 'critical' ? 'sev-critical' : sev === 'info' ? 'sev-info' : 'sev-warning';
+        const lbl    = a.sensors?.name || 'Général';
+        const ack    = a.synthetic ? '' :
+          `<button class="ack-btn" onclick="acknowledgeAlert('${a.id}','${sid}')">✓ Lu</button>`;
+        return `<div class="alert-item" id="alert-item-${a.id}">
+          <span class="alert-sev ${sevCls}">${sev}</span>
+          <div class="alert-body">
+            <div class="alert-device">${lbl}</div>
+            <div class="alert-desc">${a.description || 'Seuil dépassé'}</div>
+          </div>
+          ${ack}
+        </div>`;
+      }).join('');
+    }
+  }
+
+  /* ── Statut IoT — last_seen mis à jour en temps réel ─── */
+  const iotGrid = document.getElementById(`iot-grid-${sid}`);
+  if (iotGrid) {
+    iotGrid.innerHTML = sensors.slice(0, 4).map(s => {
+      const off  = isOffline(s);
+      const seen = s.last_seen
+        ? new Date(s.last_seen).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' })
+        : '—';
+      return `<div class="iot-box" id="iot-box-${s.id}">
+        <div class="iot-label">${s.name || s.id}</div>
+        <div class="iot-status" style="color:${off ? 'var(--accent-red)' : 'var(--accent-green)'};">
+          ${off ? '⚠ OFFLINE' : '● ONLINE'}
+        </div>
+        <div class="iot-meta">${s.firmware_v ? `v${s.firmware_v}` : '—'} · ${seen}</div>
+      </div>`;
+    }).join('');
+  }
+
+  /* ── IA ───────────────────────────────────────────────── */
+  if (aiEnabled) {
+    const aiEl = document.getElementById(`ai-msg-${sid}`);
+    if (aiEl) {
+      aiEl.textContent = gPct > 30
+        ? `L'appareil "${kpis.topSensorName}" représente ${gPct}% de consommation groupe — potentiel d'économie : ${fmtFcfa(kpis.economyPossible)} FCFA.`
+        : `Consommation équilibrée. Facteur de puissance : ${fmtPF(kpis.latestPF)} (optimal > 0.9).`;
+    }
+  }
+
+  /* ── Graphique (in-place, pas de destroy) ─────────────── */
+  updateChart(sid);
+}
+
+/* =================================================================
+   CHART.JS — JAMAIS destroy(), toujours .update()
+   ================================================================= */
+function updateChart(siteId) {
+  const allTel = cachedData[siteId]?.telemetry || [];
+  const ctx    = document.getElementById(`chart-${siteId}`);
+  if (!ctx) return;
+
+  const period   = activePeriod[siteId] || 'today';
+  const sensorId = activeSensor[siteId] || 'ALL';
+
+  let data = filterByPeriod(allTel, period);
+  if (sensorId !== 'ALL') data = data.filter(t => t.sensor_id === sensorId);
+
+  const chrono = [...data].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+
+  /* Decimation automatique si trop de points */
+  let pts = chrono;
+  if (chrono.length > CHART_POINTS * 3) {
+    const step = Math.floor(chrono.length / CHART_POINTS);
+    pts = chrono.filter((_,i) => i % step === 0).slice(-CHART_POINTS);
+  } else {
+    pts = chrono.slice(-CHART_POINTS);
+  }
+
+  const labels    = pts.map(t => new Date(t.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }));
+  const powerData = pts.map(t => t.power_w   || 0);
+  const voltData  = pts.map(t => t.voltage   || 0);
+
+  if (charts[siteId]) {
+    /* ✅ Mise à jour in-place — aucun flash, aucune perte */
+    const c = charts[siteId];
+    c.data.labels             = labels;
+    c.data.datasets[0].data   = powerData;
+    c.data.datasets[1].data   = voltData;
+    c.data.datasets[0].label  = sensorId === 'ALL' ? 'Puissance totale (W)' : 'Puissance appareil (W)';
+    c.update('none');
+  } else {
+    /* Premier rendu */
+    charts[siteId] = new Chart(ctx, {
+      type: 'line',
+      data: {
+        labels,
+        datasets: [
+          {
+            label: 'Puissance totale (W)',
+            data: powerData,
+            borderColor: 'rgba(0,212,160,0.85)',
+            backgroundColor: 'rgba(0,212,160,0.05)',
+            fill: true, tension: 0.38,
+            pointRadius: 2, pointHoverRadius: 5,
+            yAxisID: 'yP',
+          },
+          {
+            label: 'Tension (V)',
+            data: voltData,
+            borderColor: 'rgba(59,130,246,0.65)',
+            backgroundColor: 'transparent',
+            fill: false, tension: 0.38,
+            pointRadius: 1, pointHoverRadius: 4,
+            borderDash: [4,3],
+            yAxisID: 'yV',
+          }
+        ]
+      },
+      options: {
+        responsive: true,
+        interaction: { mode: 'index', intersect: false },
+        animation: { duration: 320 },
+        plugins: {
+          legend: {
+            labels: { color: '#7a8fac', font: { family: 'DM Sans', size: 11 }, boxWidth: 12 }
+          },
+          tooltip: {
+            backgroundColor: '#0f1829',
+            titleColor: '#e8f0fe',
+            bodyColor: '#7a8fac',
+            borderColor: 'rgba(255,255,255,0.04)',
+            borderWidth: 1,
+          }
+        },
+        scales: {
+          yP: {
+            type: 'linear', position: 'left',
+            ticks: { color: '#7a8fac', font: { size: 10 } },
+            grid: { color: 'rgba(255,255,255,0.025)' },
+          },
+          yV: {
+            type: 'linear', position: 'right',
+            ticks: { color: 'rgba(59,130,246,0.55)', font: { size: 10 } },
+            grid: { drawOnChartArea: false },
+            min: 0,
+          },
+          x: {
+            ticks: { color: '#7a8fac', font: { size: 10 }, maxRotation: 0 },
+            grid: { color: 'rgba(255,255,255,0.018)' },
+          }
+        }
+      }
+    });
+  }
+}
+
+/* Handlers contrôles graphique */
+function onSensorChange(siteId) {
+  const el = document.getElementById(`sel-sensor-${siteId}`);
+  if (el) activeSensor[siteId] = el.value;
+  updateChart(siteId);
+}
+function setPeriod(siteId, period, btn) {
+  activePeriod[siteId] = period;
+  /* Mise à jour boutons */
+  const wrap = document.getElementById(`period-btns-${siteId}`);
+  if (wrap) wrap.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  /* Recalcul complet avec nouvelle période */
+  const c = cachedData[siteId];
+  if (c) updateSiteCard(c.site, c.sensors, c.telemetry, c.alerts, c.aiEnabled);
+}
+
+/* =================================================================
+   ACQUITTEMENT ALERTE
+   ================================================================= */
+async function acknowledgeAlert(alertId, siteId) {
+  const itemEl = document.getElementById(`alert-item-${alertId}`);
+  if (itemEl) { itemEl.style.opacity = '0.35'; itemEl.style.pointerEvents = 'none'; }
+  try {
+    await supabaseClient
+      .from('alerts')
+      .update({ acknowledged: true, notified_at: new Date().toISOString() })
+      .eq('id', alertId);
+    setTimeout(() => { if (itemEl) itemEl.remove(); }, 500);
+  } catch (e) {
+    console.error('Erreur acquittement:', e);
+    if (itemEl) { itemEl.style.opacity = '1'; itemEl.style.pointerEvents = 'auto'; }
+  }
+}
+
+/* =================================================================
+   VITESSE 1 — INSTANTANÉE
+   Reçoit payload.new directement depuis Supabase Realtime.
+   Zéro requête réseau. Mise à jour DOM < 16ms.
+   ================================================================= */
+
+/**
+ * Injecte une nouvelle ligne de télémétrie reçue en temps réel
+ * dans le cache du site concerné, puis rafraîchit les KPI instantanés.
+ * Aucune requête Supabase n'est effectuée.
+ */
+function applyRealtimeTelemetry(newRow) {
+  /* Identifier le site auquel appartient ce capteur */
+  const sid = sensorIndex[newRow.sensor_id];
+  if (!sid || !cachedData[sid] || !renderedSites.has(sid)) return;
+
+  const cache = cachedData[sid];
+
+  /* Enrichir la ligne avec le nom du capteur depuis le cache local */
+  const sensor = cache.sensors.find(s => s.id === newRow.sensor_id);
+  newRow.sensors = sensor ? { name: sensor.name } : { name: 'Général' };
+
+  /* Insérer en tête du tableau (ordre DESC comme Supabase) */
+  cache.telemetry.unshift(newRow);
+
+  /* Garder le cache sous la limite pour éviter la croissance infinie */
+  if (cache.telemetry.length > TELEMETRY_LIMIT) {
+    cache.telemetry.length = TELEMETRY_LIMIT;
+  }
+
+  /* Mise à jour immédiate des KPI instantanés uniquement (pas de resync lourde) */
+  applyInstantKPIs(sid, newRow, cache);
+}
+
+/**
+ * Met à jour uniquement les métriques instantanées sans recalculer
+ * l'historique complet (coûts cumulés, coupures, breakdown…).
+ * Appelée à chaque nouvelle ligne Realtime — doit être < 5ms.
+ */
+function applyInstantKPIs(sid, row, cache) {
+  /* ── Status badge ── */
+  const { text, cls } = resolveStatus(row);
+  const badge = document.getElementById(`status-badge-${sid}`);
+  if (badge) { badge.textContent = text; badge.className = `status-badge ${cls}`; }
+
+  /* ── Puissance instantanée ── */
+  setText(`kpi-power-${sid}`,  `${Math.round(row.power_w || 0)} W`);
+  setText(`kpi-source-${sid}`, `Source : ${row.source || '—'}`);
+
+  /* ── Indicateurs électriques ── */
+  setText(`elec-v-${sid}`,  fmtV(row.voltage));
+  setText(`elec-i-${sid}`,  fmtA(row.current_a));
+  setText(`elec-pf-${sid}`, fmtPF(row.power_factor));
+  setText(`elec-hz-${sid}`, fmtHz(row.frequency_hz));
+
+  const vEl = document.getElementById(`elec-v-${sid}`);
+  if (vEl) {
+    const cfg = getSiteConfig(sid);
+    if      (!row.voltage || row.voltage < DEFAULT_V_OUTAGE) vEl.style.color = 'var(--accent-red)';
+    else if  (row.voltage < cfg.vLow)                        vEl.style.color = 'var(--accent-amber)';
+    else if  (row.voltage > cfg.vHigh)                       vEl.style.color = 'var(--accent-red)';
+    else                                                     vEl.style.color = 'var(--accent-green)';
+  }
+  const pfEl = document.getElementById(`elec-pf-${sid}`);
+  if (pfEl && row.power_factor != null) {
+    pfEl.style.color = row.power_factor < 0.85
+      ? 'var(--accent-amber)' : 'var(--text-primary)';
+  }
+
+  /* ── Dernière émission IoT ── */
+  setText(`last-emit-${sid}`,
+    new Date(row.created_at || Date.now()).toLocaleTimeString('fr-FR', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+  );
+
+  /* ── Alerte coupure SBEE instantanée ── */
+  if (row.voltage < DEFAULT_V_OUTAGE) {
+    setText(`last-cut-${sid}`,
+      new Date(row.created_at || Date.now()).toLocaleTimeString('fr-FR', {
+        hour: '2-digit', minute: '2-digit'
+      })
+    );
+  }
+
+  /* ── Graphique : ajout du point en temps réel ── */
+  const chart = charts[sid];
+  if (chart) {
+    const sensorFilter = activeSensor[sid] || 'ALL';
+    if (sensorFilter === 'ALL' || sensorFilter === row.sensor_id) {
+      const label = new Date(row.created_at || Date.now())
+        .toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+      chart.data.labels.push(label);
+      chart.data.datasets[0].data.push(row.power_w || 0);
+      chart.data.datasets[1].data.push(row.voltage || 0);
+      /* Garder seulement CHART_POINTS points visibles */
+      if (chart.data.labels.length > CHART_POINTS) {
+        chart.data.labels.shift();
+        chart.data.datasets[0].data.shift();
+        chart.data.datasets[1].data.shift();
+      }
+      chart.update('none'); // animation désactivée pour fluidité max
+    }
+  }
+
+  /* ── last_seen du capteur — mis à jour en cache ET dans le DOM ── */
+  const sid2 = sensorIndex[row.sensor_id];
+  if (sid2 && cachedData[sid2]) {
+    const sensorInCache = cachedData[sid2].sensors.find(s => s.id === row.sensor_id);
+    if (sensorInCache) {
+      sensorInCache.last_seen = row.created_at || new Date().toISOString();
+      /* Mise à jour de la tuile IoT correspondante sans reconstruire la grille entière */
+      const iotBox = document.getElementById(`iot-box-${row.sensor_id}`);
+      if (iotBox) {
+        const seen = new Date(sensorInCache.last_seen).toLocaleTimeString('fr-FR', {
+          hour: '2-digit', minute: '2-digit'
+        });
+        const statusEl = iotBox.querySelector('.iot-status');
+        const metaEl   = iotBox.querySelector('.iot-meta');
+        if (statusEl) { statusEl.textContent = '● ONLINE'; statusEl.style.color = 'var(--accent-green)'; }
+        if (metaEl)   { metaEl.textContent = `${sensorInCache.firmware_v ? 'v' + sensorInCache.firmware_v : '—'} · ${seen}`; }
+      }
+    }
+  }
+
+  /* ── Timestamp MAJ ── */
+  setText('lastRefreshTime',
+    new Date().toLocaleTimeString('fr-FR', {
+      hour: '2-digit', minute: '2-digit', second: '2-digit'
+    })
+  );
+}
+
+/**
+ * Traite une nouvelle alerte reçue en Realtime.
+ * Insère l'item dans le DOM sans reconstruire la liste entière.
+ */
+function applyRealtimeAlert(newAlert) {
+  const sid = sensorIndex[newAlert.sensor_id];
+  if (!sid || !renderedSites.has(sid)) return;
+
+  /* Ajouter au cache local */
+  if (cachedData[sid]) {
+    const exists = cachedData[sid].alerts.some(a => a.id === newAlert.id);
+    if (!exists) cachedData[sid].alerts.unshift(newAlert);
+  }
+
+  /* Chercher le nom du capteur depuis le cache */
+  const sensor = cachedData[sid]?.sensors.find(s => s.id === newAlert.sensor_id);
+  newAlert.sensors = sensor ? { name: sensor.name } : { name: 'Général' };
+
+  const alertsEl = document.getElementById(`alerts-list-${sid}`);
+  if (!alertsEl) return;
+
+  /* Retirer le message "aucun dysfonctionnement" s'il est présent */
+  const noIssue = alertsEl.querySelector('[data-no-issue]');
+  if (noIssue) noIssue.remove();
+
+  /* Ne pas dupliquer si l'item existe déjà dans le DOM */
+  if (document.getElementById(`alert-item-${newAlert.id}`)) return;
+
+  const sev    = newAlert.severity || 'warning';
+  const sevCls = sev === 'critical' ? 'sev-critical' : sev === 'info' ? 'sev-info' : 'sev-warning';
+  const lbl    = newAlert.sensors?.name || 'Général';
+  const ack    = `<button class="ack-btn" onclick="acknowledgeAlert('${newAlert.id}','${sid}')">✓ Lu</button>`;
+
+  const item = document.createElement('div');
+  item.className = 'alert-item';
+  item.id = `alert-item-${newAlert.id}`;
+  item.innerHTML = `
+    <span class="alert-sev ${sevCls}">${sev}</span>
+    <div class="alert-body">
+      <div class="alert-device">${lbl}</div>
+      <div class="alert-desc">${newAlert.description || 'Seuil dépassé'}</div>
+    </div>
+    ${ack}`;
+
+  /* Insérer en haut de la liste */
+  alertsEl.insertAdjacentElement('afterbegin', item);
+
+  /* Incrémenter le badge KPI alertes */
+  const kpiAl = document.getElementById(`kpi-alerts-${sid}`);
+  if (kpiAl) {
+    const current = parseInt(kpiAl.textContent) || 0;
+    kpiAl.textContent = current + 1;
+  }
+}
+
+/* =================================================================
+   VITESSE 2 — RESYNC COMPLÈTE (toutes les 60s)
+   Recharge l'historique, les coûts cumulés, coupures, breakdown.
+   ================================================================= */
+async function loadDashboard() {
+  const user = await getUser();
+  if (!user) return;
+
+  /* Récupérer les deux colonnes de tarif (tariff_sbee + tariff_groupe) */
+  const { data: userSettings } = await supabaseClient
+    .from('settings')
+    .select('tariff_sbee, tariff_groupe')
+    .eq('user_id', user.id)
+    .single();
+
+  const { data: sites, error } = await supabaseClient
+    .from('sites').select('*').eq('user_id', user.id);
+  if (error || !sites) { console.error(error); return; }
+
+  const filteredSites = canAccessMultiSite ? sites : sites.slice(0, 1);
+  const container     = document.getElementById('sitesContainer');
+  const aiEnabled     = await hasFeature('ai');
+
+  /* Cas liste vide */
+  if (filteredSites.length === 0) {
+    if (!renderedSites.has('__empty__')) {
+      container.insertAdjacentHTML('beforeend', `
+        <div class="site-card" id="card-__empty__">
+          <h2>Aucun site enregistré</h2>
+          <p style="margin-top:16px; color:var(--text-secondary); font-size:13px;">
+            Ajoutez un site depuis le menu Paramètres pour commencer le suivi.
+          </p>
+        </div>`);
+      renderedSites.add('__empty__');
+    }
+    return;
+  }
+
+  /* Nettoyage cartes orphelines (sites supprimés) */
+  renderedSites.forEach(existingSid => {
+    if (existingSid === '__empty__') return;
+    if (!filteredSites.some(s => s.id === existingSid)) {
+      const card = document.getElementById(`card-${existingSid}`);
+      if (card) card.remove();
+      renderedSites.delete(existingSid);
+      delete cachedData[existingSid];
+      if (charts[existingSid]) { charts[existingSid].destroy(); delete charts[existingSid]; }
+    }
+  });
+
+  /* Boucle sites */
+  for (const site of filteredSites) {
+    const sid = site.id;
+
+    /* ── Résolution config par site ──────────────────────────
+       Priorité : site.config (par site) > userSettings (global)
+       Fallback : constantes DEFAULT_*
+    ────────────────────────────────────────────────────────── */
+    buildSiteConfig(sid, userSettings, site);
+
+    /* Capteurs */
+    const { data: rawSensors } = await supabaseClient
+      .from('sensors').select('*').eq('site_id', sid);
+    let sensors = rawSensors || [];
+    if (!canAccessMultiSensor && sensors.length > 1) sensors = sensors.slice(0, 1);
+    const sensorIds = sensors.map(s => s.id);
+
+    /* Construire l'index sensor_id → siteId pour le Realtime instantané */
+    sensorIds.forEach(id => { sensorIndex[id] = sid; });
+
+    /* Télémétrie — LIMIT obligatoire */
+    let telemetry = [];
+    if (sensorIds.length > 0) {
+      const { data } = await supabaseClient
+        .from('telemetry')
+        .select('*, sensors(name)')
+        .in('sensor_id', sensorIds)
+        .order('created_at', { ascending: false })
+        .limit(TELEMETRY_LIMIT);
+      telemetry = data || [];
+    }
+
+    /* Alertes DB (non acquittées) */
+    let dbAlerts = [];
+    if (sensorIds.length > 0) {
+      const { data } = await supabaseClient
+        .from('alerts')
+        .select('*, sensors(name)')
+        .in('sensor_id', sensorIds)
+        .eq('status', 'ACTIVE')
+        .eq('acknowledged', false);
+      dbAlerts = data || [];
+    }
+
+    /* Mise en cache */
+    cachedData[sid] = { site, sensors, telemetry, alerts: dbAlerts, aiEnabled };
+
+    /* ── DÉCISION : 1er rendu vs mise à jour in-place ── */
+    if (!renderedSites.has(sid)) {
+      if (telemetry.length === 0) {
+        container.insertAdjacentHTML('beforeend', `
+          <div class="site-card" id="card-${sid}">
+            <h2>🏢 ${site.name}</h2>
+            <p style="margin-top:16px; color:var(--text-secondary); font-size:13px;">
+              Aucune donnée disponible pour ce site.
+            </p>
+          </div>`);
+      } else {
+        container.insertAdjacentHTML('beforeend', buildSiteCardHTML(site, sensors, aiEnabled));
+      }
+      renderedSites.add(sid);
+      activePeriod[sid] = 'today';
+      activeSensor[sid] = 'ALL';
+      if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
+
+    } else {
+      /* Resync complète in-place — historique, coûts, coupures */
+      if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
+    }
+  }
+
+  /* Timestamp MAJ */
+  setText('lastRefreshTime',
+    new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
+  );
+}
+
+/* Planifie la prochaine resync complète */
+function scheduleFullSync() {
+  clearTimeout(syncFullTimer);
+  syncFullTimer = setTimeout(() => {
+    loadDashboard().finally(scheduleFullSync); // boucle auto toutes les 60s
+  }, SYNC_FULL_MS);
+}
+
+/* =================================================================
+   REALTIME SUPABASE — deux canaux distincts
+   Canal 1 : telemetry INSERT → applyRealtimeTelemetry (instantané)
+   Canal 2 : alerts INSERT/UPDATE → applyRealtimeAlert (instantané)
+   ================================================================= */
+function startRealtime() {
+  /* Canal télémétrie — vitesse maximale, payload.new utilisé directement */
+  supabaseClient
+    .channel('et-telemetry-live')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'telemetry' },
+      (payload) => {
+        if (payload.new) applyRealtimeTelemetry(payload.new);
+      }
+    )
+    .subscribe((status) => {
+      if (status === 'SUBSCRIBED') {
+        console.log('[Realtime] Canal télémétrie abonné ✓');
+      }
+    });
+
+  /* Canal alertes — debounce court pour éviter les rafales */
+  supabaseClient
+    .channel('et-alerts-live')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'alerts' },
+      (payload) => {
+        if (payload.new) {
+          clearTimeout(alertDebounceTimer);
+          alertDebounceTimer = setTimeout(
+            () => applyRealtimeAlert(payload.new),
+            DEBOUNCE_ALERT
+          );
+        }
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'alerts' },
+      () => {
+        /* Un acquittement externe → resync alertes légère */
+        clearTimeout(alertDebounceTimer);
+        alertDebounceTimer = setTimeout(loadDashboard, DEBOUNCE_ALERT);
+      }
+    )
+    .subscribe();
+}
+
+/* =================================================================
+   EXPORT PDF
+   ================================================================= */
+async function exportPDF(siteId) {
+  alert('Export PDF : fonctionnalité en cours de développement.');
+}
+
+/* =================================================================
+   INIT
+   ================================================================= */
+async function initDashboard() {
+  canAccessMultiSite   = await canUseMultiSite();
+  canAccessMultiSensor = await canUseMultiSensor();
+  if (!canAccessMultiSite && !canAccessMultiSensor) showFreeBanner();
+  await loadDashboard();  // chargement initial complet
+  startRealtime();         // abonnements Realtime instantanés
+  scheduleFullSync();      // resync historique toutes les 60s
+}
+</script>
+
+<script src="js/feature-access.js"></script>
+<script>initDashboard();</script>
+
+</body>
+</html>
