@@ -733,10 +733,10 @@ function computeKPIs(telemetry, cfg) {
 
   const latest = telemetry[0];
   r.latestV      = latest.voltage;
-  r.latestI      = latest.current_a;
+  r.latestI      = latest.current;
   r.latestP      = latest.power_w || 0;
-  r.latestPF     = latest.power_factor;
-  r.latestFreq   = latest.frequency_hz;
+  r.latestPF     = latest.pf;
+  r.latestFreq   = latest.freq;
   r.latestSource = latest.source;
   r.lastTransmitTime = new Date(latest.created_at).toLocaleTimeString('fr-FR', {
     hour: '2-digit', minute: '2-digit', second: '2-digit'
@@ -1514,9 +1514,9 @@ function applyInstantKPIs(sid, row, cache) {
 
   /* ── Indicateurs électriques ── */
   setText(`elec-v-${sid}`,  fmtV(row.voltage));
-  setText(`elec-i-${sid}`,  fmtA(row.current_a));
-  setText(`elec-pf-${sid}`, fmtPF(row.power_factor));
-  setText(`elec-hz-${sid}`, fmtHz(row.frequency_hz));
+  setText(`elec-i-${sid}`,  fmtA(row.current));
+  setText(`elec-pf-${sid}`, fmtPF(row.pf));
+  setText(`elec-hz-${sid}`, fmtHz(row.freq));
 
   const vEl = document.getElementById(`elec-v-${sid}`);
   if (vEl) {
@@ -1527,8 +1527,8 @@ function applyInstantKPIs(sid, row, cache) {
     else                                                     vEl.style.color = 'var(--accent-green)';
   }
   const pfEl = document.getElementById(`elec-pf-${sid}`);
-  if (pfEl && row.power_factor != null) {
-    pfEl.style.color = row.power_factor < 0.85
+  if (pfEl && row.pf != null) {
+    pfEl.style.color = row.pf < 0.85
       ? 'var(--accent-amber)' : 'var(--text-primary)';
   }
 
@@ -1732,20 +1732,7 @@ async function loadDashboard() {
         .limit(TELEMETRY_LIMIT);
       telemetry = data || [];
     }
-console.log(
-'SITE',
-site.id
-);
 
-console.log(
-'SENSORS',
-sensorIds
-);
-
-console.log(
-'TELEMETRY',
-telemetry
-);
     /* Alertes DB (non acquittées) */
     let dbAlerts = [];
     if (sensorIds.length > 0) {
@@ -1753,8 +1740,9 @@ telemetry
         .from('alerts')
         .select('*, sensors(name)')
         .in('sensor_id', sensorIds)
-        .eq('status', 'ACTIVE')
-        .eq('acknowledged', false);
+        .eq('acknowledged', false)
+        .order('created_at', { ascending: false })
+        .limit(20);
       dbAlerts = data || [];
     }
 
@@ -1763,17 +1751,10 @@ telemetry
 
     /* ── DÉCISION : 1er rendu vs mise à jour in-place ── */
     if (!renderedSites.has(sid)) {
-      if (telemetry.length === 0) {
-        container.insertAdjacentHTML('beforeend', `
-          <div class="site-card" id="card-${sid}">
-            <h2>🏢 ${site.name}</h2>
-            <p style="margin-top:16px; color:var(--text-secondary); font-size:13px;">
-              Aucune donnée disponible pour ce site.
-            </p>
-          </div>`);
-      } else {
-        container.insertAdjacentHTML('beforeend', buildSiteCardHTML(site, sensors, aiEnabled));
-      }
+      /* Toujours construire la carte complète même sans données :
+         les éléments DOM doivent exister pour que le Realtime
+         puisse les mettre à jour dès le premier INSERT. */
+      container.insertAdjacentHTML('beforeend', buildSiteCardHTML(site, sensors, aiEnabled));
       renderedSites.add(sid);
       activePeriod[sid] = 'today';
       activeSensor[sid] = 'ALL';
