@@ -1474,27 +1474,29 @@ async function acknowledgeAlert(alertId, siteId) {
  * dans le cache du site concerné, puis rafraîchit les KPI instantanés.
  * Aucune requête Supabase n'est effectuée.
  */
+// Ajouter cette variable en haut avec les autres variables globales
+let lastFullUpdate = {};
+
 function applyRealtimeTelemetry(newRow) {
-  /* Identifier le site auquel appartient ce capteur */
   const sid = sensorIndex[newRow.sensor_id];
   if (!sid || !cachedData[sid] || !renderedSites.has(sid)) return;
 
   const cache = cachedData[sid];
-
-  /* Enrichir la ligne avec le nom du capteur depuis le cache local */
   const sensor = cache.sensors.find(s => s.id === newRow.sensor_id);
   newRow.sensors = sensor ? { name: sensor.name } : { name: 'Général' };
 
-  /* Insérer en tête du tableau (ordre DESC comme Supabase) */
   cache.telemetry.unshift(newRow);
+  if (cache.telemetry.length > TELEMETRY_LIMIT) cache.telemetry.length = TELEMETRY_LIMIT;
 
-  /* Garder le cache sous la limite pour éviter la croissance infinie */
-  if (cache.telemetry.length > TELEMETRY_LIMIT) {
-    cache.telemetry.length = TELEMETRY_LIMIT;
-  }
-
-  /* Mise à jour immédiate des KPI instantanés uniquement (pas de resync lourde) */
+  // Mise à jour instantanée (puissance, tension, courant)
   applyInstantKPIs(sid, newRow, cache);
+
+  // Recalcul des agrégats toutes les 10s (énergie, coûts, SBEE/groupe)
+  const now = Date.now();
+  if (!lastFullUpdate[sid] || now - lastFullUpdate[sid] > 10000) {
+    lastFullUpdate[sid] = now;
+    updateSiteCard(cache.site, cache.sensors, cache.telemetry, cache.alerts, cache.aiEnabled);
+  }
 }
 
 /**
