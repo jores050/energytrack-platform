@@ -1732,7 +1732,20 @@ async function loadDashboard() {
         .limit(TELEMETRY_LIMIT);
       telemetry = data || [];
     }
+console.log(
+'SITE',
+site.id
+);
 
+console.log(
+'SENSORS',
+sensorIds
+);
+
+console.log(
+'TELEMETRY',
+telemetry
+);
     /* Alertes DB (non acquittées) */
     let dbAlerts = [];
     if (sensorIds.length > 0) {
