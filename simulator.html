@@ -137,7 +137,7 @@ let simulation  = false;
 let interval    = null;
 let progressInt = null;
 let scenario    = 'normal';
-let kwhCumul    = 0;
+let kwhCumul = 45 + Math.random() * 30; // Démarre à 45–75 kWh (comme un vrai compteur mensuel);
 let cntSent     = 0;
 let cntErr      = 0;
 const INTERVAL_MS = 5000;
@@ -249,7 +249,7 @@ async function buildAndInsert() {
   const freq    = parseFloat(vals.freq.toFixed(2));
 
   /* kWh différentiel sur la durée de l'intervalle */
-  const kwhDelta = parseFloat((power * (INTERVAL_MS / 1000) / 3_600_000).toFixed(6));
+  const kwhDelta = parseFloat((power * 60 / 3_600_000).toFixed(6)); // simule 1 minute
   kwhCumul += kwhDelta;
   const kwhTotal = parseFloat(kwhCumul.toFixed(6));
 
