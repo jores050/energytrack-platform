@@ -1,968 +1,173 @@
-<!DOCTYPE html>
-<html lang="fr">
-
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-
-<title>EnergyTrack Simulator</title>
-
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Orbitron:wght@500;700&display=swap"
-rel="stylesheet">
-
-<style>
-
-body{
-background:#0b1220;
-font-family:Poppins;
-color:white;
-padding:50px;
-}
-
-.card{
-background:#182235;
-padding:35px;
-border-radius:28px;
-max-width:900px;
-margin:auto;
-}
-
-.grid{
-display:grid;
-grid-template-columns:
-repeat(
-auto-fit,
-minmax(
-180px,
-1fr
-)
-);
-
-gap:20px;
-margin-top:25px;
-}
-
-.metric{
-background:#101826;
-padding:20px;
-border-radius:18px;
-}
-
-.metric-value{
-font-size:40px;
-font-family:Orbitron;
-color:#00c896;
-margin-top:10px;
-}
-
-select{
-
-width:100%;
-padding:15px;
-background:#101826;
-border:none;
-border-radius:12px;
-color:white;
-margin-top:15px;
-
-}
-
-button{
-
-padding:15px 24px;
-border:none;
-border-radius:14px;
-cursor:pointer;
-font-weight:700;
-margin-top:20px;
-
-}
-
-.start{
-
-background:#00c896;
-color:white;
-
-}
-
-.stop{
-
-background:#ff4c61;
-color:white;
-
-}
-
-.log{
-
-background:#101826;
-padding:20px;
-border-radius:20px;
-margin-top:30px;
-max-height:300px;
-overflow:auto;
-
-}
-
-</style>
-
-</head>
-
-<body>
-
-<div class="card">
-
-<h1>
-
-⚡ EnergyTrack Simulator
-
-</h1>
-
-
-
-<select
-id="siteSelector"
-onchange="loadSensors()">
-
-<option value="">
-Choisir site
-</option>
-
-</select>
-
-
-
-<select
-id="sensorSelector">
-
-<option value="">
-Choisir capteur
-</option>
-
-</select>
-
-
-
-
-<div class="grid">
-
-<div class="metric">
-
-Voltage
-
-<div
-id="voltage"
-class="metric-value">
-
-0V
-
-</div>
-
-</div>
-
-
-
-<div class="metric">
-
-Puissance
-
-<div
-id="power"
-class="metric-value">
-
-0W
-
-</div>
-
-</div>
-
-
-
-<div class="metric">
-
-Température
-
-<div
-id="temperature"
-class="metric-value">
-
-0°C
-
-</div>
-
-</div>
-
-
-
-<div class="metric">
-
-Source
-
-<div
-id="source"
-class="metric-value">
-
-SBEE
-
-</div>
-
-</div>
-
-</div>
-
-
-
-<button
-class="start"
-onclick="startSimulation()">
-
-▶ Démarrer
-
-</button>
-
-
-<button
-class="stop"
-onclick="stopSimulation()">
-
-⛔ Stop
-
-</button>
-
-
-
-<div
-id="log"
-class="log">
-
-Logs…
-
-</div>
-
-</div>
-
-
-
-<script>
-
-let simulation=false;
-
-let interval=null;
-
-let lastAlert={};
-
-
-
-async function getUser(){
-
-const {
-
-data:userData
-
-}
-
-=
-
-await supabaseClient
-
-.auth
-
-.getUser();
-
-
-if(
-
-!userData.user
-
-){
-
-location.href='auth.html';
-
-return null;
-
-}
-
-
-return userData.user;
-
-}
-
-
-
-function canTriggerAlert(type){
-
-const now=Date.now();
-
-if(
-
-!lastAlert[type]
-
-||
-
-now-lastAlert[type]
-
->60000
-
-){
-
-lastAlert[type]=now;
-
-return true;
-
-}
-
-return false;
-
-}
-
-
-
-async function loadSites(){
-
-const user=
-
-await getUser();
-
-if(!user)return;
-
-
-const {
-
-data:sites
-
-}
-
-=
-
-await supabaseClient
-
-.from(
-
-'sites'
-
-)
-
-.select('*')
-
-.eq(
-
-'user_id',
-
-user.id
-
-);
-
-
-
-const selector=
-
-document.getElementById(
-
-'siteSelector'
-
-);
-
-
-selector.innerHTML=
-
-'<option value="">Choisir site</option>';
-
-
-
-sites.forEach(
-
-site=>{
-
-selector.innerHTML +=
-
-`
-
-<option
-
-value="${site.id}"
-
->
-
-${site.name}
-
-</option>
-
-`;
-
-}
-
-);
-
-}
-
-
-
-async function loadSensors(){
-
-const site=
-
-document
-
-.getElementById(
-
-'siteSelector'
-
-)
-
-.value;
-
-
-
-const {
-
-data:sensors
-
-}
-
-=
-
-await supabaseClient
-
-.from(
-
-'sensors'
-
-)
-
-.select('*')
-
-.eq(
-
-'site_id',
-
-site
-
-);
-
-
-
-const selector=
-
-document
-
-.getElementById(
-
-'sensorSelector'
-
-);
-
-
-selector.innerHTML=
-
-'<option value="">Choisir capteur</option>';
-
-
-
-sensors.forEach(
-
-sensor=>{
-
-selector.innerHTML +=
-
-`
-
-<option
-
-value="${sensor.id}"
-
->
-
-${sensor.name}
-
-</option>
-
-`;
-
-}
-
-);
-
-}
-
-
-async function startSimulation(){
-
-if(simulation){
-
-console.log(
-
-'Simulation déjà active'
-
-);
-
-return;
-
-}
-
-
-const site =
-
-document
-
-.getElementById(
-
-'siteSelector'
-
-)
-
-.value;
-
-
-const sensor =
-
-document
-
-.getElementById(
-
-'sensorSelector'
-
-)
-
-.value;
-
-
-console.log(
-
-'SITE =',
-
-site
-
-);
-
-console.log(
-
-'SENSOR =',
-
-sensor
-
-);
-
-
-if(
-
-site === ''
-
-||
-
-sensor === ''
-
-){
-
-alert(
-
-'Sélectionnez un site ET un capteur'
-
-);
-
-return;
-
-}
-
-
-simulation=true;
-
-
-document
-
-.getElementById(
-
-'log'
-
-)
-
-.innerHTML=
-
-'▶ Simulation démarrée<br>';
-
-
-
-const {
-
-error:updateError
-
-}
-
-=
-
-await supabaseClient
-
-.from(
-
-'sensors'
-
-)
-
-.update({
-
-status:
-
-'ONLINE'
-
-})
-
-.eq(
-
-'id',
-
-sensor);
-
-
-console.log(
-
-'UPDATE SENSOR',
-
-updateError
-
-);
-
-
-interval = setInterval(
-
-async()=>{
-
+/*
+=========================
+VALEURS SIMULÉES RÉALISTES
+=========================
+*/
 
 const voltage =
+Math.floor(Math.random()*60)+190; //190-250V
 
-Math.floor(
+const current =
+(Number((Math.random()*20).toFixed(2))); //0-20A
 
-Math.random()*220
-
-)+40;
-
+const pf =
+Number((0.75 + Math.random()*0.25).toFixed(2)); //0.75-1
 
 const power =
+Math.round(
+voltage *
+current *
+pf
+); //W
 
-Math.floor(
+const ap =
+Math.round(
+(voltage*current)
+); //VA
 
-Math.random()*5000
+const freq =
+Number(
+(49 + Math.random()*2)
+.toFixed(2)
+); //49-51Hz
 
-);
+const temperature =
+Math.round(
+25 + Math.random()*25
+); //25-50°C
 
+const battery =
+Math.round(
+30 + Math.random()*70
+); //30-100%
 
-const current = (
+const source =
+Math.random()>0.2
+? 'SBEE'
+: 'GROUPE';
 
-power/voltage
+const sbee_ok =
+source === 'SBEE';
 
-).toFixed(
-
-2
-
-);
-
-
-const kwh=(
-
-power*5
-
-/
-
-3600000
-
-).toFixed(
-
-5
-
-);
-
-
-const temperature=
-
-Math.floor(
-
-20+
-
-Math.random()*20
-
-);
-
-
-const source=
-
-Math.random()>0.8
-
-?
-
-'GROUPE'
-
+const status =
+power > 4000
+? 'WARNING'
 :
+voltage < 200
+? 'ALERT'
+:
+'ACTIVE';
 
-'SBEE';
+
+/*
+kWh cumulatif
+*/
+
+const kwh =
+Number(
+(
+(power*5)
+/3600000
+).toFixed(5)
+);
 
 
+/*
+COÛT FCFA
+Tarif SBEE ~91 FCFA/kWh
+*/
 
-const {
+const cost =
+Math.round(
+kwh * 91
+);
 
-data,
 
-error
+/*
+RÉCUPÉRER CAPTEUR DU SITE
+*/
 
-}
+const { data:sensor } =
+await supabaseClient
 
-=
+.from('sensors')
+
+.select('id')
+
+.eq(
+'site_id',
+selectedSite
+)
+
+.limit(1)
+
+.single();
+
+
+/*
+INSERT TELEMETRY
+*/
+
+const { error } =
 
 await supabaseClient
 
-.from(
-
-'telemetry'
-
-)
+.from('telemetry')
 
 .insert([{
 
 sensor_id:
-
-sensor,
+sensor?.id || null,
 
 site_id:
+selectedSite,
 
-site,
-
+voltage:
 voltage,
 
+current:
 current,
 
 power_w:
-
 power,
 
 kwh_total:
-
 kwh,
 
+source:
+source,
+
+temperature:
 temperature,
 
-source
+status:
+status,
 
-}])
+battery_percent:
+battery,
+
+pf:
+pf,
+
+ap:
+ap,
+
+freq:
+freq,
+
+sbee_ok:
+sbee_ok,
+
+cost_fcfa:
+cost
+
+}]);
 
 
-.select();
+if(error){
 
-
-
-console.log(
-
-'INSERT',
-
-data,
-
-error
-
-);
-
-
-if(
-
-error
-
-){
-
-document
-
-.getElementById(
-
-'log'
-
-)
-
-.innerHTML=
-
-'❌ '
-
-+
-
-error.message
-
-+
-
-'<br>'
-
-+
-
-document
-
-.getElementById(
-
-'log'
-
-)
-
-.innerHTML;
+console.log(error);
 
 return;
 
 }
-
-
-
-document
-
-.getElementById(
-
-'voltage'
-
-)
-
-.innerHTML=
-
-voltage+'V';
-
-
-document
-
-.getElementById(
-
-'power'
-
-)
-
-.innerHTML=
-
-power+'W';
-
-
-document
-
-.getElementById(
-
-'temperature'
-
-)
-
-.innerHTML=
-
-temperature+'°C';
-
-
-document
-
-.getElementById(
-
-'source'
-
-)
-
-.innerHTML=
-
-source;
-
-
-
-document
-
-.getElementById(
-
-'log'
-
-)
-
-.innerHTML=
-
-'✅ '
-
-+
-
-power
-
-+
-
-'W | '
-
-+
-
-voltage
-
-+
-
-'V<br>'
-
-+
-
-document
-
-.getElementById(
-
-'log'
-
-)
-
-.innerHTML;
-
-},
-
-5000
-
-);
-
-}
-
-
-
-
-async function stopSimulation(){
-
-clearInterval(
-
-interval
-
-);
-
-simulation=false;
-
-
-const sensor=
-
-document
-
-.getElementById(
-
-'sensorSelector'
-
-)
-
-.value;
-
-
-
-await supabaseClient
-
-.from(
-
-'sensors'
-
-)
-
-.update({
-
-status:
-
-'OFFLINE'
-
-})
-
-.eq(
-
-'id',
-
-sensor
-
-);
-
-}
-
-
-
-loadSites();
-
-</script>
-
-</body>
-</html>
