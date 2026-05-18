@@ -1,173 +1,1189 @@
-/*
-=========================
-VALEURS SIMULÉES RÉALISTES
-=========================
-*/
+<!DOCTYPE html>
+<html lang="fr">
 
-const voltage =
-Math.floor(Math.random()*60)+190; //190-250V
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+content="width=device-width,initial-scale=1">
 
-const current =
-(Number((Math.random()*20).toFixed(2))); //0-20A
+<title>
+EnergyTrack Simulator V3
+</title>
 
-const pf =
-Number((0.75 + Math.random()*0.25).toFixed(2)); //0.75-1
+<script src="
+https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
+"></script>
 
-const power =
-Math.round(
-voltage *
-current *
-pf
-); //W
+<script src="
+js/supabase.js
+"></script>
 
-const ap =
-Math.round(
-(voltage*current)
-); //VA
-
-const freq =
-Number(
-(49 + Math.random()*2)
-.toFixed(2)
-); //49-51Hz
-
-const temperature =
-Math.round(
-25 + Math.random()*25
-); //25-50°C
-
-const battery =
-Math.round(
-30 + Math.random()*70
-); //30-100%
-
-const source =
-Math.random()>0.2
-? 'SBEE'
-: 'GROUPE';
-
-const sbee_ok =
-source === 'SBEE';
-
-const status =
-power > 4000
-? 'WARNING'
-:
-voltage < 200
-? 'ALERT'
-:
-'ACTIVE';
+<link href="
+https://fonts.googleapis.com/css2?
+family=Orbitron:wght@700&
+family=Poppins:wght@300;400;500;600
+&display=swap
+"
+rel="stylesheet">
 
 
-/*
-kWh cumulatif
-*/
+<style>
 
-const kwh =
-Number(
-(
-(power*5)
-/3600000
-).toFixed(5)
+body{
+background:#0b1220;
+font-family:Poppins;
+color:white;
+padding:50px;
+}
+
+.card{
+
+background:#182235;
+padding:35px;
+border-radius:30px;
+max-width:900px;
+margin:auto;
+
+}
+
+h1{
+
+font-family:Orbitron;
+margin-bottom:20px;
+
+}
+
+
+.grid{
+
+display:grid;
+
+grid-template-columns:
+
+repeat(
+auto-fit,
+minmax(180px,1fr)
 );
 
+gap:20px;
 
-/*
-COÛT FCFA
-Tarif SBEE ~91 FCFA/kWh
-*/
+margin-top:25px;
 
-const cost =
-Math.round(
-kwh * 91
+}
+
+
+.metric{
+
+background:#101826;
+padding:20px;
+border-radius:20px;
+
+}
+
+
+.metric h3{
+
+font-size:13px;
+color:#94a3b8;
+
+}
+
+
+.metric p{
+
+font-size:28px;
+margin-top:10px;
+color:#00c896;
+
+}
+
+
+
+button{
+
+padding:18px;
+
+border:none;
+
+border-radius:16px;
+
+font-weight:600;
+
+cursor:pointer;
+
+margin-top:25px;
+
+}
+
+
+.start{
+
+background:
+
+linear-gradient(
+135deg,
+#00c896,
+#00aeef
 );
 
+color:white;
 
-/*
-RÉCUPÉRER CAPTEUR DU SITE
-*/
+}
 
-const { data:sensor } =
-await supabaseClient
 
-.from('sensors')
+.stop{
 
-.select('id')
+background:#ff4c61;
+color:white;
 
-.eq(
-'site_id',
-selectedSite
+}
+
+
+select{
+
+width:100%;
+
+padding:18px;
+
+background:#101826;
+
+border:none;
+
+border-radius:16px;
+
+color:white;
+
+}
+
+
+.log{
+
+margin-top:30px;
+
+background:#101826;
+
+padding:20px;
+
+height:220px;
+
+overflow:auto;
+
+border-radius:20px;
+
+}
+
+</style>
+
+</head>
+
+
+<body>
+
+<div class="card">
+
+
+<h1>
+
+⚡ EnergyTrack Simulator
+
+</h1>
+
+
+<select
+id="siteSelector">
+
+<option value="">
+
+Choisir site
+
+</option>
+
+</select>
+
+
+
+<div class="grid">
+
+<div class="metric">
+
+<h3>
+
+Voltage
+
+</h3>
+
+<p id="voltage">
+
+0V
+
+</p>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+
+Puissance
+
+</h3>
+
+<p id="power">
+
+0W
+
+</p>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+
+Température
+
+</h3>
+
+<p id="temp">
+
+0°C
+
+</p>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+
+Fréquence
+
+</h3>
+
+<p id="freq">
+
+50Hz
+
+</p>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+
+Batterie
+
+</h3>
+
+<p id="battery">
+
+0%
+
+</p>
+
+</div>
+
+
+
+<div class="metric">
+
+<h3>
+
+Coût
+
+</h3>
+
+<p id="cost">
+
+0FCFA
+
+</p>
+
+</div>
+
+
+
+</div>
+
+
+
+<button
+
+class="start"
+
+onclick="startSimulation()">
+
+Démarrer
+
+</button>
+
+
+
+<button
+
+class="stop"
+
+onclick="stopSimulation()">
+
+Arrêter
+
+</button>
+
+
+
+<div
+
+class="log"
+
+id="log">
+
+Logs...
+
+</div>
+
+
+
+</div>
+
+
+
+<script>
+
+let running=false;
+
+let interval=null;
+
+let alerts={};
+
+
+
+async function getUser(){
+
+const {
+
+data:userData
+
+}
+
+=
+
+await
+
+supabaseClient
+
+.auth
+
+.getUser();
+
+
+
+return
+
+userData.user;
+
+}
+
+
+
+
+async function loadSites(){
+
+const user=
+
+await getUser();
+
+
+
+const {
+
+data
+
+}
+
+=
+
+await
+
+supabaseClient
+
+.from(
+
+"sites"
+
 )
 
-.limit(1)
+.select("*")
+
+.eq(
+
+"user_id",
+
+user.id
+
+);
+
+
+
+let html=
+
+`
+
+<option>
+
+Choisir
+
+</option>
+
+`;
+
+
+
+data.forEach(
+
+s=>{
+
+html+=
+
+`
+
+<option
+
+value=
+
+"${s.id}"
+
+>
+
+${s.name}
+
+</option>
+
+`;
+
+}
+
+);
+
+
+
+document
+
+.getElementById(
+
+"siteSelector"
+
+)
+
+.innerHTML
+
+=
+
+html;
+
+
+}
+
+
+
+async function createAlert(
+
+type,
+
+message,
+
+value,
+
+threshold,
+
+site
+
+){
+
+
+if(
+
+alerts[type]
+
+&&
+
+Date.now()
+
+-
+
+alerts[type]
+
+<60000
+
+){
+
+return;
+
+}
+
+
+alerts[type]
+
+=
+
+Date.now();
+
+
+
+await
+
+supabaseClient
+
+.from(
+
+"alerts"
+
+)
+
+.insert([{
+
+site_id:site,
+
+type,
+
+message,
+
+value,
+
+threshold
+
+}]);
+
+
+}
+
+
+
+
+async function startSimulation(){
+
+
+if(
+
+running
+
+)
+
+return;
+
+
+
+let site=
+
+document
+
+.getElementById(
+
+"siteSelector"
+
+)
+
+.value;
+
+
+
+if(
+
+!site
+
+){
+
+alert(
+
+"Choisir site"
+
+);
+
+return;
+
+}
+
+
+running=true;
+
+
+
+interval=
+
+setInterval(
+
+async()=>{
+
+
+let voltage=
+
+190+
+
+Math.random()
+
+*60;
+
+
+
+let current=
+
+Math.random()
+
+*20;
+
+
+
+let pf=
+
+0.75+
+
+Math.random()
+
+*0.25;
+
+
+
+let power=
+
+Math.round(
+
+voltage*
+
+current*
+
+pf
+
+);
+
+
+
+let freq=
+
+49+
+
+Math.random()
+
+*2;
+
+
+
+let temp=
+
+25+
+
+Math.random()
+
+*30;
+
+
+
+let battery=
+
+30+
+
+Math.random()
+
+*70;
+
+
+
+let source=
+
+Math.random()
+
+>.2
+
+?
+
+"SBEE"
+
+:
+
+"GROUPE";
+
+
+
+let ap=
+
+Math.round(
+
+voltage*
+
+current
+
+);
+
+
+
+let kwh=
+
+(
+
+power
+
+*
+
+5
+
+/
+
+3600000
+
+).toFixed(
+
+5
+
+);
+
+
+
+let cost=
+
+Math.round(
+
+kwh
+
+*
+
+91
+
+);
+
+
+
+let status=
+
+power>
+
+4000
+
+?
+
+"WARNING"
+
+:
+
+"ACTIVE";
+
+
+
+let {
+
+data:sensor
+
+}
+
+=
+
+await
+
+supabaseClient
+
+.from(
+
+"sensors"
+
+)
+
+.select(
+
+"id"
+
+)
+
+.eq(
+
+"site_id",
+
+site
+
+)
+
+.limit(
+
+1
+
+)
 
 .single();
 
 
-/*
-INSERT TELEMETRY
-*/
 
-const { error } =
 
-await supabaseClient
 
-.from('telemetry')
+await
+
+supabaseClient
+
+.from(
+
+"telemetry"
+
+)
 
 .insert([{
 
 sensor_id:
-sensor?.id || null,
+
+sensor?.id,
 
 site_id:
-selectedSite,
 
-voltage:
+site,
+
 voltage,
 
-current:
 current,
 
 power_w:
+
 power,
 
 kwh_total:
+
 kwh,
 
-source:
 source,
 
 temperature:
-temperature,
 
-status:
+temp,
+
 status,
 
 battery_percent:
+
 battery,
 
-pf:
 pf,
 
-ap:
 ap,
 
-freq:
 freq,
 
 sbee_ok:
-sbee_ok,
+
+source==="SBEE",
 
 cost_fcfa:
+
 cost
 
 }]);
 
 
-if(error){
+if(
 
-console.log(error);
+power>
 
-return;
+4000
+
+){
+
+createAlert(
+
+"OVERLOAD",
+
+"Surconsommation",
+
+power,
+
+4000,
+
+site
+
+);
 
 }
+
+
+
+if(
+
+voltage
+
+<200
+
+){
+
+createAlert(
+
+"LOW_VOLTAGE",
+
+"Tension basse",
+
+voltage,
+
+200,
+
+site
+
+);
+
+}
+
+
+
+if(
+
+freq<49
+
+){
+
+createAlert(
+
+"LOW_FREQ",
+
+"Fréquence basse",
+
+freq,
+
+49,
+
+site
+
+);
+
+}
+
+
+
+document
+
+.getElementById(
+
+"voltage"
+
+)
+
+.innerHTML=
+
+Math.round(
+
+voltage
+
+)
+
++
+
+"V";
+
+
+
+
+document
+
+.getElementById(
+
+"power"
+
+)
+
+.innerHTML=
+
+power+
+
+"W";
+
+
+
+
+document
+
+.getElementById(
+
+"temp"
+
+)
+
+.innerHTML=
+
+Math.round(
+
+temp
+
+)
+
++
+
+"°C";
+
+
+
+
+document
+
+.getElementById(
+
+"freq"
+
+)
+
+.innerHTML=
+
+freq
+
+.toFixed(
+
+2
+
+)
+
++
+
+"Hz";
+
+
+
+
+document
+
+.getElementById(
+
+"battery"
+
+)
+
+.innerHTML=
+
+Math.round(
+
+battery
+
+)
+
++
+
+"%";
+
+
+
+
+document
+
+.getElementById(
+
+"cost"
+
+)
+
+.innerHTML=
+
+cost+
+
+" FCFA";
+
+
+
+
+document
+
+.getElementById(
+
+"log"
+
+)
+
+.innerHTML=
+
+
+`✅
+
+${new Date()
+
+.toLocaleTimeString()}
+
+→
+
+${power}W
+
+|
+
+${voltage.toFixed(0)}V
+
+|
+
+${source}
+
+<br>
+
+`
+
++
+
+document
+
+.getElementById(
+
+"log"
+
+)
+
+.innerHTML;
+
+
+
+},5000);
+
+
+}
+
+
+
+function stopSimulation(){
+
+clearInterval(
+
+interval
+
+);
+
+running=false;
+
+
+
+document
+
+.getElementById(
+
+"log"
+
+)
+
+.innerHTML=
+
+
+"⛔ Simulation arrêtée<br>"
+
++
+
+document
+
+.getElementById(
+
+"log"
+
+)
+
+.innerHTML;
+
+
+}
+
+
+
+loadSites();
+
+</script>
+
+</body>
+
+</html>
