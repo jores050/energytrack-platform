@@ -3,89 +3,282 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Analytics Énergétiques - EnergyTrack</title>
-<link rel="stylesheet" href="css/style.css">
+<title>Analytics Énergétiques — EnergyTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
 <style>
-.analytics-grid{
-  display:grid;
-  grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-  gap:20px;
-  margin-top:25px;
+/* ── VARIABLES ────────────────────────────────── */
+:root{
+  --bg:       #090f1a;
+  --surface:  #0f1c2e;
+  --surface2: #162338;
+  --border:   rgba(255,255,255,0.06);
+  --green:    #00c896;
+  --amber:    #f59e0b;
+  --blue:     #3b82f6;
+  --red:      #ef4444;
+  --text:     #e2e8f0;
+  --muted:    #64748b;
+  --font:     'Poppins', sans-serif;
+  --font-hd:  'Orbitron', monospace;
 }
-.analytics-card{
-  background:linear-gradient(145deg,#182235,#101826);
-  padding:25px;
-  border-radius:24px;
-  border:1px solid rgba(255,255,255,0.05);
-  transition:0.3s;
+
+*{ box-sizing:border-box; margin:0; padding:0; }
+body{
+  font-family:var(--font);
+  background:var(--bg);
+  color:var(--text);
+  display:flex;
+  min-height:100vh;
 }
-.analytics-card:hover{
-  transform:translateY(-5px);
-  box-shadow:0 20px 40px rgba(0,0,0,0.35);
+
+/* ── SIDEBAR ──────────────────────────────────── */
+.sidebar{
+  width:220px;
+  min-height:100vh;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  padding:28px 16px;
+  position:fixed;
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  z-index:100;
 }
-.big-value{
-  font-size:36px;
-  margin-top:15px;
-  font-weight:700;
+.logo{
+  font-family:var(--font-hd);
+  font-size:16px;
+  color:#fff;
+  padding:0 8px 24px;
+  letter-spacing:.05em;
 }
-.card-sub{
-  font-size:12px;
-  color:#94a3b8;
-  margin-top:6px;
+.logo span{ color:var(--green); }
+.nav-item{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  text-decoration:none;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:500;
+  transition:.2s;
 }
-.chart-box{
-  background:#182235;
-  padding:25px;
-  border-radius:24px;
-  margin-top:25px;
+.nav-item:hover{ background:var(--surface2); color:var(--text); }
+.nav-item.active{ background:rgba(0,200,150,.12); color:var(--green); }
+
+/* ── MAIN ─────────────────────────────────────── */
+.main{
+  margin-left:220px;
+  flex:1;
+  padding:32px;
+  display:flex;
+  flex-direction:column;
+  gap:24px;
+}
+
+/* ── HEADER ───────────────────────────────────── */
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:16px;
+}
+.page-header h1{
+  font-family:var(--font-hd);
+  font-size:20px;
+  font-weight:500;
+  letter-spacing:.04em;
+}
+.page-header p{ color:var(--muted); font-size:13px; margin-top:4px; }
+
+/* ── SBEE STATUS BADGE ────────────────────────── */
+.sbee-badge{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 16px;
+  border-radius:100px;
+  font-size:13px;
+  font-weight:500;
+  background:var(--surface);
+  border:1px solid var(--border);
+  transition:.3s;
+}
+.sbee-badge.ok   { border-color:var(--green); color:var(--green); }
+.sbee-badge.err  { border-color:var(--red);   color:var(--red); }
+.sbee-badge.amber{ border-color:var(--amber); color:var(--amber); }
+.dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background:currentColor;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{
+  0%,100%{ opacity:1; }
+  50%{ opacity:.4; }
+}
+
+/* ── TOOLBAR ──────────────────────────────────── */
+.toolbar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  flex-wrap:wrap;
 }
 .filter-select{
-  padding:12px 16px;
-  border:none;
-  border-radius:14px;
-  background:#182235;
-  color:white;
-  margin-top:20px;
-  font-family:Poppins,sans-serif;
+  padding:10px 16px;
+  border:1px solid var(--border);
+  border-radius:10px;
+  background:var(--surface);
+  color:var(--text);
+  font-family:var(--font);
+  font-size:13px;
+  outline:none;
+  cursor:pointer;
+  transition:.2s;
 }
-.cost-split{
-  display:flex;
-  gap:10px;
-  margin-top:10px;
+.filter-select:hover{ border-color:var(--green); }
+
+.btn-refresh{
+  padding:10px 18px;
+  border-radius:10px;
+  background:rgba(0,200,150,.12);
+  border:1px solid rgba(0,200,150,.25);
+  color:var(--green);
+  font-family:var(--font);
+  font-size:13px;
+  font-weight:500;
+  cursor:pointer;
+  transition:.2s;
 }
+.btn-refresh:hover{ background:rgba(0,200,150,.2); }
+.btn-refresh:disabled{ opacity:.4; cursor:not-allowed; }
+
+/* ── KPI GRID ─────────────────────────────────── */
+.kpi-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit, minmax(210px, 1fr));
+  gap:16px;
+}
+.kpi-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:22px;
+  transition:.25s;
+  position:relative;
+  overflow:hidden;
+}
+.kpi-card::before{
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:2px;
+  background:var(--accent, var(--green));
+  opacity:.6;
+}
+.kpi-card:hover{ transform:translateY(-3px); box-shadow:0 16px 40px rgba(0,0,0,.3); }
+.kpi-label{
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.08em;
+  color:var(--muted);
+  margin-bottom:12px;
+}
+.kpi-icon{ font-size:18px; margin-right:6px; }
+.kpi-value{
+  font-size:28px;
+  font-weight:700;
+  line-height:1;
+  color:#fff;
+}
+.kpi-sub{
+  font-size:11px;
+  color:var(--muted);
+  margin-top:6px;
+}
+
+/* Cost split */
+.cost-split{ display:flex; gap:8px; margin-top:12px; }
 .cost-pill{
   flex:1;
-  background:#0f1a2a;
-  border-radius:12px;
-  padding:10px 12px;
+  background:var(--bg);
+  border-radius:10px;
+  padding:8px 10px;
+  border-left:3px solid;
+}
+.cost-pill.sbee   { border-color:var(--green); }
+.cost-pill.groupe { border-color:var(--amber); }
+.cost-pill span{ display:block; font-size:10px; color:var(--muted); margin-bottom:3px; }
+.cost-pill strong{ font-size:12px; }
+
+/* ── CHARTS ───────────────────────────────────── */
+.chart-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:24px;
+}
+.chart-card h2{
+  font-size:14px;
+  font-weight:600;
+  color:var(--text);
+  margin-bottom:20px;
+}
+.chart-wrap{ position:relative; }
+
+/* ── LOADING / EMPTY STATE ───────────────────── */
+.state-overlay{
+  position:absolute;
+  inset:0;
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  justify-content:center;
+  gap:12px;
+  background:rgba(9,15,26,.75);
+  border-radius:18px;
   font-size:13px;
+  color:var(--muted);
+  z-index:10;
 }
-.cost-pill span{
-  display:block;
-  font-size:11px;
-  color:#94a3b8;
-  margin-bottom:4px;
-}
-.pill-sbee{ border-left:3px solid #00c896; }
-.pill-groupe{ border-left:3px solid #f59e0b; }
-.status-dot{
-  display:inline-block;
-  width:8px;height:8px;
+.spinner{
+  width:32px; height:32px;
+  border:3px solid var(--border);
+  border-top-color:var(--green);
   border-radius:50%;
-  margin-right:6px;
+  animation:spin .7s linear infinite;
 }
-.dot-ok{ background:#00c896; }
-.dot-err{ background:#ef4444; }
+@keyframes spin{ to{ transform:rotate(360deg); } }
+
+/* ── TOAST ────────────────────────────────────── */
+#toast{
+  position:fixed;
+  bottom:24px; right:24px;
+  padding:12px 20px;
+  border-radius:12px;
+  font-size:13px;
+  font-weight:500;
+  z-index:999;
+  opacity:0;
+  transition:.3s;
+  pointer-events:none;
+}
+#toast.show{ opacity:1; }
+#toast.success{ background:#064e3b; color:#6ee7b7; border:1px solid #059669; }
+#toast.error  { background:#450a0a; color:#fca5a5; border:1px solid #dc2626; }
+#toast.warn   { background:#451a03; color:#fcd34d; border:1px solid #d97706; }
 </style>
 </head>
-
 <body>
 
-<div class="sidebar">
+<!-- ── SIDEBAR ──────────────────────────────── -->
+<aside class="sidebar">
   <div class="logo">Energy<span>Track</span></div>
   <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
   <a class="nav-item active" href="consommation.html">⚡ Consommation</a>
@@ -95,120 +288,203 @@
   <a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
   <a class="nav-item" href="ia.html">🤖 Analyse IA</a>
   <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
-</div>
+</aside>
 
-<div class="main" style="display:block;">
+<!-- ── MAIN ─────────────────────────────────── -->
+<main class="main">
 
-  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;margin-bottom:25px;">
+  <!-- Header -->
+  <div class="page-header">
     <div>
       <h1>Analytics Énergétiques</h1>
-      <p style="margin-top:10px;color:#94a3b8;">Analyse avancée de la consommation électrique.</p>
+      <p>Analyse avancée de la consommation électrique en temps réel.</p>
     </div>
-    <div id="sbee-status" style="font-size:14px;color:#94a3b8;">
-      <span class="status-dot dot-ok"></span>Chargement…
+    <div id="sbee-badge" class="sbee-badge">
+      <span class="dot"></span>
+      <span id="sbee-label">Connexion…</span>
     </div>
   </div>
 
-  <select id="periodFilter" class="filter-select" onchange="loadAnalytics()">
-    <option value="24">Dernières 24h</option>
-    <option value="168">7 derniers jours</option>
-    <option value="720">30 derniers jours</option>
-  </select>
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <select id="periodFilter" class="filter-select" onchange="loadAnalytics()">
+      <option value="24">Dernières 24h</option>
+      <option value="168" selected>7 derniers jours</option>
+      <option value="720">30 derniers jours</option>
+    </select>
 
-  <!-- KPI GRID -->
-  <div class="analytics-grid">
+    <select id="siteFilter" class="filter-select" onchange="onSiteChange()">
+      <option value="">Chargement des sites…</option>
+    </select>
 
-    <div class="analytics-card">
-      <h3>⚡ Énergie consommée</h3>
-      <div class="big-value" id="totalEnergy">0 kWh</div>
-      <div class="card-sub">Calculé sur la période sélectionnée</div>
+    <select id="sensorFilter" class="filter-select" onchange="onSensorChange()">
+      <option value="">Chargement des capteurs…</option>
+    </select>
+
+    <button class="btn-refresh" id="btnRefresh" onclick="loadAnalytics()">⟳ Actualiser</button>
+  </div>
+
+  <!-- KPI Grid -->
+  <div class="kpi-grid">
+
+    <div class="kpi-card" style="--accent:#00c896">
+      <div class="kpi-label"><span class="kpi-icon">⚡</span>Énergie consommée</div>
+      <div class="kpi-value" id="kpiEnergy">—</div>
+      <div class="kpi-sub" id="kpiEnergySub">Calculé sur la période</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>💰 Coût estimé</h3>
-      <div class="big-value" id="estimatedCost">0 FCFA</div>
+    <div class="kpi-card" style="--accent:#f59e0b">
+      <div class="kpi-label"><span class="kpi-icon">💰</span>Coût estimé</div>
+      <div class="kpi-value" id="kpiCost">—</div>
       <div class="cost-split">
-        <div class="cost-pill pill-sbee">
+        <div class="cost-pill sbee">
           <span>Réseau SBEE</span>
-          <strong id="costSBEE">0 FCFA</strong>
+          <strong id="costSBEE">— FCFA</strong>
         </div>
-        <div class="cost-pill pill-groupe">
+        <div class="cost-pill groupe">
           <span>Groupe (×3,8)</span>
-          <strong id="costGroupe">0 FCFA</strong>
+          <strong id="costGroupe">— FCFA</strong>
         </div>
       </div>
     </div>
 
-    <div class="analytics-card">
-      <h3>📈 Pic de puissance</h3>
-      <div class="big-value" id="peakPower">0 W</div>
-      <div class="card-sub" id="peakHour">Heure du pic : --</div>
+    <div class="kpi-card" style="--accent:#3b82f6">
+      <div class="kpi-label"><span class="kpi-icon">📈</span>Pic de puissance</div>
+      <div class="kpi-value" id="kpiPeak">—</div>
+      <div class="kpi-sub" id="kpiPeakHour">Heure du pic : —</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>📊 Puissance moyenne</h3>
-      <div class="big-value" id="avgPower">0 W</div>
-      <div class="card-sub">Puissance active moyenne</div>
+    <div class="kpi-card" style="--accent:#8b5cf6">
+      <div class="kpi-label"><span class="kpi-icon">📊</span>Puissance moyenne</div>
+      <div class="kpi-value" id="kpiAvgPower">—</div>
+      <div class="kpi-sub">Puissance active moyenne</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>🏭 Utilisation Groupe</h3>
-      <div class="big-value" id="groupUsage">0%</div>
-      <div class="card-sub" id="groupKwh">-- kWh hors réseau SBEE</div>
+    <div class="kpi-card" style="--accent:#f59e0b">
+      <div class="kpi-label"><span class="kpi-icon">🏭</span>Utilisation Groupe</div>
+      <div class="kpi-value" id="kpiGroup">—</div>
+      <div class="kpi-sub" id="kpiGroupKwh">— kWh hors réseau SBEE</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>⚡ Facteur de puissance</h3>
-      <div class="big-value" id="avgPF">--</div>
-      <div class="card-sub">Qualité de charge (idéal > 0,9)</div>
+    <div class="kpi-card" style="--accent:#06b6d4">
+      <div class="kpi-label"><span class="kpi-icon">⚡</span>Facteur de puissance</div>
+      <div class="kpi-value" id="kpiPF">—</div>
+      <div class="kpi-sub">Qualité de charge (idéal &gt; 0,9)</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>🌐 Fréquence réseau</h3>
-      <div class="big-value" id="avgFreq">-- Hz</div>
-      <div class="card-sub">Nominal SBEE : 50 Hz</div>
+    <div class="kpi-card" style="--accent:#10b981">
+      <div class="kpi-label"><span class="kpi-icon">🌐</span>Fréquence réseau</div>
+      <div class="kpi-value" id="kpiFreq">—</div>
+      <div class="kpi-sub">Nominal SBEE : 50 Hz</div>
     </div>
 
-    <div class="analytics-card">
-      <h3>🔌 Puissance apparente</h3>
-      <div class="big-value" id="avgAP">0 VA</div>
-      <div class="card-sub">Puissance apparente moyenne</div>
+    <div class="kpi-card" style="--accent:#ec4899">
+      <div class="kpi-label"><span class="kpi-icon">🔌</span>Puissance apparente</div>
+      <div class="kpi-value" id="kpiAP">—</div>
+      <div class="kpi-sub">Puissance apparente moyenne</div>
     </div>
 
   </div>
 
-  <!-- POWER CHART -->
-  <div class="chart-box">
+  <!-- Power chart -->
+  <div class="chart-card">
     <h2>Puissance active — temps réel (W)</h2>
-    <canvas id="powerChart" style="margin-top:25px;"></canvas>
+    <div class="chart-wrap" style="height:260px">
+      <div id="overlayPower" class="state-overlay"><div class="spinner"></div>Chargement…</div>
+      <canvas id="powerChart"></canvas>
+    </div>
   </div>
 
-  <!-- SBEE vs GROUPE CHART -->
-  <div class="chart-box">
+  <!-- SBEE vs Groupe -->
+  <div class="chart-card">
     <h2>Répartition SBEE vs Groupe (kWh / heure)</h2>
-    <canvas id="splitChart" style="margin-top:25px;"></canvas>
+    <div class="chart-wrap" style="height:240px">
+      <div id="overlaySplit" class="state-overlay"><div class="spinner"></div>Chargement…</div>
+      <canvas id="splitChart"></canvas>
+    </div>
   </div>
 
-  <!-- HOURLY CHART -->
-  <div class="chart-box">
+  <!-- Hourly -->
+  <div class="chart-card">
     <h2>Consommation horaire (kWh)</h2>
-    <canvas id="hourlyChart" style="margin-top:25px;"></canvas>
+    <div class="chart-wrap" style="height:240px">
+      <div id="overlayHourly" class="state-overlay"><div class="spinner"></div>Chargement…</div>
+      <canvas id="hourlyChart"></canvas>
+    </div>
   </div>
 
-</div><!-- /.main -->
+</main>
 
+<div id="toast"></div>
+
+<!-- ─────────────────────────────────────────────
+     SCRIPTS
+     ───────────────────────────────────────────── -->
 <script>
-let powerChart, hourlyChart, splitChart;
+/* ── 1. SUPABASE INIT ──────────────────────────
+   On récupère l'instance depuis supabase.js si déjà
+   chargée, sinon on initialise ici en fallback.
+   ─────────────────────────────────────────────── */
+const SUPABASE_URL = 'https://prvsatpdgybnevolzhhf.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
+
+// supabaseClient peut déjà exister si supabase.js est chargé avant ce fichier
+const sb = (typeof supabaseClient !== 'undefined')
+  ? supabaseClient
+  : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ── 2. ÉTAT GLOBAL ────────────────────────────── */
+let charts       = {};
 let currentSensorId = null;
-let tariffSBEE  = 91;   // FCFA/kWh — écrasé par settings
-let tariffGroupe = 350;  // FCFA/kWh — écrasé par settings
+let tariffSBEE   = 91;
+let tariffGroupe = 350;
+let realtimeChan = null;
+let lastKPIReload = 0;
 
-/* ================================================
-   INIT CHARTS
-   ================================================ */
+/* ── 3. TOAST ─────────────────────────────────── */
+function toast(msg, type='success', ms=3500){
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'show ' + type;
+  clearTimeout(el._t);
+  el._t = setTimeout(() => el.className = '', ms);
+}
+
+/* ── 4. OVERLAY HELPERS ───────────────────────── */
+function showOverlay(id, msg='Chargement…'){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = 'flex';
+  el.innerHTML = `<div class="spinner"></div>${msg}`;
+}
+function hideOverlay(id){
+  const el = document.getElementById(id);
+  if(el) el.style.display = 'none';
+}
+function emptyOverlay(id, msg='Aucune donnée pour cette période'){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.style.display = 'flex';
+  el.innerHTML = `<span style="font-size:24px">📭</span>${msg}`;
+}
+
+/* ── 5. CHART INIT ────────────────────────────── */
+const CHART_DEFAULTS = {
+  responsive:true,
+  maintainAspectRatio:false,
+  plugins:{ legend:{ labels:{ color:'#94a3b8', font:{ family:'Poppins', size:12 } } } },
+  scales:{
+    x:{ ticks:{ color:'#64748b', font:{ size:11 } }, grid:{ color:'rgba(255,255,255,.04)' } },
+    y:{ ticks:{ color:'#64748b', font:{ size:11 } }, grid:{ color:'rgba(255,255,255,.04)' } }
+  }
+};
+
 function initCharts(){
+  const powerCtx   = document.getElementById('powerChart').getContext('2d');
+  const splitCtx   = document.getElementById('splitChart').getContext('2d');
+  const hourlyCtx  = document.getElementById('hourlyChart').getContext('2d');
 
-  powerChart = new Chart(document.getElementById('powerChart'),{
+  charts.power = new Chart(powerCtx, {
     type:'line',
     data:{
       labels:[],
@@ -216,311 +492,436 @@ function initCharts(){
         label:'Puissance (W)',
         data:[],
         borderColor:'#00c896',
-        backgroundColor:'rgba(0,200,150,0.15)',
-        fill:true,
-        tension:0.4
+        backgroundColor:'rgba(0,200,150,0.1)',
+        fill:true, tension:0.4, pointRadius:0, borderWidth:2
       }]
     },
-    options:{responsive:true}
+    options:{
+      ...CHART_DEFAULTS,
+      interaction:{ mode:'index', intersect:false },
+      plugins:{
+        ...CHART_DEFAULTS.plugins,
+        tooltip:{
+          callbacks:{
+            label:ctx=>`${Math.round(ctx.parsed.y)} W`
+          }
+        }
+      }
+    }
   });
 
-  splitChart = new Chart(document.getElementById('splitChart'),{
+  charts.split = new Chart(splitCtx, {
     type:'bar',
     data:{
       labels:[],
       datasets:[
-        {label:'SBEE (kWh)',  data:[], backgroundColor:'#00c896'},
-        {label:'Groupe (kWh)',data:[], backgroundColor:'#f59e0b'}
+        { label:'SBEE (kWh)',   data:[], backgroundColor:'rgba(0,200,150,.7)' },
+        { label:'Groupe (kWh)', data:[], backgroundColor:'rgba(245,158,11,.7)' }
       ]
     },
     options:{
-      responsive:true,
-      scales:{ x:{stacked:true}, y:{stacked:true} }
+      ...CHART_DEFAULTS,
+      scales:{
+        x:{ ...CHART_DEFAULTS.scales.x, stacked:true },
+        y:{ ...CHART_DEFAULTS.scales.y, stacked:true }
+      }
     }
   });
 
-  hourlyChart = new Chart(document.getElementById('hourlyChart'),{
+  charts.hourly = new Chart(hourlyCtx, {
     type:'bar',
     data:{
       labels:[],
-      datasets:[{label:'kWh', data:[], backgroundColor:'#00aeef'}]
+      datasets:[{ label:'kWh', data:[], backgroundColor:'rgba(59,130,246,.65)', borderRadius:4 }]
     },
-    options:{responsive:true}
+    options:{ ...CHART_DEFAULTS }
   });
 }
 
-/* ================================================
-   LOAD SETTINGS (tarifs depuis Supabase)
-   ================================================ */
+/* ── 6. AUTH & SETTINGS ───────────────────────── */
+async function getUser(){
+  const { data:{ user }, error } = await sb.auth.getUser();
+  if(error || !user){
+    window.location.href = 'auth.html';
+    return null;
+  }
+  return user;
+}
+
 async function loadSettings(userId){
-  const { data:settings } = await supabaseClient
+  const { data, error } = await sb
     .from('settings')
     .select('tariff, tariff_groupe')
     .eq('user_id', userId)
     .maybeSingle();
 
-  if(settings){
-    if(settings.tariff)        tariffSBEE   = Number(settings.tariff);
-    if(settings.tariff_groupe) tariffGroupe = Number(settings.tariff_groupe);
+  if(!error && data){
+    if(data.tariff)        tariffSBEE   = Number(data.tariff);
+    if(data.tariff_groupe) tariffGroupe = Number(data.tariff_groupe);
   }
 }
 
-/* ================================================
-   RESOLVE SENSOR ID pour l'utilisateur courant
-   ================================================ */
-async function resolveSensorId(userId){
-  /* 1. Chercher un site appartenant à cet utilisateur */
-  const { data:sites } = await supabaseClient
+/* ── 7. POPULATE SITE + SENSOR SELECTS ─────────── */
+async function populateSites(userId){
+  const { data:sites, error } = await sb
     .from('sites')
-    .select('id')
+    .select('id, name, city')
     .eq('user_id', userId)
-    .limit(1);
+    .order('created_at', { ascending:true });
 
-  if(!sites || sites.length === 0) return null;
+  const sel = document.getElementById('siteFilter');
+  sel.innerHTML = '';
 
-  const siteId = sites[0].id;
-
-  /* 2. Chercher un capteur actif sur ce site */
-  const { data:sensors } = await supabaseClient
-    .from('sensors')
-    .select('id')
-    .eq('site_id', siteId)
-    .eq('status','ACTIVE')
-    .limit(1);
-
-  if(!sensors || sensors.length === 0) return null;
-
-  return sensors[0].id;
-}
-
-/* ================================================
-   LOAD ANALYTICS
-   ================================================ */
-async function loadAnalytics(){
-
-  /* Auth */
-  const { data:userData } = await supabaseClient.auth.getUser();
-  if(!userData.user){ window.location.href='auth.html'; return; }
-  const userId = userData.user.id;
-
-  /* Tarifs */
-  await loadSettings(userId);
-
-  /* Résolution du capteur (une seule fois) */
-  if(!currentSensorId){
-    currentSensorId = await resolveSensorId(userId);
+  if(error || !sites || sites.length === 0){
+    sel.innerHTML = '<option value="">Aucun site</option>';
+    return;
   }
 
+  sites.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name + (s.city ? ` (${s.city})` : '');
+    sel.appendChild(opt);
+  });
+
+  await populateSensors(sites[0].id);
+}
+
+async function populateSensors(siteId){
+  const { data:sensors, error } = await sb
+    .from('sensors')
+    .select('id, name, sensor_name, serial_number, status')
+    .eq('site_id', siteId)
+    .order('created_at', { ascending:true });
+
+  const sel = document.getElementById('sensorFilter');
+  sel.innerHTML = '';
+
+  if(error || !sensors || sensors.length === 0){
+    sel.innerHTML = '<option value="">Aucun capteur</option>';
+    currentSensorId = null;
+    return;
+  }
+
+  // Préférer les capteurs ACTIVE
+  const sorted = [...sensors].sort((a,b) =>
+    (a.status === 'ACTIVE' ? -1 : 1));
+
+  sorted.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    const label = s.name || s.sensor_name || s.serial_number || s.id.slice(0,8);
+    const badge = s.status === 'ACTIVE' ? '🟢 ' : '⚫ ';
+    opt.textContent = badge + label;
+    sel.appendChild(opt);
+  });
+
+  currentSensorId = sorted[0].id;
+}
+
+async function onSiteChange(){
+  const siteId = document.getElementById('siteFilter').value;
+  if(!siteId) return;
+  await populateSensors(siteId);
+  await loadAnalytics();
+}
+
+async function onSensorChange(){
+  currentSensorId = document.getElementById('sensorFilter').value || null;
+  await loadAnalytics();
+}
+
+/* ── 8. CORE: LOAD ANALYTICS ─────────────────── */
+async function loadAnalytics(){
+  const btn = document.getElementById('btnRefresh');
+  btn.disabled = true;
+  btn.textContent = '⟳ Chargement…';
+
+  showOverlay('overlayPower');
+  showOverlay('overlaySplit');
+  showOverlay('overlayHourly');
+
+  // Synchroniser currentSensorId avec le select
+  const selSensor = document.getElementById('sensorFilter').value;
+  if(selSensor) currentSensorId = selSensor;
+
   if(!currentSensorId){
-    console.warn('[EnergyTrack] Aucun capteur actif trouvé pour cet utilisateur.');
+    ['overlayPower','overlaySplit','overlayHourly'].forEach(id =>
+      emptyOverlay(id, 'Aucun capteur sélectionné'));
+    resetKPIs();
+    btn.disabled = false;
+    btn.textContent = '⟳ Actualiser';
     return;
   }
 
   /* Fenêtre temporelle */
   const hours = Number(document.getElementById('periodFilter').value);
-  const startDate = new Date();
-  startDate.setHours(startDate.getHours() - hours);
+  const startDate = new Date(Date.now() - hours * 3_600_000).toISOString();
 
-  /* Requête telemetry — récupère tous les champs nécessaires */
-  const { data:telemetry, error } = await supabaseClient
+  /* ── Requête telemetry ───────────────────────── */
+  const { data:rows, error } = await sb
     .from('telemetry')
-    .select('created_at, voltage, current, power_w, kwh_total, ap, pf, freq, sbee_ok, source')
+    .select(`
+      created_at,
+      voltage,
+      current,
+      power_w,
+      kwh_total,
+      ap,
+      pf,
+      freq,
+      sbee_ok,
+      cost_fcfa,
+      source,
+      temperature,
+      status
+    `)
     .eq('sensor_id', currentSensorId)
-    .gte('created_at', startDate.toISOString())
-    .order('created_at', {ascending:true});
+    .gte('created_at', startDate)
+    .order('created_at', { ascending:true });
 
-  if(error){ console.error('[EnergyTrack] Erreur telemetry:', error); return; }
-  if(!telemetry || telemetry.length === 0){ console.log('[EnergyTrack] Pas de données pour cette période.'); return; }
+  if(error){
+    toast('Erreur Supabase : ' + error.message, 'error');
+    ['overlayPower','overlaySplit','overlayHourly'].forEach(id =>
+      emptyOverlay(id, 'Erreur de chargement'));
+    btn.disabled = false;
+    btn.textContent = '⟳ Actualiser';
+    return;
+  }
 
-  /* ------------------------------------------------
-     CALCULS
-     ------------------------------------------------ */
+  if(!rows || rows.length === 0){
+    ['overlayPower','overlaySplit','overlayHourly'].forEach(id =>
+      emptyOverlay(id, 'Aucune donnée pour cette période'));
+    updateSBEEBadge(null);
+    resetKPIs();
+    btn.disabled = false;
+    btn.textContent = '⟳ Actualiser';
+    toast('Aucune donnée reçue pour cette période.', 'warn');
+    return;
+  }
 
-  /* Énergie réelle = MAX(kwh_total) - MIN(kwh_total) sur la période.
-     kwh_total est un cumulatif depuis le démarrage du capteur —
-     additionner chaque ligne donnerait un total aberrant. */
-  const kwhValues = telemetry.map(r => Number(r.kwh_total)).filter(v => !isNaN(v));
+  /* ── Calculs ─────────────────────────────────── */
+  compute(rows);
+
+  btn.disabled = false;
+  btn.textContent = '⟳ Actualiser';
+  toast(`${rows.length} mesures chargées`, 'success');
+}
+
+/* ── 9. COMPUTE & RENDER ──────────────────────── */
+function compute(rows){
+
+  /* kWh : cumulatif → delta max−min */
+  const kwhValues = rows.map(r => Number(r.kwh_total)).filter(v => !isNaN(v) && v > 0);
   const totalEnergy = kwhValues.length > 1
     ? Math.max(...kwhValues) - Math.min(...kwhValues)
     : 0;
 
-  /* Puissance */
-  let totalPower = 0, peakPower = 0, peakHour = '--';
-  let totalAP = 0, apCount = 0;
-  let totalPF = 0, pfCount = 0;
-  let totalFreq = 0, freqCount = 0;
+  let sumPower=0, peakPower=0, peakHour='—';
+  let sumAP=0, cntAP=0;
+  let sumPF=0, cntPF=0;
+  let sumFreq=0, cntFreq=0;
+  let groupeCount=0;
+  let kwhSBEE=0, kwhGroupe=0;
+  const hourlyMap={};
 
-  /* Groupe vs SBEE — basé sur sbee_ok (source de vérité du firmware) */
-  let groupeCount = 0;
-  let kwhSBEE = 0, kwhGroupe = 0;
+  rows.forEach((item, idx) => {
+    const power = Number(item.power_w) || 0;
+    const ap    = Number(item.ap)      || 0;
+    const pf    = Number(item.pf)      || 0;
+    const freq  = Number(item.freq)    || 0;
 
-  /* Cartes horaires */
-  const hourlyMap = {};        // { '14h': { sbee: 0, groupe: 0 } }
-
-  telemetry.forEach((item, idx) => {
-    const power  = Number(item.power_w) || 0;
-    const ap     = Number(item.ap)      || 0;
-    const pf     = Number(item.pf)      || 0;
-    const freq   = Number(item.freq)    || 0;
-
-    /* Détection groupe : sbee_ok = false → pas de réseau SBEE */
-    /* Fallback sur source === 'GROUPE' pour les données antérieures à la migration */
+    /* Source de vérité : sbee_ok du firmware
+       Fallback : source === 'GROUPE' pour anciennes données */
     const isGroupe = (item.sbee_ok === false) || (item.source === 'GROUPE');
 
-    totalPower += power;
+    sumPower += power;
     if(power > peakPower){
       peakPower = power;
-      peakHour = new Date(item.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'});
+      peakHour = fmtTime(item.created_at);
     }
-
-    if(ap > 0){ totalAP += ap; apCount++; }
-    if(pf > 0){ totalPF += pf; pfCount++; }
-    if(freq > 0){ totalFreq += freq; freqCount++; }
+    if(ap   > 0){ sumAP   += ap;   cntAP++;   }
+    if(pf   > 0){ sumPF   += pf;   cntPF++;   }
+    if(freq > 0){ sumFreq += freq; cntFreq++; }
     if(isGroupe) groupeCount++;
 
-    /* kWh par tranche (estimation différentielle entre deux mesures consécutives) */
+    /* kWh différentiel entre deux points consécutifs */
     if(idx > 0){
-      const prev    = telemetry[idx - 1];
-      const dtHours = (new Date(item.created_at) - new Date(prev.created_at)) / 3_600_000;
-      const wh      = ((Number(item.power_w) + Number(prev.power_w)) / 2) * dtHours;
-      const kwh     = wh / 1000;
+      const prev    = rows[idx - 1];
+      const dtH     = (new Date(item.created_at) - new Date(prev.created_at)) / 3_600_000;
+      const avgW    = (power + (Number(prev.power_w)||0)) / 2;
+      const kwh     = avgW * dtH / 1000;
       if(isGroupe) kwhGroupe += kwh;
-      else         kwhSBEE   += kwh;
-    }
+      else         kwhSBEE  += kwh;
 
-    /* Regroupement horaire */
-    const hour = new Date(item.created_at).getHours() + 'h';
-    if(!hourlyMap[hour]) hourlyMap[hour] = { sbee:0, groupe:0 };
-
-    if(idx > 0){
-      const prev    = telemetry[idx - 1];
-      const dtHours = (new Date(item.created_at) - new Date(prev.created_at)) / 3_600_000;
-      const kwh     = ((Number(item.power_w) + Number(prev.power_w)) / 2) * dtHours / 1000;
+      /* Regroupement horaire */
+      const hour = new Date(item.created_at).getHours() + 'h';
+      if(!hourlyMap[hour]) hourlyMap[hour] = { sbee:0, groupe:0 };
       if(isGroupe) hourlyMap[hour].groupe += kwh;
       else         hourlyMap[hour].sbee   += kwh;
     }
   });
 
-  const avgPower  = Math.round(totalPower / telemetry.length);
-  const avgAP     = apCount   > 0 ? Math.round(totalAP / apCount) : 0;
-  const avgPF     = pfCount   > 0 ? (totalPF / pfCount).toFixed(2) : '--';
-  const avgFreq   = freqCount > 0 ? (totalFreq / freqCount).toFixed(1) : '--';
-  const groupUsage= Math.round((groupeCount / telemetry.length) * 100);
+  const n        = rows.length;
+  const avgPower = Math.round(sumPower / n);
+  const avgAP    = cntAP   > 0 ? Math.round(sumAP   / cntAP)   : 0;
+  const avgPF    = cntPF   > 0 ? (sumPF   / cntPF).toFixed(2)  : '—';
+  const avgFreq  = cntFreq > 0 ? (sumFreq / cntFreq).toFixed(1) : '—';
+  const groupPct = Math.round((groupeCount / n) * 100);
 
-  /* Coûts différenciés */
+  /* Coûts — tarifs depuis settings Supabase */
   const costSBEE   = Math.round(kwhSBEE   * tariffSBEE);
   const costGroupe = Math.round(kwhGroupe * tariffGroupe);
   const costTotal  = costSBEE + costGroupe;
 
-  /* Statut SBEE courant (dernière mesure) */
-  const lastItem  = telemetry[telemetry.length - 1];
-  const sbeeOK    = lastItem.sbee_ok !== false && lastItem.source !== 'GROUPE';
-  const statusEl  = document.getElementById('sbee-status');
-  statusEl.innerHTML = sbeeOK
-    ? '<span class="status-dot dot-ok"></span>Réseau SBEE actif'
-    : '<span class="status-dot dot-err"></span>Groupe électrogène actif';
+  /* ── Mise à jour KPI ─────────────────────────── */
+  set('kpiEnergy',    totalEnergy.toFixed(3) + ' kWh');
+  set('kpiCost',      fmtFCFA(costTotal) + ' FCFA');
+  set('costSBEE',     fmtFCFA(costSBEE)   + ' FCFA');
+  set('costGroupe',   fmtFCFA(costGroupe) + ' FCFA');
+  set('kpiPeak',      peakPower + ' W');
+  set('kpiPeakHour',  'Heure du pic : ' + peakHour);
+  set('kpiAvgPower',  avgPower + ' W');
+  set('kpiGroup',     groupPct + ' %');
+  set('kpiGroupKwh',  kwhGroupe.toFixed(3) + ' kWh hors réseau SBEE');
+  set('kpiPF',        avgPF);
+  set('kpiFreq',      avgFreq + ' Hz');
+  set('kpiAP',        avgAP + ' VA');
 
-  /* ------------------------------------------------
-     MISE À JOUR KPI
-     ------------------------------------------------ */
-  document.getElementById('totalEnergy').innerHTML  = totalEnergy.toFixed(3) + ' kWh';
-  document.getElementById('estimatedCost').innerHTML= formatFCFA(costTotal) + ' FCFA';
-  document.getElementById('costSBEE').innerHTML     = formatFCFA(costSBEE)   + ' FCFA';
-  document.getElementById('costGroupe').innerHTML   = formatFCFA(costGroupe) + ' FCFA';
-  document.getElementById('peakPower').innerHTML    = peakPower + ' W';
-  document.getElementById('peakHour').innerHTML     = 'Heure du pic : ' + peakHour;
-  document.getElementById('avgPower').innerHTML     = avgPower  + ' W';
-  document.getElementById('groupUsage').innerHTML   = groupUsage + '%';
-  document.getElementById('groupKwh').innerHTML     = kwhGroupe.toFixed(3) + ' kWh hors réseau SBEE';
-  document.getElementById('avgPF').innerHTML        = avgPF;
-  document.getElementById('avgFreq').innerHTML      = avgFreq + ' Hz';
-  document.getElementById('avgAP').innerHTML        = avgAP + ' VA';
+  /* Statut SBEE (dernière mesure) */
+  const last = rows[rows.length - 1];
+  updateSBEEBadge(last);
 
-  /* ------------------------------------------------
-     POWER CHART
-     ------------------------------------------------ */
-  powerChart.data.labels = [];
-  powerChart.data.datasets[0].data = [];
-  telemetry.forEach(item => {
-    powerChart.data.labels.push(
-      new Date(item.created_at).toLocaleTimeString('fr-FR', {hour:'2-digit',minute:'2-digit'})
-    );
-    powerChart.data.datasets[0].data.push(item.power_w);
-  });
-  powerChart.update();
+  /* ── Graphiques ──────────────────────────────── */
+  updatePowerChart(rows);
+  updateSplitChart(hourlyMap);
+  updateHourlyChart(hourlyMap);
 
-  /* ------------------------------------------------
-     SBEE vs GROUPE CHART
-     ------------------------------------------------ */
-  splitChart.data.labels = [];
-  splitChart.data.datasets[0].data = [];
-  splitChart.data.datasets[1].data = [];
-  Object.keys(hourlyMap).forEach(hour => {
-    splitChart.data.labels.push(hour);
-    splitChart.data.datasets[0].data.push(hourlyMap[hour].sbee.toFixed(3));
-    splitChart.data.datasets[1].data.push(hourlyMap[hour].groupe.toFixed(3));
-  });
-  splitChart.update();
-
-  /* ------------------------------------------------
-     HOURLY TOTAL CHART
-     ------------------------------------------------ */
-  hourlyChart.data.labels = [];
-  hourlyChart.data.datasets[0].data = [];
-  Object.keys(hourlyMap).forEach(hour => {
-    const total = hourlyMap[hour].sbee + hourlyMap[hour].groupe;
-    hourlyChart.data.labels.push(hour);
-    hourlyChart.data.datasets[0].data.push(total.toFixed(3));
-  });
-  hourlyChart.update();
+  hideOverlay('overlayPower');
+  hideOverlay('overlaySplit');
+  hideOverlay('overlayHourly');
 }
 
-/* ================================================
-   FORMAT FCFA
-   ================================================ */
-function formatFCFA(v){
-  return v.toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+/* ── 10. CHART UPDATES ────────────────────────── */
+function updatePowerChart(rows){
+  const MAX = 200;
+  const step = rows.length > MAX ? Math.ceil(rows.length / MAX) : 1;
+  const sampled = rows.filter((_,i) => i % step === 0);
+
+  charts.power.data.labels = sampled.map(r => fmtTime(r.created_at));
+  charts.power.data.datasets[0].data = sampled.map(r => Number(r.power_w) || 0);
+  charts.power.update('none');
 }
 
-/* ================================================
-   INIT
-   ================================================ */
-initCharts();
-loadAnalytics();
+function updateSplitChart(hourlyMap){
+  const hours = Object.keys(hourlyMap).sort((a,b) => parseInt(a)-parseInt(b));
+  charts.split.data.labels = hours;
+  charts.split.data.datasets[0].data = hours.map(h => +hourlyMap[h].sbee.toFixed(4));
+  charts.split.data.datasets[1].data = hours.map(h => +hourlyMap[h].groupe.toFixed(4));
+  charts.split.update('none');
+}
 
-/* ================================================
-   REALTIME — on insère seulement le nouveau point
-   dans le chart puissance, puis on recharge les KPI
-   toutes les 60 s pour ne pas surcharger
-   ================================================ */
-let lastReloadKPI = Date.now();
+function updateHourlyChart(hourlyMap){
+  const hours = Object.keys(hourlyMap).sort((a,b) => parseInt(a)-parseInt(b));
+  charts.hourly.data.labels = hours;
+  charts.hourly.data.datasets[0].data = hours.map(h =>
+    +((hourlyMap[h].sbee + hourlyMap[h].groupe).toFixed(4)));
+  charts.hourly.update('none');
+}
 
-supabaseClient
-  .channel('analytics-live')
-  .on('postgres_changes',{ event:'INSERT', schema:'public', table:'telemetry' }, payload => {
+/* ── 11. SBEE STATUS BADGE ───────────────────── */
+function updateSBEEBadge(item){
+  const badge = document.getElementById('sbee-badge');
+  const label = document.getElementById('sbee-label');
 
-    /* Vérifier que l'INSERT concerne bien notre capteur */
-    if(payload.new.sensor_id !== currentSensorId) return;
+  if(!item){
+    badge.className = 'sbee-badge';
+    label.textContent = 'Aucune donnée';
+    return;
+  }
 
-    /* Insérer le nouveau point dans le chart puissance */
-    const ts = new Date(payload.new.created_at)
-      .toLocaleTimeString('fr-FR', {hour:'2-digit', minute:'2-digit'});
-    powerChart.data.labels.push(ts);
-    powerChart.data.datasets[0].data.push(payload.new.power_w);
-    /* Garder max 120 points pour la lisibilité */
-    if(powerChart.data.labels.length > 120){
-      powerChart.data.labels.shift();
-      powerChart.data.datasets[0].data.shift();
-    }
-    powerChart.update('none');
+  const isGroupe = (item.sbee_ok === false) || (item.source === 'GROUPE');
+  if(isGroupe){
+    badge.className = 'sbee-badge amber';
+    label.textContent = 'Groupe électrogène actif';
+  } else {
+    badge.className = 'sbee-badge ok';
+    label.textContent = 'Réseau SBEE actif';
+  }
+}
 
-    /* Recharger les KPI agrégés max 1 fois par minute */
-    if(Date.now() - lastReloadKPI > 60_000){
-      lastReloadKPI = Date.now();
-      loadAnalytics();
-    }
-  })
-  .subscribe();
+/* ── 12. REALTIME ─────────────────────────────── */
+function setupRealtime(){
+  if(realtimeChan) realtimeChan.unsubscribe();
+
+  realtimeChan = sb
+    .channel('consommation-live')
+    .on('postgres_changes',{ event:'INSERT', schema:'public', table:'telemetry' }, payload => {
+      if(payload.new.sensor_id !== currentSensorId) return;
+
+      const item = payload.new;
+      const ts   = fmtTime(item.created_at);
+
+      /* Insérer dans le chart puissance */
+      charts.power.data.labels.push(ts);
+      charts.power.data.datasets[0].data.push(Number(item.power_w)||0);
+      if(charts.power.data.labels.length > 150){
+        charts.power.data.labels.shift();
+        charts.power.data.datasets[0].data.shift();
+      }
+      charts.power.update('none');
+
+      /* Mettre à jour le badge SBEE */
+      updateSBEEBadge(item);
+
+      /* Recharger les KPI agrégés max 1×/minute */
+      if(Date.now() - lastKPIReload > 60_000){
+        lastKPIReload = Date.now();
+        loadAnalytics();
+      }
+    })
+    .subscribe(status => {
+      if(status === 'SUBSCRIBED')
+        console.log('[EnergyTrack] Realtime actif — capteur', currentSensorId);
+    });
+}
+
+/* ── 13. HELPERS ──────────────────────────────── */
+function set(id, val){
+  const el = document.getElementById(id);
+  if(el) el.textContent = val;
+}
+
+function resetKPIs(){
+  ['kpiEnergy','kpiCost','costSBEE','costGroupe','kpiPeak',
+   'kpiAvgPower','kpiGroup','kpiGroupKwh','kpiPF','kpiFreq','kpiAP']
+    .forEach(id => set(id, '—'));
+  set('kpiPeakHour', 'Heure du pic : —');
+}
+
+function fmtTime(isoStr){
+  return new Date(isoStr).toLocaleTimeString('fr-FR',{ hour:'2-digit', minute:'2-digit' });
+}
+
+function fmtFCFA(v){
+  return Math.round(v).toString().replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+}
+
+/* ── 14. INIT ─────────────────────────────────── */
+(async () => {
+  initCharts();
+
+  const user = await getUser();
+  if(!user) return;
+
+  await loadSettings(user.id);
+  await populateSites(user.id);
+
+  if(currentSensorId){
+    await loadAnalytics();
+    setupRealtime();
+  }
+})();
 </script>
 </body>
 </html>
