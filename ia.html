@@ -585,10 +585,6 @@ async function refreshData() {
 function computeStats(rows) {
   const n = rows.length;
 
-  /* kWh total : delta max–min du compteur cumulatif */
-  const kwhVals = rows.map(r => Number(r.kwh_total)).filter(v => !isNaN(v) && v > 0);
-  const totalKwh = kwhVals.length > 1 ? Math.
-
   let peakPower = 0, sumPower = 0;
   let kwhGroupe = 0, kwhSBEE = 0;
   let outageEvents = 0, outageMs = 0, inOutage = false, outageStart = null;
@@ -605,7 +601,7 @@ function computeStats(rows) {
     if (pf > 0) { sumPF += pf; cntPF++; }
     if (isGroupe) groupeCount++;
 
-    /* kWh différentiel (trapèze) */
+    /* kWh différentiel (trapèze) — source unique de vérité pour kWh */
     if (idx > 0) {
       const prev = rows[idx - 1];
       const dtH  = (new Date(item.created_at) - new Date(prev.created_at)) / 3_600_000;
@@ -629,6 +625,11 @@ function computeStats(rows) {
   if (inOutage && outageStart) {
     outageMs += new Date(rows[rows.length - 1].created_at) - outageStart;
   }
+
+  /* ── FIX : totalKwh = somme cohérente des deux sous-totaux trapèze ──
+     On n'utilise plus le delta max/min de kwh_total (compteur cumulatif)
+     qui était incohérent avec kwhGroupe + kwhSBEE calculés par trapèze. */
+  const totalKwh = kwhSBEE + kwhGroupe;
 
   const outageMin  = Math.round(outageMs / 60000);
   const groupPct   = Math.round((groupeCount / n) * 100);
@@ -676,22 +677,22 @@ function computeStats(rows) {
 
   /* ── Sauvegarder pour l'IA ── */
   lastStats = {
-    periode_heures:     Number(document.getElementById('periodFilter').value),
-    energie_totale_kwh: totalKwh.toFixed(3),
-    kwh_sbee:           kwhSBEE.toFixed(3),
-    kwh_groupe:         kwhGroupe.toFixed(3),
-    part_groupe_pct:    groupPct,
-    coupures_sbee:      outageEvents,
-    duree_coupures_min: outageMin,
-    pic_puissance_w:    peakPower,
-    cout_sbee_fcfa:     costSBEE,
-    cout_groupe_fcfa:   costGroupe,
-    surcout_groupe_fcfa:surcout,
-    facteur_puissance:  avgPF,
-    tarif_sbee:         tariffSBEE,
-    tarif_groupe:       tariffGroupe,
-    score_energetique:  score,
-    nb_mesures:         n
+    periode_heures:      Number(document.getElementById('periodFilter').value),
+    energie_totale_kwh:  totalKwh.toFixed(3),
+    kwh_sbee:            kwhSBEE.toFixed(3),
+    kwh_groupe:          kwhGroupe.toFixed(3),
+    part_groupe_pct:     groupPct,
+    coupures_sbee:       outageEvents,
+    duree_coupures_min:  outageMin,
+    pic_puissance_w:     peakPower,
+    cout_sbee_fcfa:      costSBEE,
+    cout_groupe_fcfa:    costGroupe,
+    surcout_groupe_fcfa: surcout,
+    facteur_puissance:   avgPF,
+    tarif_sbee:          tariffSBEE,
+    tarif_groupe:        tariffGroupe,
+    score_energetique:   score,
+    nb_mesures:          n
   };
 }
 
@@ -829,7 +830,8 @@ async function runAIAnalysis() {
     );
 
     const data = await response.json();
-console.log('Réponse brute Gemini:', JSON.stringify(data)) 
+    console.log('Réponse brute Gemini:', JSON.stringify(data));
+
     if (!response.ok) {
       throw new Error(data.error || `Erreur HTTP ${response.status}`);
     }
