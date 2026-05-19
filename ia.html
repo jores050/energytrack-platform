@@ -592,54 +592,143 @@ async function loadAlerts(){
   }).join('')+'</div>';
 }
 
-/* ── ANALYSE IA VIA API CLAUDE ──────────────── */
+/* ── ANALYSE IA VIA API  ──────────────── */
 async function runAIAnalysis(){
-  if(!lastStats){ toast('Chargez d\'abord les données.','warn'); return; }
 
-  const btn = document.getElementById('btnAnalyze');
-  btn.disabled=true; btn.textContent='⟳ Analyse en cours…';
-  document.getElementById('aiStatus').innerHTML = '<span class="thinking-dots"><span></span><span></span><span></span></span> Claude analyse vos données…';
+if(!lastStats){
 
-  document.getElementById('aiOutput').innerHTML = `<div class="placeholder"><div class="spinner" style="border-top-color:var(--purple)"></div>Analyse intelligente en cours…</div>`;
+toast(
+"Chargez les données",
+"warn"
+);
 
-  const prompt = buildPrompt(lastStats);
+return;
 
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `Tu es EnergyTrack AI, un expert en gestion d'énergie pour les PME d'Afrique de l'Ouest (Bénin).
-Tu analyses des données de consommation électrique réelles et fournis des recommandations concrètes, chiffrées en FCFA.
-Tes recommandations doivent être directement actionnables par un gérant de PME non-technique.
-Ne mentionne jamais de volts, ampères ou termes trop techniques.
-Parle uniquement en FCFA, kWh et heures.
-Sois direct, concis et bienveillant. Utilise des emojis pour structurer.
-Réponds UNIQUEMENT en français.`,
-        messages:[{ role:'user', content: prompt }]
-      })
-    });
+}
 
-    const data = await response.json();
 
-    if(!response.ok){
-      throw new Error(data.error?.message || 'Erreur API Claude');
-    }
+const btn=
+document.getElementById(
+'btnAnalyze'
+);
 
-    const text = data.content?.map(b=>b.type==='text'?b.text:'').join('') || '';
-    renderAIOutput(text);
-    document.getElementById('aiStatus').textContent = '✅ Analyse complète · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
-    toast('Analyse IA générée avec succès','success');
 
-  } catch(err){
-    document.getElementById('aiOutput').innerHTML = `<div class="placeholder" style="color:var(--red)">❌ Erreur : ${err.message}</div>`;
-    document.getElementById('aiStatus').textContent = 'Erreur d\'analyse';
-    toast('Erreur IA : '+err.message,'error');
-  }
+btn.disabled=true;
 
-  btn.disabled=false; btn.textContent='🤖 Relancer l\'analyse';
+
+btn.textContent=
+'Analyse...';
+
+
+
+try{
+
+const prompt=
+buildPrompt(
+lastStats
+);
+
+
+const response=
+
+await fetch(
+
+'https://prvsatpdgybnevolzhhf.supabase.co/functions/v1/dynamic-task',
+
+{
+
+method:'POST',
+
+headers:{
+
+'Content-Type':
+
+'application/json'
+
+},
+
+body:
+
+JSON.stringify({
+
+prompt
+
+})
+
+}
+
+);
+
+
+
+const data=
+await response.json();
+
+
+
+const result=
+
+data
+?.candidates
+?.[0]
+?.content
+?.parts
+?.[0]
+?.text;
+
+
+
+if(!result){
+
+throw new Error(
+
+"Réponse vide"
+
+);
+
+}
+
+
+
+renderAIOutput(
+result
+);
+
+
+
+toast(
+
+'Analyse terminée',
+
+'success'
+
+);
+
+
+}
+
+catch(err){
+
+toast(
+
+err.message,
+
+'error'
+
+);
+
+console.error(
+err
+);
+
+}
+
+
+btn.disabled=false;
+
+btn.textContent=
+'🤖 Relancer';
+
 }
 
 /* ── PROMPT BUILDER ─────────────────────────── */
