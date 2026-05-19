@@ -319,7 +319,7 @@ body{
   <!-- Analyse IA -->
   <div class="ai-card">
     <div class="ai-card-header">
-      <h2>🤖 Recommandations IA <span class="ai-badge">Claude Sonnet</span></h2>
+      <h2>🤖 Recommandations IA <span class="ai-badge">Gemini</span></h2>
       <span class="ai-status" id="aiStatus">En attente d'analyse</span>
     </div>
     <div id="aiOutput">
@@ -342,6 +342,11 @@ const SUPABASE_KEY = 'sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
 const sb = (typeof supabaseClient !== 'undefined')
   ? supabaseClient
   : supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+/* ── GEMINI CONFIG ─────────────────────────── */
+const GEMINI_API_KEY  = 'VOTRE_CLE_API_GEMINI'; // 🔑 Remplacer par votre clé API Google Gemini
+const GEMINI_MODEL    = 'gemini-2.0-flash';
+const GEMINI_ENDPOINT = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
 
 /* ── ÉTAT ──────────────────────────────────── */
 let currentSensorId = null;
@@ -488,10 +493,10 @@ function computeStats(rows){
 
   /* Score sur 100 */
   let score = 100;
-  score -= Math.min(35, groupPct * 0.7);           // groupe pénalise jusqu'à 35 pts
-  score -= Math.min(20, outageEvents * 3);          // chaque coupure : -3 pts max 20
-  if(peakPower>5000) score -= 10;                  // surconsommation
-  if(avgPF !== '—' && Number(avgPF)<0.8) score -= 10; // mauvais PF
+  score -= Math.min(35, groupPct * 0.7);
+  score -= Math.min(20, outageEvents * 3);
+  if(peakPower>5000) score -= 10;
+  if(avgPF !== '—' && Number(avgPF)<0.8) score -= 10;
   score = Math.max(0, Math.round(score));
 
   /* Couleur score */
@@ -592,43 +597,60 @@ async function loadAlerts(){
   }).join('')+'</div>';
 }
 
-/* ── ANALYSE IA VIA API CLAUDE ──────────────── */
+/* ── ANALYSE IA VIA API GEMINI ──────────────── */
 async function runAIAnalysis(){
   if(!lastStats){ toast('Chargez d\'abord les données.','warn'); return; }
 
   const btn = document.getElementById('btnAnalyze');
   btn.disabled=true; btn.textContent='⟳ Analyse en cours…';
-  document.getElementById('aiStatus').innerHTML = '<span class="thinking-dots"><span></span><span></span><span></span></span> Claude analyse vos données…';
-
+  document.getElementById('aiStatus').innerHTML = '<span class="thinking-dots"><span></span><span></span><span></span></span> Gemini analyse vos données…';
   document.getElementById('aiOutput').innerHTML = `<div class="placeholder"><div class="spinner" style="border-top-color:var(--purple)"></div>Analyse intelligente en cours…</div>`;
 
-  const prompt = buildPrompt(lastStats);
-
-  try {
-    const response = await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{ 'Content-Type':'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: `Tu es EnergyTrack AI, un expert en gestion d'énergie pour les PME d'Afrique de l'Ouest (Bénin).
+  const systemInstruction = `Tu es EnergyTrack AI, un expert en gestion d'énergie pour les PME d'Afrique de l'Ouest (Bénin).
 Tu analyses des données de consommation électrique réelles et fournis des recommandations concrètes, chiffrées en FCFA.
 Tes recommandations doivent être directement actionnables par un gérant de PME non-technique.
 Ne mentionne jamais de volts, ampères ou termes trop techniques.
 Parle uniquement en FCFA, kWh et heures.
 Sois direct, concis et bienveillant. Utilise des emojis pour structurer.
-Réponds UNIQUEMENT en français.`,
-        messages:[{ role:'user', content: prompt }]
+Réponds UNIQUEMENT en français.`;
+
+  const prompt = buildPrompt(lastStats);
+
+  try {
+    const response = await fetch(GEMINI_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        system_instruction: {
+          parts: [{ text: systemInstruction }]
+        },
+        contents: [{
+          role: 'user',
+          parts: [{ text: prompt }]
+        }],
+        generationConfig: {
+          maxOutputTokens: 1024,
+          temperature: 0.7
+        }
       })
     });
 
     const data = await response.json();
 
     if(!response.ok){
-      throw new Error(data.error?.message || 'Erreur API Claude');
+      const errMsg = data.error?.message || JSON.stringify(data.error) || 'Erreur API Gemini';
+      throw new Error(errMsg);
     }
 
-    const text = data.content?.map(b=>b.type==='text'?b.text:'').join('') || '';
+    /* Extraction du texte depuis la réponse Gemini */
+    const text = data.candidates?.[0]?.content?.parts
+      ?.map(p => p.text || '')
+      .join('') || '';
+
+    if(!text){
+      throw new Error('Réponse vide de Gemini. Vérifiez votre clé API.');
+    }
+
     renderAIOutput(text);
     document.getElementById('aiStatus').textContent = '✅ Analyse complète · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
     toast('Analyse IA générée avec succès','success');
@@ -676,7 +698,6 @@ Chaque recommandation doit commencer par un emoji et indiquer l'économie mensue
 
 /* ── RENDER AI OUTPUT ───────────────────────── */
 function renderAIOutput(text){
-  /* Transformation simple du texte en HTML lisible */
   let html = text
     .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
     .replace(/^#{1,3} (.+)$/gm,'<span class="section-title">$1</span>')
@@ -698,8 +719,6 @@ function resetKPIs(){
   const user = await getUser();
   if(!user) return;
 
-  /* Vérification accès premium IA */
-  /* On vérifie via la table subscriptions + plans (features.ai) */
   const { data:sub } = await sb
     .from('subscriptions')
     .select('status, expires_at, plan_id')
@@ -712,7 +731,6 @@ function resetKPIs(){
       window.location.href='premium-required.html'; return;
     }
   } else {
-    /* Pas d'abonnement actif → rediriger */
     /* Commenté pour le développement — décommenter en production : */
     /* window.location.href='premium-required.html'; return; */
     console.warn('[EnergyTrack] Accès IA sans abonnement actif (mode dev)');
