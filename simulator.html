@@ -249,10 +249,9 @@ async function buildAndInsert() {
   const freq    = parseFloat(vals.freq.toFixed(2));
 
   /* kWh différentiel sur la durée de l'intervalle */
-  const dtHours = INTERVAL_MS / 3600000;
-  const kwhDelta = power * dtHours;
+  const kwhDelta = parseFloat((power * 60 / 3_600_000).toFixed(6)); // simule 1 minute
   kwhCumul += kwhDelta;
-  const kwhTotal = Number(kwhCumul.toFixed(6));
+  const kwhTotal = parseFloat(kwhCumul.toFixed(6));
 
   /* ── PAYLOAD COMPLET aligné sur le schéma telemetry ── */
   const payload = {
@@ -340,17 +339,7 @@ async function startSimulation() {
   if (!siteId || !sensorId) { alert('Sélectionnez un site ET un capteur.'); return; }
 
   simulation = true;
-  cntSent = 0;
-  cntErr = 0;
-
-  const { data:last } = await supabaseClient
-    .from('telemetry')
-    .select('kwh_total')
-    .order('created_at',{ascending:false})
-    .limit(1)
-    .maybeSingle();
-
-  kwhCumul = last?.kwh_total ?? (45 + Math.random()*30);
+  kwhCumul = cntSent = cntErr = 0;
   document.getElementById('cnt-sent').textContent = '0';
   document.getElementById('cnt-err').textContent  = '0';
   document.getElementById('cnt-kwh').textContent  = '0.0000';
