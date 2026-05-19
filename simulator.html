@@ -137,10 +137,10 @@ let simulation  = false;
 let interval    = null;
 let progressInt = null;
 let scenario    = 'normal';
-let kwhCumul = 45 + Math.random() * 30; // Démarre à 45–75 kWh (comme un vrai compteur mensuel);
+let kwhCumul    = 0;
 let cntSent     = 0;
 let cntErr      = 0;
-const INTERVAL_MS = 5000;
+const INTERVAL_MS = 5000; // 5 secondes entre chaque mesure
 
 /* ── SCÉNARIOS ────────────────────────────────── */
 const SCENARIOS = {
@@ -241,19 +241,21 @@ async function buildAndInsert() {
   const sensorId = document.getElementById('sensorSelector').value;
   if (!siteId || !sensorId) { addLog('Aucun site/capteur sélectionné.', 'warn'); return false; }
 
-  const vals   = SCENARIOS[scenario]();
+  const vals    = SCENARIOS[scenario]();
   const voltage = parseFloat(vals.voltage.toFixed(1));
   const power   = Math.round(vals.power);
   const current = voltage > 0 ? parseFloat((power / voltage).toFixed(3)) : 0;
   const pf      = parseFloat(vals.pf.toFixed(3));
   const freq    = parseFloat(vals.freq.toFixed(2));
 
-  /* kWh différentiel sur la durée de l'intervalle */
-  const kwhDelta = parseFloat((power * 60 / 3_600_000).toFixed(6)); // simule 1 minute
-  kwhCumul += kwhDelta;
+  /* ── FIX 1 : kWh correct (W → kW, intervalle réel en heures) ──
+     power en W / 1000 = kW  ×  INTERVAL_MS en heures = kWh réel    */
+  const dtHeures = INTERVAL_MS / 3_600_000;          // 5 000 ms → 0.001388 h
+  const kwhDelta = (power / 1000) * dtHeures;        // kW × h = kWh
+  kwhCumul      += kwhDelta;
   const kwhTotal = parseFloat(kwhCumul.toFixed(6));
 
-  /* ── PAYLOAD COMPLET aligné sur le schéma telemetry ── */
+  /* ── PAYLOAD ── */
   const payload = {
     sensor_id:   sensorId,
     site_id:     siteId,
@@ -261,10 +263,10 @@ async function buildAndInsert() {
     current,
     power_w:     power,
     kwh_total:   kwhTotal,
-    pf,                       // facteur de puissance (0–1)
-    freq,                     // fréquence Hz
-    sbee_ok:     vals.sbee_ok, // true = réseau SBEE présent
-    source:      vals.source,  // 'SBEE' | 'GROUPE'
+    pf,
+    freq,
+    sbee_ok:     vals.sbee_ok,
+    source:      vals.source,
     temperature: Math.round(25 + Math.random() * 15),
   };
 
@@ -281,17 +283,21 @@ async function buildAndInsert() {
     return false;
   }
 
-  /* Mettre à jour last_seen + status du capteur */
-  await supabaseClient
+  /* ── FIX 2 : status 'ACTIVE' au lieu de 'ONLINE' (valeur acceptée par l'enum) ── */
+  const { error: sensorErr } = await supabaseClient
     .from('sensors')
-    .update({ last_seen: new Date().toISOString(), status: 'ONLINE' })
+    .update({ status: 'ACTIVE' })
     .eq('id', sensorId);
+
+  if (sensorErr) {
+    addLog('⚠️ Mise à jour capteur échouée : ' + sensorErr.message, 'warn');
+  }
 
   cntSent++;
   document.getElementById('cnt-sent').textContent = cntSent;
   document.getElementById('cnt-kwh').textContent  = kwhCumul.toFixed(4);
   addLog(
-    `✅ ${power}W | ${voltage}V | PF:${pf} | ${vals.source} | sbee_ok:${vals.sbee_ok}`,
+    `✅ ${power}W | ${voltage}V | PF:${pf} | ${vals.source} | kWh:${kwhTotal}`,
     'ok'
   );
   return true;
@@ -339,10 +345,23 @@ async function startSimulation() {
   if (!siteId || !sensorId) { alert('Sélectionnez un site ET un capteur.'); return; }
 
   simulation = true;
-  kwhCumul = cntSent = cntErr = 0;
+
+  /* ── FIX 3 : reprendre le kwhCumul depuis la dernière valeur en base ──
+     Évite de repartir de 0 à chaque démarrage et maintient un compteur continu */
+  const { data: last } = await supabaseClient
+    .from('telemetry')
+    .select('kwh_total')
+    .eq('sensor_id', sensorId)
+    .order('created_at', { ascending: false })
+    .limit(1)
+    .maybeSingle();
+
+  kwhCumul = last?.kwh_total ?? 0;
+
+  cntSent = cntErr = 0;
   document.getElementById('cnt-sent').textContent = '0';
   document.getElementById('cnt-err').textContent  = '0';
-  document.getElementById('cnt-kwh').textContent  = '0.0000';
+  document.getElementById('cnt-kwh').textContent  = kwhCumul.toFixed(4);
   document.getElementById('btn-start').disabled   = true;
   document.getElementById('btn-stop').disabled    = false;
 
@@ -350,7 +369,7 @@ async function startSimulation() {
   badge.className = 'live-badge';
   badge.innerHTML = '<span class="live-dot"></span>EN DIRECT';
 
-  addLog('▶ Démarré — scénario : ' + scenario, 'info');
+  addLog(`▶ Démarré — scénario : ${scenario} | kWh repris à : ${kwhCumul.toFixed(4)}`, 'info');
   await buildAndInsert();
   startProgressBar();
   interval = setInterval(buildAndInsert, INTERVAL_MS);
@@ -379,6 +398,19 @@ async function sendOnce() {
   const siteId   = document.getElementById('siteSelector').value;
   const sensorId = document.getElementById('sensorSelector').value;
   if (!siteId || !sensorId) { alert('Sélectionnez un site ET un capteur.'); return; }
+
+  /* Reprendre le kwhCumul si pas encore initialisé */
+  if (kwhCumul === 0) {
+    const { data: last } = await supabaseClient
+      .from('telemetry')
+      .select('kwh_total')
+      .eq('sensor_id', sensorId)
+      .order('created_at', { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    kwhCumul = last?.kwh_total ?? 0;
+  }
+
   addLog('📤 Envoi unique…', 'info');
   await buildAndInsert();
 }
@@ -403,3 +435,4 @@ loadSites();
 </script>
 </body>
 </html>
+ENDOFFILE
