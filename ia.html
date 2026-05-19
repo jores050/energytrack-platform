@@ -829,7 +829,7 @@ async function runAIAnalysis() {
     );
 
     const data = await response.json();
-
+console.log('Réponse brute Gemini:', JSON.stringify(data)) 
     if (!response.ok) {
       throw new Error(data.error || `Erreur HTTP ${response.status}`);
     }
