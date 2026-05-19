@@ -631,11 +631,39 @@ function computeStats(rows) {
      qui était incohérent avec kwhGroupe + kwhSBEE calculés par trapèze. */
   const totalKwh = kwhSBEE + kwhGroupe;
 
-  const outageMin  = Math.round(outageMs / 60000);
-  const groupPct   = Math.round((groupeCount / n) * 100);
-  const costSBEE   = Math.round(kwhSBEE   * tariffSBEE);
-  const costGroupe = Math.round(kwhGroupe * tariffGroupe);
-  const surcout    = Math.round(kwhGroupe * (tariffGroupe - tariffSBEE));
+ const outageMin = Math.round(outageMs / 60000);
+
+/* Part réelle du groupe basée sur les kWh consommés */
+const groupPct =
+
+totalKwh > 0
+
+?
+
+Math.round(
+
+(
+
+kwhGroupe
+
+/
+
+totalKwh
+
+)
+
+*
+
+100
+
+)
+
+:
+
+0;
+
+const costSBEE   = Math.round(kwhSBEE * tariffSBEE);
+const costGroupe = Math.round(kwhGroupe * tariffGroupe);
   const avgPF      = cntPF > 0 ? (sumPF / cntPF).toFixed(2) : '—';
 
   /* ── Score énergétique sur 100 ── */
