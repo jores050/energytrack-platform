@@ -869,49 +869,34 @@ console.log('Réponse brute Gemini:', JSON.stringify(data))
    PROMPT BUILDER
    ══════════════════════════════════════════════ */
 function buildPrompt(s) {
-  const kwhSBEE   = parseFloat(s.kwh_sbee);
-  const kwhGroupe = parseFloat(s.kwh_groupe);
-  const kwhTotal  = parseFloat(s.energie_totale_kwh);
+  return `Voici les données énergétiques réelles d'une PME à Cotonou (Bénin) sur les dernières ${s.periode_heures} heures :
 
-  // Projection mensuelle (30j)
-  const facteurMois = (30 * 24) / s.periode_heures;
-  const kwhMoisSBEE   = (kwhSBEE   * facteurMois).toFixed(1);
-  const kwhMoisGroupe = (kwhGroupe  * facteurMois).toFixed(1);
-  const coutMoisSBEE   = Math.round(kwhSBEE   * facteurMois * s.tarif_sbee);
-  const coutMoisGroupe = Math.round(kwhGroupe  * facteurMois * s.tarif_groupe);
-  const coutMoisTotal  = coutMoisSBEE + coutMoisGroupe;
+DONNÉES DE CONSOMMATION :
+- Énergie totale consommée : ${s.energie_totale_kwh} kWh
+- Dont réseau SBEE : ${s.kwh_sbee} kWh (tarif : ${s.tarif_sbee} FCFA/kWh)
+- Dont groupe électrogène : ${s.kwh_groupe} kWh (tarif : ${s.tarif_groupe} FCFA/kWh)
+- Part du groupe : ${s.part_groupe_pct}%
+- Coupures SBEE : ${s.coupures_sbee} interruption(s) · durée totale : ${s.duree_coupures_min} minutes
 
-  return `Tu es un conseiller en énergie pour PME en Afrique de l'Ouest. Voici les données réelles d'une PME à Cotonou (Bénin).
+COÛTS :
+- Coût réseau SBEE : ${s.cout_sbee_fcfa} FCFA
+- Coût groupe électrogène : ${s.cout_groupe_fcfa} FCFA
+- Surcoût lié au groupe (vs tarif SBEE) : ${s.surcout_groupe_fcfa} FCFA
 
-PÉRIODE ANALYSÉE : ${s.periode_heures} heures
+QUALITÉ :
+- Score énergétique EnergyTrack : ${s.score_energetique}/100
+- Pic de puissance détecté : ${s.pic_puissance_w} W
+- Facteur de puissance moyen : ${s.facteur_puissance}
+- Nombre de mesures analysées : ${s.nb_mesures}
 
-─── CONSOMMATION (période) ───────────────────────
-- Énergie SBEE   : ${s.kwh_sbee} kWh  ×  ${s.tarif_sbee} FCFA/kWh  = ${s.cout_sbee_fcfa} FCFA
-- Énergie groupe : ${s.kwh_groupe} kWh  ×  ${s.tarif_groupe} FCFA/kWh  = ${s.cout_groupe_fcfa} FCFA
-- TOTAL période  : ${kwhTotal.toFixed(3)} kWh — Coût total : ${s.cout_sbee_fcfa + s.cout_groupe_fcfa} FCFA
-- Surcoût groupe vs SBEE : ${s.surcout_groupe_fcfa} FCFA (différentiel ${s.tarif_groupe - s.tarif_sbee} FCFA/kWh × ${s.kwh_groupe} kWh)
+Fournis une analyse structurée avec :
+1. Un diagnostic de l'efficacité énergétique en 2-3 phrases
+2. Les 3 recommandations les plus impactantes, chacune avec l'économie estimée en FCFA/mois
+3. Un conseil spécifique sur l'utilisation du groupe électrogène si la part dépasse 20%
+4. Une alerte si le facteur de puissance est inférieur à 0,85 (coût caché)
+5. Un message de félicitation si le score est supérieur à 80
 
-─── PROJECTION MENSUELLE (30 jours) ─────────────
-- SBEE   : ${kwhMoisSBEE} kWh → ${coutMoisSBEE.toLocaleString('fr-FR')} FCFA/mois
-- Groupe : ${kwhMoisGroupe} kWh → ${coutMoisGroupe.toLocaleString('fr-FR')} FCFA/mois
-- TOTAL  : ${coutMoisTotal.toLocaleString('fr-FR')} FCFA/mois
-
-─── INDICATEURS QUALITÉ ──────────────────────────
-- Part groupe électrogène : ${s.part_groupe_pct}% (seuil critique : 20%)
-- Coupures SBEE : ${s.coupures_sbee} interruption(s) · durée totale : ${s.duree_coupures_min} min
-- Pic de puissance : ${s.pic_puissance_w} W
-- Facteur de puissance moyen : ${s.facteur_puissance} (seuil alerte : 0,85)
-- Score EnergyTrack : ${s.score_energetique}/100
-- Mesures analysées : ${s.nb_mesures}
-
-─── CE QUE TU DOIS FOURNIR ───────────────────────
-1. Diagnostic de l'efficacité énergétique (2-3 phrases, basé sur les chiffres ci-dessus)
-2. Les 3 recommandations les plus impactantes avec l'économie mensuelle estimée en FCFA (calcule à partir de la projection mensuelle ci-dessus)
-3. Conseil spécifique groupe électrogène si sa part dépasse 20%
-4. Alerte facteur de puissance si < 0,85
-5. Félicitations si score > 80
-
-IMPORTANT : Base tous tes calculs d'économies sur la projection mensuelle fournie ci-dessus. Ne remets pas en question la cohérence des données.`;
+Chaque recommandation doit commencer par un emoji et indiquer l'économie mensuelle estimée en FCFA.`;
 }
 
 /* ══════════════════════════════════════════════
