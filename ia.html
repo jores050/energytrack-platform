@@ -664,6 +664,25 @@ totalKwh
 
 const costSBEE   = Math.round(kwhSBEE * tariffSBEE);
 const costGroupe = Math.round(kwhGroupe * tariffGroupe);
+  const surcout =
+
+Math.round(
+
+kwhGroupe
+
+*
+
+(
+
+tariffGroupe
+
+-
+
+tariffSBEE
+
+)
+
+);
   const avgPF      = cntPF > 0 ? (sumPF / cntPF).toFixed(2) : '—';
 
   /* ── Score énergétique sur 100 ── */
