@@ -319,7 +319,7 @@ body{
   <!-- Analyse IA -->
   <div class="ai-card">
     <div class="ai-card-header">
-      <h2>🤖 Recommandations IA <span class="ai-badge">Claude Sonnet</span></h2>
+      <h2>🤖 Recommandations IA <span class="ai-badge"> Gemini 2.5 Flash </span></h2>
       <span class="ai-status" id="aiStatus">En attente d'analyse</span>
     </div>
     <div id="aiOutput">
@@ -377,19 +377,86 @@ async function loadSettings(userId){
 
 /* ── SITES ──────────────────────────────────── */
 async function populateSites(userId){
-  const { data:sites } = await sb.from('sites').select('id,name,city').eq('user_id',userId).order('created_at');
-  const sel = document.getElementById('siteFilter');
-  sel.innerHTML = '';
-  if(!sites||!sites.length){ sel.innerHTML='<option value="">Aucun site</option>'; return; }
-  sites.forEach(s=>{
-    const o=document.createElement('option');
-    o.value=s.id;
-    o.textContent=s.name+(s.city?` (${s.city})`:'');
-    sel.appendChild(o);
-  });
-  await populateSensors(sites[0].id);
+
+const { data:sites } =
+await sb
+.from('sites')
+.select('id,name,city')
+.eq('user_id',userId)
+.order('created_at');
+
+
+const sel =
+document.getElementById(
+'siteFilter'
+);
+
+
+sel.innerHTML='';
+
+
+if(!sites || !sites.length){
+
+sel.innerHTML=
+'<option>Aucun site</option>';
+
+return;
+
 }
 
+
+sites.forEach(s=>{
+
+const o=
+document.createElement(
+'option'
+);
+
+
+o.value=s.id;
+
+
+o.textContent=
+s.name+
+
+(
+
+s.city
+
+?
+
+` (${s.city})`
+
+:
+
+''
+
+);
+
+
+sel.appendChild(
+o
+);
+
+
+});
+
+
+await populateSensors(
+
+sites[0].id
+
+);
+
+
+if(currentSensorId){
+
+await refreshData();
+
+}
+
+
+}
 async function populateSensors(siteId){
   currentSiteId = siteId;
   const { data:sensors } = await sb.from('sensors').select('id,name,sensor_name,serial_number,status').eq('site_id',siteId).order('created_at');
@@ -595,38 +662,99 @@ async function loadAlerts(){
 /* ── ANALYSE IA VIA API  ──────────────── */
 async function runAIAnalysis(){
 
+const btn =
+document.getElementById(
+'btnAnalyze'
+);
+
+
+if(!lastStats){
+
+await refreshData();
+
+
 if(!lastStats){
 
 toast(
-"Chargez les données",
-"warn"
+
+'Aucune donnée disponible',
+
+'warn'
+
 );
 
 return;
 
 }
 
-
-const btn=
-document.getElementById(
-'btnAnalyze'
-);
+}
 
 
 btn.disabled=true;
 
 
 btn.textContent=
-'Analyse...';
 
+'🤖 Analyse...';
+
+
+
+document.getElementById(
+
+'aiStatus'
+
+).innerHTML=
+
+`
+
+<span class="thinking-dots">
+
+<span></span>
+
+<span></span>
+
+<span></span>
+
+</span>
+
+Gemini analyse...
+
+`;
+
+
+
+document.getElementById(
+
+'aiOutput'
+
+).innerHTML=
+
+`
+
+<div class="placeholder">
+
+<div class="spinner">
+
+</div>
+
+Analyse énergétique...
+
+</div>
+
+`;
 
 
 try{
 
+
 const prompt=
+
 buildPrompt(
+
 lastStats
+
 );
+
 
 
 const response=
@@ -637,7 +765,10 @@ await fetch(
 
 {
 
-method:'POST',
+method:
+
+'POST',
+
 
 headers:{
 
@@ -647,6 +778,7 @@ headers:{
 
 },
 
+
 body:
 
 JSON.stringify({
@@ -655,6 +787,7 @@ prompt
 
 })
 
+
 }
 
 );
@@ -662,11 +795,18 @@ prompt
 
 
 const data=
+
 await response.json();
 
 
 
-const result=
+console.log(
+data
+);
+
+
+
+const text=
 
 data
 ?.candidates
@@ -674,40 +814,89 @@ data
 ?.content
 ?.parts
 ?.[0]
-?.text;
+?.text
 
+||
 
+data
+?.response
 
-if(!result){
+||
 
-throw new Error(
+data
+?.message
 
-"Réponse vide"
+||
 
-);
-
-}
+"Analyse indisponible";
 
 
 
 renderAIOutput(
-result
+text
 );
+
+
+
+document.getElementById(
+
+'aiStatus'
+
+).textContent=
+
+'✅ Analyse terminée';
 
 
 
 toast(
 
-'Analyse terminée',
+'Analyse Gemini réussie',
 
 'success'
 
 );
 
 
-}
 
-catch(err){
+}catch(err){
+
+
+console.error(
+err
+);
+
+
+document.getElementById(
+
+'aiOutput'
+
+).innerHTML=
+
+`
+
+<div class="placeholder">
+
+❌
+
+Erreur :
+
+${err.message}
+
+</div>
+
+`;
+
+
+
+document.getElementById(
+
+'aiStatus'
+
+).textContent=
+
+'Erreur IA';
+
+
 
 toast(
 
@@ -717,16 +906,15 @@ err.message,
 
 );
 
-console.error(
-err
-);
 
 }
 
 
 btn.disabled=false;
 
+
 btn.textContent=
+
 '🤖 Relancer';
 
 }
