@@ -587,7 +587,7 @@ function computeStats(rows) {
 
   /* kWh total : delta max–min du compteur cumulatif */
   const kwhVals = rows.map(r => Number(r.kwh_total)).filter(v => !isNaN(v) && v > 0);
-  const totalKwh = kwhVals.length > 1 ? Math.max(...kwhVals) - Math.min(...kwhVals) : 0;
+  const totalKwh = kwhSBEE + kwhGroupe;
 
   let peakPower = 0, sumPower = 0;
   let kwhGroupe = 0, kwhSBEE = 0;
