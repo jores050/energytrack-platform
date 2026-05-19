@@ -248,10 +248,29 @@ async function buildAndInsert() {
   const pf      = parseFloat(vals.pf.toFixed(3));
   const freq    = parseFloat(vals.freq.toFixed(2));
 
-  /* kWh différentiel sur la durée de l'intervalle */
-  const kwhDelta = parseFloat((power * 60 / 3_600_000).toFixed(6)); // simule 1 minute
-  kwhCumul += kwhDelta;
-  const kwhTotal = parseFloat(kwhCumul.toFixed(6));
+  /* kWh différentiel selon le vrai intervalle */
+const kwhDelta =
+parseFloat(
+
+(
+
+power *
+
+(
+
+INTERVAL_MS / 1000
+
+)
+
+/
+
+3600000
+
+)
+
+.toFixed(6)
+
+);
 
   /* ── PAYLOAD COMPLET aligné sur le schéma telemetry ── */
   const payload = {
@@ -338,11 +357,68 @@ async function startSimulation() {
   const sensorId = document.getElementById('sensorSelector').value;
   if (!siteId || !sensorId) { alert('Sélectionnez un site ET un capteur.'); return; }
 
-  simulation = true;
-  kwhCumul = cntSent = cntErr = 0;
-  document.getElementById('cnt-sent').textContent = '0';
-  document.getElementById('cnt-err').textContent  = '0';
-  document.getElementById('cnt-kwh').textContent  = '0.0000';
+ simulation = true;
+
+cntSent = 0;
+cntErr = 0;
+
+/* récupérer dernier compteur enregistré */
+const { data:last } =
+await supabaseClient
+
+.from('telemetry')
+
+.select('kwh_total')
+
+.order(
+
+'created_at',
+
+{ ascending:false }
+
+)
+
+.limit(1)
+
+.maybeSingle();
+
+
+kwhCumul =
+
+last?.kwh_total
+
+??
+
+(
+
+45 +
+
+Math.random()*30
+
+);
+
+
+document.getElementById(
+
+'cnt-sent'
+
+).textContent='0';
+
+
+document.getElementById(
+
+'cnt-err'
+
+).textContent='0';
+
+
+document.getElementById(
+
+'cnt-kwh'
+
+).textContent=
+
+kwhCumul.toFixed(4);
   document.getElementById('btn-start').disabled   = true;
   document.getElementById('btn-stop').disabled    = false;
 
