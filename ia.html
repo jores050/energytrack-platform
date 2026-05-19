@@ -319,7 +319,7 @@ body{
   <!-- Analyse IA -->
   <div class="ai-card">
     <div class="ai-card-header">
-      <h2>🤖 Recommandations IA <span class="ai-badge"> Gemini 2.5 Flash </span></h2>
+      <h2>🤖 Recommandations IA <span class="ai-badge">Claude Sonnet</span></h2>
       <span class="ai-status" id="aiStatus">En attente d'analyse</span>
     </div>
     <div id="aiOutput">
@@ -377,86 +377,19 @@ async function loadSettings(userId){
 
 /* ── SITES ──────────────────────────────────── */
 async function populateSites(userId){
-
-const { data:sites } =
-await sb
-.from('sites')
-.select('id,name,city')
-.eq('user_id',userId)
-.order('created_at');
-
-
-const sel =
-document.getElementById(
-'siteFilter'
-);
-
-
-sel.innerHTML='';
-
-
-if(!sites || !sites.length){
-
-sel.innerHTML=
-'<option>Aucun site</option>';
-
-return;
-
+  const { data:sites } = await sb.from('sites').select('id,name,city').eq('user_id',userId).order('created_at');
+  const sel = document.getElementById('siteFilter');
+  sel.innerHTML = '';
+  if(!sites||!sites.length){ sel.innerHTML='<option value="">Aucun site</option>'; return; }
+  sites.forEach(s=>{
+    const o=document.createElement('option');
+    o.value=s.id;
+    o.textContent=s.name+(s.city?` (${s.city})`:'');
+    sel.appendChild(o);
+  });
+  await populateSensors(sites[0].id);
 }
 
-
-sites.forEach(s=>{
-
-const o=
-document.createElement(
-'option'
-);
-
-
-o.value=s.id;
-
-
-o.textContent=
-s.name+
-
-(
-
-s.city
-
-?
-
-` (${s.city})`
-
-:
-
-''
-
-);
-
-
-sel.appendChild(
-o
-);
-
-
-});
-
-
-await populateSensors(
-
-sites[0].id
-
-);
-
-
-if(currentSensorId){
-
-await refreshData();
-
-}
-
-
-}
 async function populateSensors(siteId){
   currentSiteId = siteId;
   const { data:sensors } = await sb.from('sensors').select('id,name,sensor_name,serial_number,status').eq('site_id',siteId).order('created_at');
@@ -659,264 +592,54 @@ async function loadAlerts(){
   }).join('')+'</div>';
 }
 
-/* ── ANALYSE IA VIA API  ──────────────── */
+/* ── ANALYSE IA VIA API CLAUDE ──────────────── */
 async function runAIAnalysis(){
-
-const btn =
-document.getElementById(
-'btnAnalyze'
-);
-
-
-if(!lastStats){
-
-await refreshData();
-
-
-if(!lastStats){
-
-toast(
-
-'Aucune donnée disponible',
-
-'warn'
-
-);
-
-return;
-
-}
-
-}
-
-
-btn.disabled=true;
-
-
-btn.textContent=
-
-'🤖 Analyse...';
-
-
-
-document.getElementById(
-
-'aiStatus'
-
-).innerHTML=
-
-`
-
-<span class="thinking-dots">
-
-<span></span>
-
-<span></span>
-
-<span></span>
-
-</span>
-
-Gemini analyse...
-
-`;
-
-
-
-document.getElementById(
-
-'aiOutput'
-
-).innerHTML=
-
-`
-
-<div class="placeholder">
-
-<div class="spinner">
-
-</div>
-
-Analyse énergétique...
-
-</div>
-
-`;
-
-
-try{
-
-
-const prompt=
-
-buildPrompt(
-
-lastStats
-
-);
-
-
-
-const response=
-
-await fetch(
-
-'https://prvsatpdgybnevolzhhf.functions.supabase.co/dynamic-task',
-
-{
-
-method:
-
-'POST',
-
-
-headers:{
-
-'Content-Type':
-
-'application/json'
-
-},
-
-
-body:
-
-JSON.stringify({
-
-prompt
-
-})
-
-
-}
-
-);
-
-
-
-const data=
-
-await response.json();
-
-
-
-console.log(
-data
-);
-
-
-
-const text=
-
-data
-?.candidates
-?.[0]
-?.content
-?.parts
-?.[0]
-?.text
-
-||
-
-data
-?.response
-
-||
-
-data
-?.message
-
-||
-
-"Analyse indisponible";
-
-
-
-renderAIOutput(
-text
-);
-
-
-
-document.getElementById(
-
-'aiStatus'
-
-).textContent=
-
-'✅ Analyse terminée';
-
-
-
-toast(
-
-'Analyse Gemini réussie',
-
-'success'
-
-);
-
-
-
-}catch(err){
-
-
-console.error(
-err
-);
-
-
-document.getElementById(
-
-'aiOutput'
-
-).innerHTML=
-
-`
-
-<div class="placeholder">
-
-❌
-
-Erreur :
-
-${err.message}
-
-</div>
-
-`;
-
-
-
-document.getElementById(
-
-'aiStatus'
-
-).textContent=
-
-'Erreur IA';
-
-
-
-toast(
-
-err.message,
-
-'error'
-
-);
-
-
-}
-
-
-btn.disabled=false;
-
-
-btn.textContent=
-
-'🤖 Relancer';
-
+  if(!lastStats){ toast('Chargez d\'abord les données.','warn'); return; }
+
+  const btn = document.getElementById('btnAnalyze');
+  btn.disabled=true; btn.textContent='⟳ Analyse en cours…';
+  document.getElementById('aiStatus').innerHTML = '<span class="thinking-dots"><span></span><span></span><span></span></span> Claude analyse vos données…';
+
+  document.getElementById('aiOutput').innerHTML = `<div class="placeholder"><div class="spinner" style="border-top-color:var(--purple)"></div>Analyse intelligente en cours…</div>`;
+
+  const prompt = buildPrompt(lastStats);
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{ 'Content-Type':'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: `Tu es EnergyTrack AI, un expert en gestion d'énergie pour les PME d'Afrique de l'Ouest (Bénin).
+Tu analyses des données de consommation électrique réelles et fournis des recommandations concrètes, chiffrées en FCFA.
+Tes recommandations doivent être directement actionnables par un gérant de PME non-technique.
+Ne mentionne jamais de volts, ampères ou termes trop techniques.
+Parle uniquement en FCFA, kWh et heures.
+Sois direct, concis et bienveillant. Utilise des emojis pour structurer.
+Réponds UNIQUEMENT en français.`,
+        messages:[{ role:'user', content: prompt }]
+      })
+    });
+
+    const data = await response.json();
+
+    if(!response.ok){
+      throw new Error(data.error?.message || 'Erreur API Claude');
+    }
+
+    const text = data.content?.map(b=>b.type==='text'?b.text:'').join('') || '';
+    renderAIOutput(text);
+    document.getElementById('aiStatus').textContent = '✅ Analyse complète · ' + new Date().toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'});
+    toast('Analyse IA générée avec succès','success');
+
+  } catch(err){
+    document.getElementById('aiOutput').innerHTML = `<div class="placeholder" style="color:var(--red)">❌ Erreur : ${err.message}</div>`;
+    document.getElementById('aiStatus').textContent = 'Erreur d\'analyse';
+    toast('Erreur IA : '+err.message,'error');
+  }
+
+  btn.disabled=false; btn.textContent='🤖 Relancer l\'analyse';
 }
 
 /* ── PROMPT BUILDER ─────────────────────────── */
