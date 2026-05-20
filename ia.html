@@ -374,16 +374,194 @@ body{
     </div>
   </div>
 
-  <!-- Alertes actives depuis BDD -->
-  <div class="ai-card">
-    <div class="ai-card-header">
-      <h2>🔔 Alertes actives <span class="ai-badge bdd">BDD</span></h2>
-      <span class="ai-status" id="alertCount">Chargement…</span>
-    </div>
-    <div id="alertList">
-      <div class="placeholder"><div class="spinner"></div>Récupération des alertes…</div>
-    </div>
-  </div>
+<!-- ═════════ ALERT CENTER V2 ═════════ -->
+
+<div class="ai-card">
+
+<div class="ai-card-header">
+
+<h2>
+
+🔔 Centre d'incidents
+
+<span class="ai-badge bdd">
+
+Temps réel
+
+</span>
+
+</h2>
+
+
+<div id="alertSummary">
+
+Chargement...
+
+</div>
+
+</div>
+
+
+
+<!-- KPI Alertes -->
+
+<div class="kpi-row">
+
+<div class="kpi-mini">
+
+<div class="kpi-mini-label">
+
+🔴 Critiques
+
+</div>
+
+<div
+
+id="criticalCount"
+
+class="kpi-mini-val"
+
+>
+
+0
+
+</div>
+
+</div>
+
+
+
+<div class="kpi-mini">
+
+<div class="kpi-mini-label">
+
+🟠 Warnings
+
+</div>
+
+<div
+
+id="warningCount"
+
+class="kpi-mini-val"
+
+>
+
+0
+
+</div>
+
+</div>
+
+
+
+<div class="kpi-mini">
+
+<div class="kpi-mini-label">
+
+🔵 Infos
+
+</div>
+
+<div
+
+id="infoCount"
+
+class="kpi-mini-val"
+
+>
+
+0
+
+</div>
+
+</div>
+
+
+
+<div class="kpi-mini">
+
+<div class="kpi-mini-label">
+
+⏱ Temps moyen
+
+</div>
+
+<div
+
+id="avgDuration"
+
+class="kpi-mini-val"
+
+>
+
+—
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<div style="margin:20px 0;display:flex;gap:10px">
+
+<select
+
+id="alertFilter"
+
+class="filter-select"
+
+onchange="loadAlerts()"
+
+>
+
+<option value="ALL">
+
+Toutes
+
+</option>
+
+<option value="critical">
+
+Critiques
+
+</option>
+
+<option value="warning">
+
+Warnings
+
+</option>
+
+<option value="info">
+
+Infos
+
+</option>
+
+</select>
+
+</div>
+
+
+
+<div
+
+id="alertList"
+
+>
+
+<div class="placeholder">
+
+Chargement alertes...
+
+</div>
+
+</div>
+
+</div>
 
   <!-- Analyse IA -->
   <div class="ai-card">
@@ -754,77 +932,501 @@ function updateLastUpdateLabel() {
 /* ══════════════════════════════════════════════
    ALERTES DEPUIS BDD
    ══════════════════════════════════════════════ */
-async function loadAlerts() {
-  if (!currentSensorId && !currentSiteId) {
-    document.getElementById('alertList').innerHTML = '<div class="placeholder">Aucun capteur sélectionné</div>';
-    return;
-  }
+async function loadAlerts(){
 
-  let query = sb
-    .from('alerts')
-    .select('*')
-    .eq('status', 'ACTIVE')
-    .order('created_at', { ascending: false })
-    .limit(20);
+let query=
 
-  if (currentSensorId)    query = query.eq('sensor_id', currentSensorId);
-  else if (currentSiteId) query = query.eq('site_id', currentSiteId);
+sb
 
-  const { data: alerts, error } = await query;
-  const countEl = document.getElementById('alertCount');
-  const listEl  = document.getElementById('alertList');
+.from(
 
-  if (error) { listEl.innerHTML = '<div class="placeholder">Erreur de chargement des alertes</div>'; return; }
+'alerts'
 
-  if (!alerts || !alerts.length) {
-    countEl.textContent = 'Aucune alerte active';
-    listEl.innerHTML = '<div class="placeholder"><span style="font-size:28px">✅</span>Aucune alerte active — installation stable</div>';
-    return;
-  }
+)
 
-  countEl.textContent = alerts.length + ' alerte' + (alerts.length > 1 ? 's' : '') + ' active' + (alerts.length > 1 ? 's' : '');
+.select('*')
 
-  const SEVERITY_MAP = {
-    SBEE_OUTAGE: 'critical', HIGH_VOLTAGE: 'critical', OVERCONSUMPTION: 'critical',
-    LOW_VOLTAGE: 'warning',  DEVICE_OFFLINE: 'warning', HIGH_GROUPE_COST: 'warning',
-    WEEKLY_REPORT: 'info',   SBEE_RESTORED: 'info'
-  };
-  const ICON_MAP = {
-    SBEE_OUTAGE: '⚡', HIGH_VOLTAGE: '🔺', OVERCONSUMPTION: '📈',
-    LOW_VOLTAGE: '🔻', DEVICE_OFFLINE: '📡', HIGH_GROUPE_COST: '🏭',
-    WEEKLY_REPORT: '📊', SBEE_RESTORED: '✅'
-  };
+.order(
 
-  listEl.innerHTML = '<div class="alert-list">' + alerts.map(a => {
-    const sev  = SEVERITY_MAP[a.type] || 'info';
-    const icon = ICON_MAP[a.type] || '🔔';
-    const val  = a.value ? ` · Valeur : ${a.value}${a.threshold ? ' (seuil ' + a.threshold + ')' : ''}` : '';
-    const ts   = new Date(a.created_at).toLocaleString('fr-FR', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit' });
-    return `<div class="alert-item ${sev}" id="alert-${a.id}">
-      <div class="alert-dot"></div>
-      <div class="alert-text">
-        <strong>${icon} ${a.type.replace(/_/g, ' ')}</strong>${val}<br>
-        ${a.message || ''}
-        <div class="alert-time">${ts}</div>
-      </div>
-      <button class="alert-dismiss" onclick="dismissAlert('${a.id}')">Rejeter</button>
-    </div>`;
-  }).join('') + '</div>';
+'created_at',
+
+{
+
+ascending:false
+
+}
+
+)
+
+.limit(
+
+50
+
+);
+
+
+if(
+
+currentSensorId
+
+)
+
+query=
+
+query.eq(
+
+'sensor_id',
+
+currentSensorId
+
+);
+
+
+
+const {
+
+data:alerts,
+
+error
+
+}
+
+=
+
+await query;
+
+
+if(
+
+error
+
+){
+
+return;
+
+}
+
+
+const severityMap={
+
+HIGH_VOLTAGE:
+
+'critical',
+
+SBEE_OUTAGE:
+
+'critical',
+
+OVERCONSUMPTION:
+
+'critical',
+
+
+LOW_VOLTAGE:
+
+'warning',
+
+DEVICE_OFFLINE:
+
+'warning',
+
+HIGH_GROUPE_COST:
+
+'warning',
+
+
+SBEE_RESTORED:
+
+'info'
+
+};
+
+
+const filter=
+
+document
+
+.getElementById(
+
+'alertFilter'
+
+)
+
+.value;
+
+
+let critical=0;
+
+let warning=0;
+
+let info=0;
+
+
+alerts.forEach(
+
+a=>{
+
+const sev=
+
+severityMap[
+
+a.type
+
+]
+
+||
+
+'info';
+
+
+if(
+
+sev==='critical'
+
+)
+
+critical++;
+
+
+if(
+
+sev==='warning'
+
+)
+
+warning++;
+
+
+if(
+
+sev==='info'
+
+)
+
+info++;
+
+});
+
+
+document
+
+.getElementById(
+
+'criticalCount'
+
+)
+
+.textContent=
+
+critical;
+
+
+
+document
+
+.getElementById(
+
+'warningCount'
+
+)
+
+.textContent=
+
+warning;
+
+
+
+document
+
+.getElementById(
+
+'infoCount'
+
+)
+
+.textContent=
+
+info;
+
+
+
+document
+
+.getElementById(
+
+'alertSummary'
+
+)
+
+.innerHTML=
+
+`
+
+${alerts.length}
+
+incident(s)
+
+`;
+
+
+
+const filtered=
+
+alerts.filter(
+
+a=>{
+
+if(
+
+filter==='ALL'
+
+)
+
+return true;
+
+
+return (
+
+severityMap[
+
+a.type
+
+]
+
+===
+
+filter
+
+);
+
+}
+
+);
+
+
+
+document
+
+.getElementById(
+
+'alertList'
+
+)
+
+.innerHTML=
+
+filtered
+
+.map(
+
+a=>{
+
+
+const sev=
+
+severityMap[
+
+a.type
+
+]
+
+||
+
+'info';
+
+
+const duration=
+
+a.duration_minutes
+
+?
+
+`${a.duration_minutes} min`
+
+:
+
+'—';
+
+
+const cost=
+
+a.type===
+
+'HIGH_GROUPE_COST'
+
+?
+
+`+${Math.round(
+
+a.value
+
+)} FCFA`
+
+:
+
+'';
+
+
+return `
+
+
+<div
+
+class="alert-item ${sev}"
+
+>
+
+<div
+
+class="alert-dot"
+
+>
+
+</div>
+
+
+
+<div style="flex:1">
+
+<strong>
+
+${a.type}
+
+</strong>
+
+
+<div>
+
+${
+
+a.message
+
+||
+
+''
+
+}
+
+</div>
+
+
+<div class="alert-time">
+
+${
+
+new Date(
+
+a.created_at
+
+)
+
+.toLocaleString(
+
+'fr-FR'
+
+)
+
+}
+
+</div>
+
+
+<div style="
+margin-top:8px;
+font-size:12px;
+color:#94a3b8;
+">
+
+Durée :
+
+${duration}
+
+
+${cost}
+
+</div>
+
+
+</div>
+
+
+
+<button
+
+class="alert-dismiss"
+
+onclick="dismissAlert(
+
+'${a.id}'
+
+)"
+
+>
+
+Résoudre
+
+</button>
+
+
+</div>
+
+`;
+
+}
+
+)
+
+.join(
+
+''
+
+);
+
 }
 
 /* Rejeter une alerte (passer en RESOLVED) */
-async function dismissAlert(alertId) {
-  const { error } = await sb
-    .from('alerts')
-    .update({ status: 'RESOLVED' })
-    .eq('id', alertId);
+async function dismissAlert(
 
-  if (error) { toast('Erreur lors du rejet : ' + error.message, 'error'); return; }
+id
 
-  /* Retirer visuellement */
-  const el = document.getElementById('alert-' + alertId);
-  if (el) { el.style.opacity = '0'; el.style.transition = '.3s'; setTimeout(() => el.remove(), 300); }
-  toast('Alerte rejetée', 'success');
+){
+
+await sb
+
+.from(
+
+'alerts'
+
+)
+
+.update({
+
+status:
+
+'RESOLVED'
+
+})
+
+.eq(
+
+'id',
+
+id
+
+);
+
+
+toast(
+
+'Incident résolu',
+
+'success'
+
+);
+
+
+loadAlerts();
+
 }
 
 /* Auto-refresh des alertes toutes les 2 minutes */
