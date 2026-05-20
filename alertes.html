@@ -463,7 +463,7 @@ async function loadAlerts(){
 
   const { data, error } = await supabaseClient
     .from('alerts')
-    .select(`*, sites(name)`)
+    .select(`*, sensor(sensors_class)`)
     .order('created_at', { ascending: false })
     .limit(100);
 
