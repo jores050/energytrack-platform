@@ -1,543 +1,782 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>Alertes EnergyTrack</title>
-
 <link rel="stylesheet" href="css/style.css">
-
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="js/supabase.js"></script>
 
 <style>
+/* ── RESET & BASE ── */
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
 
-.alert-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:22px;
-border-radius:24px;
-margin-bottom:20px;
-border-left:6px solid #ffb547;
-transition:0.3s;
+/* ── LAYOUT ── */
+.page-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  flex-wrap:wrap;
+  gap:15px;
+  margin-bottom:28px;
+}
+.page-header h1{
+  font-family:'Orbitron',sans-serif;
+  font-size:clamp(20px,3vw,28px);
+  color:#e2e8f0;
+  letter-spacing:1px;
+}
+.page-header p{
+  margin-top:8px;
+  color:#64748b;
+  font-size:14px;
 }
 
-.alert-card:hover{
-transform:translateY(-3px);
-box-shadow:0 15px 40px rgba(0,0,0,0.3);
+/* ── STATS BAR ── */
+.stats-bar{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:12px;
+  margin-bottom:24px;
+}
+.stat-pill{
+  background:linear-gradient(145deg,#182235,#101826);
+  border-radius:16px;
+  padding:16px 18px;
+  border:1px solid rgba(255,255,255,0.05);
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.stat-pill-icon{
+  font-size:22px;
+  line-height:1;
+}
+.stat-pill-value{
+  font-size:22px;
+  font-weight:700;
+  font-family:'Orbitron',sans-serif;
+  color:#e2e8f0;
+  line-height:1;
+}
+.stat-pill-label{
+  font-size:11px;
+  color:#64748b;
+  margin-top:3px;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
 }
 
-.alert-header{
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:10px;
-margin-bottom:15px;
-}
-
-.alert-badge{
-padding:8px 14px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
-}
-
-.badge-active{
-background:rgba(255,181,71,0.15);
-color:#ffb547;
-}
-
-.badge-critical{
-background:rgba(255,76,97,0.15);
-color:#ff4c61;
-}
-
-.badge-resolved{
-background:rgba(0,200,150,0.15);
-color:#00c896;
-}
-
+/* ── FILTER BAR ── */
 .filter-bar{
-display:flex;
-gap:12px;
-flex-wrap:wrap;
-margin:25px 0;
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  margin-bottom:24px;
+  align-items:center;
 }
-
 .filter-btn{
-padding:12px 18px;
-border:none;
-border-radius:14px;
-background:#182235;
-color:white;
-cursor:pointer;
-transition:0.3s;
+  padding:9px 16px;
+  border:1.5px solid rgba(255,255,255,0.08);
+  border-radius:12px;
+  background:transparent;
+  color:#94a3b8;
+  cursor:pointer;
+  font-family:'Poppins',sans-serif;
+  font-size:13px;
+  font-weight:500;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.filter-btn:hover{background:rgba(255,255,255,0.06);color:#e2e8f0;}
+.filter-btn.active{
+  background:rgba(0,200,150,0.12);
+  border-color:#00c896;
+  color:#00c896;
+}
+.filter-btn.active.red{background:rgba(255,76,97,0.12);border-color:#ff4c61;color:#ff4c61;}
+.filter-btn.active.orange{background:rgba(255,181,71,0.12);border-color:#ffb547;color:#ffb547;}
+.filter-btn.active.yellow{background:rgba(255,217,61,0.12);border-color:#ffd93d;color:#ffd93d;}
+.filter-btn.active.blue{background:rgba(0,174,239,0.12);border-color:#00aeef;color:#00aeef;}
+
+.filter-dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  display:inline-block;
 }
 
-.filter-btn:hover{
-background:#00c896;
+/* ── ALERT CARD ── */
+.alert-card{
+  background:linear-gradient(145deg,#182235,#101826);
+  border-radius:20px;
+  margin-bottom:14px;
+  border-left:5px solid #ffb547;
+  border:1px solid rgba(255,255,255,0.05);
+  border-left:5px solid #ffb547;
+  overflow:hidden;
+  transition:transform 0.2s, box-shadow 0.2s;
+  animation:slideIn 0.3s ease;
+}
+@keyframes slideIn{from{opacity:0;transform:translateY(8px);}to{opacity:1;transform:none;}}
+.alert-card:hover{transform:translateY(-2px);box-shadow:0 12px 35px rgba(0,0,0,0.4);}
+.alert-card.acknowledged{
+  opacity:0.45;
+  filter:saturate(0.4);
 }
 
+.alert-card-body{padding:20px 22px;}
+
+.alert-top{
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:12px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.alert-left{display:flex;align-items:flex-start;gap:14px;}
+.alert-icon{
+  font-size:26px;
+  line-height:1;
+  flex-shrink:0;
+  margin-top:2px;
+}
+.alert-title{
+  font-size:15px;
+  font-weight:600;
+  color:#e2e8f0;
+  font-family:'Orbitron',sans-serif;
+  letter-spacing:0.5px;
+}
+.alert-site{
+  font-size:13px;
+  color:#64748b;
+  margin-top:4px;
+  display:flex;
+  align-items:center;
+  gap:5px;
+}
+.alert-message{
+  font-size:14px;
+  color:#94a3b8;
+  line-height:1.7;
+  margin-bottom:16px;
+}
+
+/* ── BADGE ── */
+.badge{
+  padding:5px 12px;
+  border-radius:999px;
+  font-size:11px;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:0.6px;
+  white-space:nowrap;
+  flex-shrink:0;
+}
+.badge-critical{background:rgba(255,76,97,0.15);color:#ff4c61;border:1px solid rgba(255,76,97,0.3);}
+.badge-warning{background:rgba(255,181,71,0.15);color:#ffb547;border:1px solid rgba(255,181,71,0.3);}
+.badge-info{background:rgba(0,174,239,0.15);color:#00aeef;border:1px solid rgba(0,174,239,0.3);}
+.badge-resolved{background:rgba(0,200,150,0.15);color:#00c896;border:1px solid rgba(0,200,150,0.3);}
+.badge-ack{background:rgba(100,116,139,0.15);color:#64748b;border:1px solid rgba(100,116,139,0.3);}
+
+/* ── METRICS GRID ── */
+.metrics-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  margin-bottom:16px;
+}
+.metric-box{
+  background:rgba(255,255,255,0.03);
+  border-radius:12px;
+  padding:12px 14px;
+  border:1px solid rgba(255,255,255,0.05);
+}
+.metric-label{
+  font-size:11px;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:0.5px;
+  margin-bottom:5px;
+}
+.metric-value{
+  font-size:17px;
+  font-weight:700;
+  color:#e2e8f0;
+  font-family:'Orbitron',sans-serif;
+}
+.metric-value.danger{color:#ff4c61;}
+.metric-value.warn{color:#ffb547;}
+.metric-value.ok{color:#00c896;}
+.metric-value.info{color:#00aeef;}
+
+/* ── DURATION BAR ── */
+.duration-bar{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  margin-bottom:16px;
+  font-size:13px;
+  color:#64748b;
+}
+.duration-bar span{color:#94a3b8;font-weight:500;}
+
+/* ── FOOTER ── */
+.alert-footer{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  flex-wrap:wrap;
+  gap:10px;
+  padding-top:14px;
+  border-top:1px solid rgba(255,255,255,0.05);
+}
+.alert-time{
+  font-size:12px;
+  color:#64748b;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+
+/* ── ACK BUTTON ── */
+.btn-ack{
+  padding:8px 16px;
+  border-radius:10px;
+  border:1.5px solid rgba(0,200,150,0.3);
+  background:rgba(0,200,150,0.08);
+  color:#00c896;
+  font-size:12px;
+  font-weight:600;
+  font-family:'Poppins',sans-serif;
+  cursor:pointer;
+  transition:all 0.2s;
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.btn-ack:hover{background:rgba(0,200,150,0.18);border-color:#00c896;}
+.btn-ack:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-ack.acking{animation:pulse 0.6s ease infinite alternate;}
+@keyframes pulse{from{opacity:0.5;}to{opacity:1;}}
+
+/* ── EMPTY STATE ── */
 .empty-state{
-padding:60px;
-text-align:center;
-color:#94a3b8;
+  padding:70px 40px;
+  text-align:center;
+  color:#64748b;
+  animation:slideIn 0.4s ease;
 }
+.empty-state .empty-icon{font-size:52px;margin-bottom:16px;}
+.empty-state h2{color:#94a3b8;font-size:18px;margin-bottom:8px;}
+.empty-state p{font-size:14px;}
 
+/* ── LOADING ── */
+.loading-skeleton{
+  background:linear-gradient(90deg,#182235 25%,#1e2d45 50%,#182235 75%);
+  background-size:200% 100%;
+  animation:shimmer 1.5s infinite;
+  border-radius:20px;
+  height:130px;
+  margin-bottom:14px;
+}
+@keyframes shimmer{0%{background-position:200% 0;}100%{background-position:-200% 0;}}
+
+/* ── LIVE INDICATOR ── */
+.live-dot{
+  width:8px;height:8px;
+  border-radius:50%;
+  background:#00c896;
+  display:inline-block;
+  animation:blink 1.2s ease infinite;
+  margin-right:6px;
+}
+@keyframes blink{0%,100%{opacity:1;}50%{opacity:0.3;}}
+
+/* ── TOAST ── */
+.toast{
+  position:fixed;
+  bottom:24px;
+  right:24px;
+  background:#182235;
+  border:1px solid rgba(0,200,150,0.4);
+  color:#e2e8f0;
+  padding:14px 20px;
+  border-radius:14px;
+  font-size:14px;
+  z-index:9999;
+  display:flex;
+  align-items:center;
+  gap:10px;
+  box-shadow:0 8px 32px rgba(0,0,0,0.4);
+  transform:translateY(80px);
+  opacity:0;
+  transition:all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toast.show{transform:translateY(0);opacity:1;}
 </style>
-
 </head>
 
 <body>
 
+<!-- SIDEBAR -->
 <div class="sidebar">
-
-<div class="logo">
-Energy<span>Track</span>
+  <div class="logo">Energy<span>Track</span></div>
+  <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+  <a class="nav-item" href="consommation.html">⚡ Consommation</a>
+  <a class="nav-item active" href="alertes.html">🔔 Alertes</a>
+  <a class="nav-item" href="rapports.html">📊 Rapports</a>
+  <a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+  <a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+  <a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+  <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+  <div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
 </div>
 
-<a class="nav-item" href="dashboard.html">
-🏠 Dashboard
-</a>
-
-<a class="nav-item" href="consommation.html">
-⚡ Consommation
-</a>
-
-<a class="nav-item active" href="alertes.html">
-🔔 Alertes
-</a>
-
-<a class="nav-item" href="rapports.html">
-📊 Rapports
-</a>
-
-<a class="nav-item" href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item" href="capteurs.html">
-📡 Capteurs IoT
-</a>
-
-<a class="nav-item" href="ia.html">
-🤖 Analyse IA
-</a>
-
-<a class="nav-item" href="parametres.html">
-⚙️ Paramètres
-</a>
-
-<div class="nav-item"
-onclick="logoutUser()">
-🚪 Déconnexion
-</div>
-
-</div>
-
+<!-- MAIN -->
 <div class="main" style="display:block;">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-margin-bottom:25px;
-">
+  <!-- EN-TÊTE -->
+  <div class="page-header">
+    <div>
+      <h1>Centre d'Alertes</h1>
+      <p>Surveillance temps réel des anomalies énergétiques.</p>
+    </div>
+    <div class="badge badge-critical" style="margin-top:6px;">
+      <span class="live-dot"></span>Temps réel actif
+    </div>
+  </div>
 
-<div>
+  <!-- STATS BAR -->
+  <div class="stats-bar" id="statsBar">
+    <div class="stat-pill">
+      <div class="stat-pill-icon">🔴</div>
+      <div>
+        <div class="stat-pill-value" id="statTotal">—</div>
+        <div class="stat-pill-label">Total alertes</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-icon">⚠️</div>
+      <div>
+        <div class="stat-pill-value" id="statUnread">—</div>
+        <div class="stat-pill-label">Non acquittées</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-icon">⚡</div>
+      <div>
+        <div class="stat-pill-value" id="statSBEE">—</div>
+        <div class="stat-pill-label">Coupures SBEE</div>
+      </div>
+    </div>
+    <div class="stat-pill">
+      <div class="stat-pill-icon">📈</div>
+      <div>
+        <div class="stat-pill-value" id="statSurco">—</div>
+        <div class="stat-pill-label">Surconsommations</div>
+      </div>
+    </div>
+  </div>
 
-<h1>
-Centre d’Alertes
-</h1>
+  <!-- FILTRES -->
+  <div class="filter-bar">
+    <button class="filter-btn active" id="btn-ALL" onclick="setFilter('ALL',this)">
+      Toutes
+    </button>
+    <button class="filter-btn" id="btn-SBEE_OUTAGE" onclick="setFilter('SBEE_OUTAGE',this)">
+      <span class="filter-dot" style="background:#ff4c61;"></span>Coupures SBEE
+    </button>
+    <button class="filter-btn" id="btn-LOW_VOLTAGE" onclick="setFilter('LOW_VOLTAGE',this)">
+      <span class="filter-dot" style="background:#ffb547;"></span>Basse tension
+    </button>
+    <button class="filter-btn" id="btn-HIGH_VOLTAGE" onclick="setFilter('HIGH_VOLTAGE',this)">
+      <span class="filter-dot" style="background:#00aeef;"></span>Surtension
+    </button>
+    <button class="filter-btn" id="btn-OVERCONSUMPTION" onclick="setFilter('OVERCONSUMPTION',this)">
+      <span class="filter-dot" style="background:#ffd93d;"></span>Surconsommation
+    </button>
+    <button class="filter-btn" id="btn-ACK" onclick="setFilter('ACK',this)">
+      ✅ Acquittées
+    </button>
+  </div>
 
-<p style="
-margin-top:10px;
-color:#94a3b8;
-">
-
-Surveillance temps réel des anomalies énergétiques.
-
-</p>
-
-</div>
-
-<div class="alert-badge badge-critical">
-Temps réel actif
-</div>
-
-</div>
-
-<div class="filter-bar">
-
-<button
-class="filter-btn"
-onclick="filterAlerts('ALL')">
-
-Toutes
-
-</button>
-
-<button
-class="filter-btn"
-onclick="filterAlerts('SBEE_OUTAGE')">
-
-Coupures
-
-</button>
-
-<button
-class="filter-btn"
-onclick="filterAlerts('LOW_VOLTAGE')">
-
-Basse tension
-
-</button>
-
-<button
-class="filter-btn"
-onclick="filterAlerts('HIGH_VOLTAGE')">
-
-Surtension
-
-</button>
-
-<button
-class="filter-btn"
-onclick="filterAlerts('OVERCONSUMPTION')">
-
-Surconsommation
-
-</button>
+  <!-- CONTAINER ALERTES -->
+  <div id="alertsContainer"></div>
 
 </div>
 
-<div id="alertsContainer">
-
-</div>
-
-</div>
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
 
 <script>
-
+/* ══════════════════════════════════════
+   CONFIG
+══════════════════════════════════════ */
 let currentFilter = 'ALL';
+let allAlerts = [];
 
-/*
-AUTH
-*/
-
+/* ══════════════════════════════════════
+   AUTH
+══════════════════════════════════════ */
 async function getUser(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return null;
-
+  const { data:{ user } } = await supabaseClient.auth.getUser();
+  if(!user){ window.location.href='auth.html'; return null; }
+  return user;
 }
-
-return userData.user;
-
-}
-
-/*
-LOGOUT
-*/
 
 async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
+  await supabaseClient.auth.signOut();
+  localStorage.clear();
+  window.location.href='auth.html';
 }
 
-/*
-FILTER
-*/
-
-function filterAlerts(type){
-
-currentFilter = type;
-
-loadAlerts();
-
+/* ══════════════════════════════════════
+   FILTER
+══════════════════════════════════════ */
+function setFilter(type, btn){
+  currentFilter = type;
+  document.querySelectorAll('.filter-btn').forEach(b => {
+    b.classList.remove('active','red','orange','yellow','blue');
+  });
+  btn.classList.add('active');
+  if(type==='SBEE_OUTAGE') btn.classList.add('red');
+  else if(type==='LOW_VOLTAGE') btn.classList.add('orange');
+  else if(type==='HIGH_VOLTAGE') btn.classList.add('blue');
+  else if(type==='OVERCONSUMPTION') btn.classList.add('yellow');
+  renderAlerts();
 }
 
-/*
-LOAD ALERTS
-*/
-
+/* ══════════════════════════════════════
+   LOAD FROM SUPABASE
+══════════════════════════════════════ */
 async function loadAlerts(){
+  const user = await getUser();
+  if(!user) return;
 
-const user =
-await getUser();
+  showSkeletons();
 
-if(!user){
+  const { data, error } = await supabaseClient
+    .from('alerts')
+    .select(`*, sites(name)`)
+    .order('created_at', { ascending: false })
+    .limit(100);
 
-return;
+  if(error){
+    console.error('[EnergyTrack] Erreur chargement alertes:', error);
+    showError();
+    return;
+  }
 
+  allAlerts = data || [];
+  updateStats();
+  renderAlerts();
 }
 
-let query =
-supabaseClient
+/* ══════════════════════════════════════
+   STATS
+══════════════════════════════════════ */
+function updateStats(){
+  const total   = allAlerts.length;
+  const unread  = allAlerts.filter(a => !a.acknowledged).length;
+  const sbee    = allAlerts.filter(a => a.type==='SBEE_OUTAGE').length;
+  const surco   = allAlerts.filter(a => a.type==='OVERCONSUMPTION').length;
 
-.from('alerts')
-
-.select(`
-*,
-sites(name)
-`)
-
-.eq('sensor_id',user.id)
-
-.order('created_at',{ascending:false});
-
-if(currentFilter!=='ALL'){
-
-query =
-query.eq('type',currentFilter);
-
+  document.getElementById('statTotal').textContent  = total;
+  document.getElementById('statUnread').textContent = unread;
+  document.getElementById('statSBEE').textContent   = sbee;
+  document.getElementById('statSurco').textContent  = surco;
 }
 
-const { data:alerts, error } =
-await query;
+/* ══════════════════════════════════════
+   RENDER
+══════════════════════════════════════ */
+function renderAlerts(){
+  const container = document.getElementById('alertsContainer');
+  container.innerHTML = '';
 
-if(error){
+  let filtered = allAlerts;
+  if(currentFilter === 'ACK'){
+    filtered = allAlerts.filter(a => a.acknowledged);
+  } else if(currentFilter !== 'ALL'){
+    filtered = allAlerts.filter(a => a.type === currentFilter);
+  }
 
-console.log(error);
+  if(filtered.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <div class="empty-icon">🔍</div>
+        <h2>Aucune alerte</h2>
+        <p>${currentFilter==='ALL'?'Aucune anomalie détectée. Votre installation fonctionne normalement.':'Aucune alerte de ce type.'}</p>
+      </div>`;
+    return;
+  }
 
-return;
-
+  filtered.forEach(alert => {
+    container.appendChild(buildCard(alert));
+  });
 }
 
-const container =
-document.getElementById('alertsContainer');
+/* ══════════════════════════════════════
+   BUILD CARD
+══════════════════════════════════════ */
+function buildCard(alert){
+  const TYPE_CONFIG = {
+    SBEE_OUTAGE:     { icon:'⚡', color:'#ff4c61', label:'Coupure SBEE',     badge:'badge-critical', borderColor:'#ff4c61' },
+    LOW_VOLTAGE:     { icon:'📉', color:'#ffb547', label:'Basse Tension',    badge:'badge-warning',  borderColor:'#ffb547' },
+    HIGH_VOLTAGE:    { icon:'⚠️', color:'#00aeef', label:'Surtension',       badge:'badge-info',     borderColor:'#00aeef' },
+    OVERCONSUMPTION: { icon:'📈', color:'#ffd93d', label:'Surconsommation',  badge:'badge-warning',  borderColor:'#ffd93d' },
+    DEVICE_OFFLINE:  { icon:'📡', color:'#94a3b8', label:'Capteur hors ligne',badge:'badge-warning', borderColor:'#94a3b8' },
+    SBEE_RESTORED:   { icon:'✅', color:'#00c896', label:'SBEE Rétablie',    badge:'badge-resolved', borderColor:'#00c896' },
+  };
 
-container.innerHTML='';
+  const cfg = TYPE_CONFIG[alert.type] || {
+    icon:'🔔', color:'#94a3b8', label: alert.type,
+    badge:'badge-warning', borderColor:'#94a3b8'
+  };
 
-if(alerts.length===0){
+  // Horodatage
+  const createdAt = new Date(alert.created_at);
+  const timeStr   = createdAt.toLocaleString('fr-FR', {
+    day:'2-digit', month:'2-digit', year:'numeric',
+    hour:'2-digit', minute:'2-digit'
+  });
 
-container.innerHTML = `
+  // Durée
+  let durationHtml = '';
+  if(alert.duration_minutes != null){
+    const mins = alert.duration_minutes;
+    const h    = Math.floor(mins/60);
+    const m    = mins % 60;
+    const dStr = h>0 ? `${h}h ${m}min` : `${m} min`;
+    durationHtml = `
+      <div class="duration-bar">
+        ⏱ Durée de l'événement : <span>${dStr}</span>
+      </div>`;
+  } else if(alert.status === 'active' && alert.created_at){
+    const elapsed = Math.floor((Date.now() - createdAt.getTime()) / 60000);
+    if(elapsed > 0){
+      const h = Math.floor(elapsed/60);
+      const m = elapsed % 60;
+      const eStr = h>0 ? `${h}h ${m}min` : `${m} min`;
+      durationHtml = `
+        <div class="duration-bar">
+          ⏱ En cours depuis : <span style="color:#ff4c61;">${eStr}</span>
+          <span class="live-dot" style="margin-left:4px;"></span>
+        </div>`;
+    }
+  }
 
-<div class="empty-state">
+  // Valeur mesurée — couleur selon criticité
+  const valClass = (alert.type==='SBEE_OUTAGE'||alert.type==='HIGH_VOLTAGE') ? 'danger'
+                 : (alert.type==='OVERCONSUMPTION') ? 'warn'
+                 : (alert.type==='SBEE_RESTORED')   ? 'ok'
+                 : 'warn';
 
-<h2>
-Aucune alerte
-</h2>
+  // Status badge
+  const statusBadge = alert.acknowledged
+    ? `<span class="badge badge-ack">✔ Acquittée</span>`
+    : (alert.status==='resolved'
+        ? `<span class="badge badge-resolved">Résolue</span>`
+        : `<span class="badge ${cfg.badge}">${alert.status==='active'?'Active':alert.status||'Active'}</span>`
+      );
 
-<p style="margin-top:15px;">
+  // Bouton acquitter
+  const ackBtn = !alert.acknowledged
+    ? `<button class="btn-ack" id="ack-${alert.id}" onclick="acknowledgeAlert(${alert.id}, this)">
+         ✓ Acquitter
+       </button>`
+    : `<button class="btn-ack" disabled style="cursor:default;">✔ Acquittée</button>`;
 
-Aucune anomalie détectée actuellement.
+  const card = document.createElement('div');
+  card.className = `alert-card${alert.acknowledged?' acknowledged':''}`;
+  card.id = `card-${alert.id}`;
+  card.style.borderLeftColor = cfg.borderColor;
 
-</p>
+  card.innerHTML = `
+    <div class="alert-card-body">
 
-</div>
+      <div class="alert-top">
+        <div class="alert-left">
+          <div class="alert-icon">${cfg.icon}</div>
+          <div>
+            <div class="alert-title">${cfg.label}</div>
+            <div class="alert-site">🏢 ${alert.sites?.name || 'Site inconnu'}</div>
+          </div>
+        </div>
+        ${statusBadge}
+      </div>
 
-`;
+      <p class="alert-message">${alert.message || '—'}</p>
 
-return;
+      ${durationHtml}
 
+      <div class="metrics-grid">
+        <div class="metric-box">
+          <div class="metric-label">Valeur mesurée</div>
+          <div class="metric-value ${valClass}">${formatValue(alert)}</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Seuil configuré</div>
+          <div class="metric-value info">${formatThreshold(alert)}</div>
+        </div>
+        <div class="metric-box">
+          <div class="metric-label">Sévérité</div>
+          <div class="metric-value ${alert.severity==='critical'?'danger':alert.severity==='info'?'ok':'warn'}">
+            ${alert.severity === 'critical' ? '🔴 Critique' : alert.severity === 'info' ? '🟢 Info' : '🟡 Warning'}
+          </div>
+        </div>
+      </div>
+
+      <div class="alert-footer">
+        <div class="alert-time">
+          🕐 ${timeStr}
+        </div>
+        ${ackBtn}
+      </div>
+
+    </div>`;
+
+  return card;
 }
 
-alerts.forEach(alert=>{
-
-let borderColor='#ffb547';
-
-let badgeClass='badge-active';
-
-if(alert.type==='SBEE_OUTAGE'){
-
-borderColor='#ff4c61';
-
-badgeClass='badge-critical';
-
+/* ══════════════════════════════════════
+   FORMAT HELPERS
+══════════════════════════════════════ */
+function formatValue(alert){
+  if(alert.value == null) return '—';
+  switch(alert.type){
+    case 'SBEE_OUTAGE':     return `${alert.value} V`;
+    case 'LOW_VOLTAGE':
+    case 'HIGH_VOLTAGE':    return `${alert.value} V`;
+    case 'OVERCONSUMPTION': return `${alert.value} W`;
+    case 'DEVICE_OFFLINE':  return 'Hors ligne';
+    default:                return `${alert.value}`;
+  }
 }
 
-if(alert.type==='LOW_VOLTAGE'){
-
-borderColor='#ffb547';
-
-badgeClass='badge-active';
-
+function formatThreshold(alert){
+  if(alert.threshold == null) return '—';
+  switch(alert.type){
+    case 'SBEE_OUTAGE':
+    case 'LOW_VOLTAGE':
+    case 'HIGH_VOLTAGE':    return `${alert.threshold} V`;
+    case 'OVERCONSUMPTION': return `${alert.threshold} W`;
+    default:                return `${alert.threshold}`;
+  }
 }
 
-if(alert.type==='HIGH_VOLTAGE'){
+/* ══════════════════════════════════════
+   ACQUITTER
+══════════════════════════════════════ */
+async function acknowledgeAlert(alertId, btn){
+  btn.disabled = true;
+  btn.classList.add('acking');
+  btn.textContent = '…';
 
-borderColor='#00aeef';
+  const { error } = await supabaseClient
+    .from('alerts')
+    .update({ acknowledged: true })
+    .eq('id', alertId);
 
-badgeClass='badge-active';
+  if(error){
+    console.error('[EnergyTrack] Erreur acquittement:', error);
+    btn.disabled = false;
+    btn.classList.remove('acking');
+    btn.innerHTML = '✓ Acquitter';
+    showToast('❌ Erreur lors de l\'acquittement.');
+    return;
+  }
 
+  // Mettre à jour en local
+  const idx = allAlerts.findIndex(a => a.id === alertId);
+  if(idx !== -1) allAlerts[idx].acknowledged = true;
+
+  const card = document.getElementById(`card-${alertId}`);
+  if(card){
+    card.classList.add('acknowledged');
+    btn.innerHTML = '✔ Acquittée';
+    btn.disabled = true;
+    // Remplacer badge status
+    const statusBadgeEl = card.querySelector('.badge:not(.badge-ack)');
+    if(statusBadgeEl){
+      statusBadgeEl.className = 'badge badge-ack';
+      statusBadgeEl.textContent = '✔ Acquittée';
+    }
+  }
+
+  updateStats();
+  showToast('✅ Alerte acquittée avec succès.');
 }
 
-if(alert.type==='OVERCONSUMPTION'){
-
-borderColor='#ffd93d';
-
-badgeClass='badge-critical';
-
+/* ══════════════════════════════════════
+   TOAST
+══════════════════════════════════════ */
+function showToast(msg){
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 3000);
 }
 
-container.innerHTML += `
-
-<div class="alert-card"
-style="border-left-color:${borderColor};">
-
-<div class="alert-header">
-
-<div>
-
-<h2>
-
-${alert.type}
-
-</h2>
-
-<p style="
-margin-top:8px;
-color:#94a3b8;
-font-size:14px;
-">
-
-🏢 ${alert.sites?.name || 'Site inconnu'}
-
-</p>
-
-</div>
-
-<div class="alert-badge ${badgeClass}">
-
-${alert.status}
-
-</div>
-
-</div>
-
-<p style="
-line-height:1.8;
-color:#dbe4f0;
-">
-
-${alert.message}
-
-</p>
-
-<div style="
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
-gap:15px;
-margin-top:20px;
-">
-
-<div>
-
-<p style="color:#94a3b8;">
-Valeur mesurée
-</p>
-
-<h3 style="margin-top:8px;">
-
-${alert.value}
-
-</h3>
-
-</div>
-
-<div>
-
-<p style="color:#94a3b8;">
-Seuil
-</p>
-
-<h3 style="margin-top:8px;">
-
-${alert.threshold}
-
-</h3>
-
-</div>
-
-<div>
-
-<p style="color:#94a3b8;">
-Date
-</p>
-
-<h3 style="
-margin-top:8px;
-font-size:15px;
-">
-
-${new Date(alert.created_at)
-.toLocaleString()}
-
-</h3>
-
-</div>
-
-</div>
-
-</div>
-
-`;
-
-});
-
+/* ══════════════════════════════════════
+   SKELETONS / ERREUR
+══════════════════════════════════════ */
+function showSkeletons(){
+  const c = document.getElementById('alertsContainer');
+  c.innerHTML = Array(4).fill('<div class="loading-skeleton"></div>').join('');
 }
 
-/*
-INIT
-*/
+function showError(){
+  document.getElementById('alertsContainer').innerHTML = `
+    <div class="empty-state">
+      <div class="empty-icon">⚠️</div>
+      <h2>Erreur de chargement</h2>
+      <p>Impossible de récupérer les alertes. Vérifiez votre connexion.</p>
+    </div>`;
+}
 
+/* ══════════════════════════════════════
+   REALTIME SUPABASE
+══════════════════════════════════════ */
+function initRealtime(){
+  supabaseClient
+    .channel('alerts-realtime')
+    .on(
+      'postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'alerts' },
+      (payload) => {
+        console.log('[Realtime] Nouvelle alerte:', payload.new);
+        allAlerts.unshift(payload.new);
+        updateStats();
+        renderAlerts();
+        showToast(`🔔 Nouvelle alerte : ${payload.new.type}`);
+      }
+    )
+    .on(
+      'postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'alerts' },
+      (payload) => {
+        const idx = allAlerts.findIndex(a => a.id === payload.new.id);
+        if(idx !== -1) allAlerts[idx] = { ...allAlerts[idx], ...payload.new };
+        updateStats();
+        renderAlerts();
+      }
+    )
+    .subscribe();
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
 loadAlerts();
-
-/*
-REALTIME
-*/
-
-supabaseClient
-
-.channel('alerts-live')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'alerts'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadAlerts();
-
-}
-
-)
-
-.subscribe();
-
+initRealtime();
 </script>
 
 </body>
-
 </html>
