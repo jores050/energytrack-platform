@@ -172,7 +172,6 @@
       display: none;
     }
 
-    /* Toast notification */
     #toast {
       position: fixed;
       bottom: 30px;
@@ -219,7 +218,6 @@
 
 <body>
 
-  <!-- Toast notification -->
   <div id="toast"></div>
 
   <section class="hero">
@@ -286,9 +284,6 @@
   </section>
 
   <script>
-    /* =============================================
-       TOAST — remplace les alert() partout
-    ============================================= */
     function showToast(message, type = 'info', duration = 4000) {
       const toast = document.getElementById('toast');
       toast.textContent = message;
@@ -298,9 +293,6 @@
       }, duration);
     }
 
-    /* =============================================
-       CHARGEMENT DE L'ABONNEMENT AU DÉMARRAGE
-    ============================================= */
     async function loadSubscription() {
       const { data: userData } = await supabaseClient.auth.getUser();
 
@@ -370,9 +362,6 @@
       }
     }
 
-    /* =============================================
-       BOUTONS POUR LES VISITEURS NON CONNECTÉS
-    ============================================= */
     function setupGuestButtons() {
       const essentialBtn = document.getElementById('essentialButton');
       const businessBtn  = document.getElementById('businessButton');
@@ -384,9 +373,6 @@
       businessBtn.onclick = () => { window.location.href = 'auth.html'; };
     }
 
-    /* =============================================
-       BOUTONS POUR UN UTILISATEUR SANS ABONNEMENT
-    ============================================= */
     function setupFreeButtons() {
       const essentialBtn = document.getElementById('essentialButton');
       const businessBtn  = document.getElementById('businessButton');
@@ -398,9 +384,6 @@
       businessBtn.onclick = activateBusiness;
     }
 
-    /* =============================================
-       ACTIVATION / RENOUVELLEMENT BUSINESS CLOUD
-    ============================================= */
     async function activateBusiness() {
       const { data: userData } = await supabaseClient.auth.getUser();
       const user = userData?.user;
@@ -410,7 +393,6 @@
         return;
       }
 
-      // Désactiver le bouton pendant le processus
       const businessBtn = document.getElementById('businessButton');
       businessBtn.disabled = true;
       businessBtn.textContent = 'Ouverture du paiement...';
@@ -427,62 +409,41 @@
         },
 
         onComplete: async function (response) {
-          // ══════════════════════════════════════
-          // 🔍 DEBUG — À SUPPRIMER APRÈS LE TEST
-          console.log('══════ FEDAPAY onComplete ══════');
-          console.log('response complète :', JSON.stringify(response, null, 2));
-          // ══════════════════════════════════════
-
-          // Réactiver le bouton dans tous les cas
           businessBtn.disabled = false;
           businessBtn.textContent = 'Passer Premium';
 
-          // Paiement annulé ou fenêtre fermée sans payer
           if (!response || !response.transaction || !response.transaction.id) {
-            console.warn('🔍 DEBUG — Pas de transaction dans la réponse FedaPay');
             showToast('Paiement annulé.', 'error');
             return;
           }
-
-          console.log('🔍 DEBUG — transaction_id :', response.transaction.id);
-          console.log('🔍 DEBUG — user_id :', user.id);
 
           businessBtn.textContent = 'Vérification en cours...';
           businessBtn.disabled = true;
 
           try {
-            // Vérification côté serveur via Edge Function
             const { data, error } = await supabaseClient.functions.invoke(
               'verify-fedapay-payment',
               {
                 body: {
                   transaction_id: response.transaction.id,
-                  user_id: user.id
+                  user_id: user.id,
+                  status: response.transaction.status   // ← statut transmis directement
                 }
               }
             );
 
-            // ══════════════════════════════════════
-            // 🔍 DEBUG — À SUPPRIMER APRÈS LE TEST
-            console.log('🔍 DEBUG — data reçu :', JSON.stringify(data, null, 2));
-            console.log('🔍 DEBUG — error reçu :', JSON.stringify(error, null, 2));
-            // ══════════════════════════════════════
-
             if (error) {
-              console.error('🔍 DEBUG — Erreur invoke détaillée :', error);
+              console.error('Erreur invoke :', error);
               showToast('Erreur lors de la vérification du paiement.', 'error');
               businessBtn.disabled = false;
               businessBtn.textContent = 'Passer Premium';
               return;
             }
 
-            // ✅ Mise à jour UNIQUEMENT si le paiement est approuvé
             if (data && data.success === true) {
               showToast('✅ Business Cloud activé avec succès !', 'success', 5000);
               setTimeout(() => location.reload(), 2000);
             } else {
-              // ❌ Paiement non validé → on ne fait rien côté BDD
-              console.warn('🔍 DEBUG — Paiement refusé, data :', data);
               showToast(
                 `Paiement non validé (statut : ${data?.status || 'inconnu'}). Abonnement non activé.`,
                 'error'
@@ -492,7 +453,7 @@
             }
 
           } catch (e) {
-            console.error('🔍 DEBUG — Exception catch :', e);
+            console.error('Exception :', e);
             showToast('Une erreur inattendue est survenue.', 'error');
             businessBtn.disabled = false;
             businessBtn.textContent = 'Passer Premium';
@@ -502,9 +463,6 @@
       }).open();
     }
 
-    /* =============================================
-       LANCEMENT
-    ============================================= */
     loadSubscription().catch(console.error);
   </script>
 
