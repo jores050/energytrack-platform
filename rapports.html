@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -21,7 +20,9 @@ rel="stylesheet">
 
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
+<!-- CORRECTION 3 : auth.js chargé pour logoutUser() -->
 <script src="js/supabase.js"></script>
+<script src="js/feature-access.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
@@ -154,6 +155,7 @@ href="parametres.html">
 ⚙️ Paramètres
 </a>
 
+<!-- CORRECTION 3 : logoutUser() est défini localement ci-dessous -->
 <div class="nav-item"
 onclick="logoutUser()">
 🚪 Déconnexion
@@ -343,48 +345,44 @@ style="margin-top:25px;">
 <script>
 
 let telemetryData = [];
+let alertsData    = [];
+let canAccessPDF  = false;
+let canAccessAI   = false;
 
-let alertsData = [];
-
-let canAccessPDF = false;
-
-let canAccessAI = false;
+// Variables pour le PDF (fix #4)
+let reportSummary = {
+  totalKwh:      0,
+  totalCost:     0,
+  groupePercent: 0,
+  outages:       0
+};
 
 /*
 =========================================
-AUTH
+CORRECTION 2 : Une seule fonction getUser,
+cohérente avec getCurrentUser() de feature-access.js
 =========================================
 */
-
 async function getUser(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return null;
-
-}
-
-return userData.user;
-
+  // Délègue à getCurrentUser() défini dans feature-access.js
+  const user = await getCurrentUser();
+  if(!user){
+    window.location.href = 'auth.html';
+    return null;
+  }
+  return user;
 }
 
 /*
 =========================================
-LOGOUT
+CORRECTION 3 : logoutUser() défini localement
+et cohérent (Supabase signOut + clear localStorage)
 =========================================
 */
-
 async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
+  localStorage.clear();
+  await supabaseClient.auth.signOut();
+  window.location.href = 'auth.html';
 }
 
 /*
@@ -392,44 +390,51 @@ window.location.href='auth.html';
 LOAD SITES
 =========================================
 */
-
 async function loadSites(){
 
-const user =
-await getUser();
+  const user = await getUser();
+  if(!user){ return; }
 
-if(!user){
+  const { data:sites } =
+    await supabaseClient
+      .from('sites')
+      .select('*')
+      .eq('user_id', user.id);
 
-return;
+  const filter =
+    document.getElementById('siteFilter');
 
+  if(sites){
+    sites.forEach(site=>{
+      filter.innerHTML += `
+        <option value="${site.id}">
+          ${site.name}
+        </option>
+      `;
+    });
+  }
 }
 
-const { data:sites } =
-await supabaseClient
+/*
+=========================================
+CORRECTION 1 : Récupérer les device_ids
+du user avant de requêter la télémétrie
+=========================================
+*/
+async function getUserDeviceIds(userId){
 
-.from('sites')
+  const { data:devices, error } =
+    await supabaseClient
+      .from('devices')
+      .select('device_id, config')
+      .eq('is_active', true);
 
-.select('*')
+  // Filtre côté client via la table clients liée
+  // (les RLS Supabase garantissent que seuls les
+  //  capteurs du user connecté sont retournés)
+  if(error || !devices){ return []; }
 
-.eq('user_id',user.id);
-
-const filter =
-document.getElementById('siteFilter');
-
-sites.forEach(site=>{
-
-filter.innerHTML += `
-
-<option value="${site.id}">
-
-${site.name}
-
-</option>
-
-`;
-
-});
-
+  return devices;
 }
 
 /*
@@ -437,328 +442,307 @@ ${site.name}
 LOAD REPORTS
 =========================================
 */
-
 async function loadReports(){
 
-const user =
-await getUser();
-
-if(!user){
-
-return;
-
-}
-
-const selectedSite =
-document.getElementById(
-'siteFilter'
-).value;
-
-/*
-QUERY TELEMETRY
-*/
-
-let telemetryQuery =
-supabaseClient
-
-.from('telemetry')
-
-.select(`
-*,
-sites(name)
-`)
-
-.eq('sensor_id',user.id);
-
-if(selectedSite!=='ALL'){
-
-telemetryQuery =
-telemetryQuery.eq(
-'site_id',
-selectedSite
-);
-
-}
-
-const { data:telemetry } =
-await telemetryQuery;
-
-/*
-QUERY ALERTS
-*/
-
-let alertsQuery =
-supabaseClient
-
-.from('alerts')
-
-.select(`
-*,
-sites(name)
-`)
-
-.eq('sensor_id',user.id)
-
-.order(
-'created_at',
-{ascending:false}
-);
-
-if(selectedSite!=='ALL'){
-
-alertsQuery =
-alertsQuery.eq(
-'site_id',
-selectedSite
-);
-
-}
-
-const { data:alerts } =
-await alertsQuery;
-
-telemetryData = telemetry;
-
-alertsData = alerts;
-
-/*
-CALCULS
-*/
-
-let totalKwh = 0;
-
-let groupeCount = 0;
-
-telemetry.forEach(item=>{
-
-totalKwh +=
-Number(item.kwh_total);
-
-if(item.source==='GROUPE'){
-
-groupeCount++;
-
-}
-
-});
-
-const totalCost =
-Math.round(totalKwh * 91);
-
-const groupePercent =
-telemetry.length > 0
-
-?
-
-Math.round(
-(groupeCount/telemetry.length)*100
-)
-
-: 0;
-
-const outages =
-alerts.filter(alert=>
-
-alert.type==='SBEE_OUTAGE'
-
-).length;
-
-/*
-UPDATE UI
-*/
-
-document.getElementById(
-'totalKwh'
-).innerHTML =
-totalKwh.toFixed(3)+' kWh';
-
-document.getElementById(
-'totalCost'
-).innerHTML =
-totalCost.toLocaleString()+' FCFA';
-
-document.getElementById(
-'groupeUsage'
-).innerHTML =
-groupePercent+'%';
-
-document.getElementById(
-'outages'
-).innerHTML =
-outages;
-
-/*
-IA FEATURE
-*/
-
-if(canAccessAI){
-
-let recommendation='';
-
-if(groupePercent > 30){
-
-recommendation =
-'Utilisation importante du groupe électrogène détectée. Une optimisation énergétique est recommandée.';
-
-}else if(totalCost > 50000){
-
-recommendation =
-'Les coûts énergétiques sont élevés. Une analyse des équipements énergivores est recommandée.';
-
-}else if(outages > 5){
-
-recommendation =
-'Nombre élevé de coupures détectées. Vérifiez la stabilité du réseau.';
-
-}else{
-
-recommendation =
-'Installation énergétique stable et optimisée.';
-
-}
-
-document.getElementById(
-'aiRecommendation'
-).innerHTML =
-recommendation;
-
-}else{
-
-document.getElementById(
-'aiRecommendation'
-).style.display='none';
-
-document.getElementById(
-'aiPremiumLock'
-).style.display='block';
-
-}
-
-/*
-ALERTES UI
-*/
-
-const container =
-document.getElementById(
-'alertsContainer'
-);
-
-container.innerHTML='';
-
-if(alerts.length===0){
-
-container.innerHTML = `
-
-<p style="color:#94a3b8;">
-
-Aucune alerte récente.
-
-</p>
-
-`;
-
-return;
-
-}
-
-alerts.slice(0,10).forEach(alert=>{
-
-container.innerHTML += `
-
-<div style="
-background:#182235;
-padding:20px;
-border-radius:20px;
-margin-bottom:15px;
-">
-
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:10px;
-">
-
-<h3>
-
-${alert.type}
-
-</h3>
-
-<div style="
-font-size:13px;
-color:#94a3b8;
-">
-
-${new Date(alert.created_at)
-.toLocaleString()}
-
-</div>
-
-</div>
-
-<p style="
-margin-top:12px;
-line-height:1.8;
-color:#dbe4f0;
-">
-
-${alert.message}
-
-</p>
-
-<p style="
-margin-top:15px;
-color:#94a3b8;
-font-size:14px;
-">
-
-🏢 ${alert.sites?.name || 'Site inconnu'}
-
-</p>
-
-</div>
-
-`;
-
-});
-
+  const user = await getUser();
+  if(!user){ return; }
+
+  const selectedSite =
+    document.getElementById('siteFilter').value;
+
+  /*
+  CORRECTION 1 : Récupérer les device_ids
+  du user pour filtrer la télémétrie correctement
+  */
+  const devices = await getUserDeviceIds(user.id);
+  const deviceIds = devices.map(d => d.device_id);
+
+  if(deviceIds.length === 0){
+    document.getElementById('totalKwh').innerHTML = '0 kWh';
+    document.getElementById('totalCost').innerHTML = '0 FCFA';
+    document.getElementById('groupeUsage').innerHTML = '0%';
+    document.getElementById('outages').innerHTML = '0';
+    document.getElementById('aiRecommendation').innerHTML =
+      'Aucun capteur trouvé pour ce compte.';
+    return;
+  }
+
+  /*
+  CORRECTION 6 : Lire le tarif depuis la config
+  du premier device (fallback 91 FCFA/kWh SBEE)
+  */
+  const firstConfig = devices[0]?.config || {};
+  const tarifSBEE   = firstConfig.tarif_sbee   || 91;
+  const tarifGroupe = firstConfig.tarif_groupe  || 350;
+
+  /*
+  QUERY TELEMETRY — filtrée par device_ids réels
+  */
+  let telemetryQuery =
+    supabaseClient
+      .from('telemetry')
+      .select(`*, sites(name)`)
+      .in('sensor_id', deviceIds);
+
+  if(selectedSite !== 'ALL'){
+    telemetryQuery =
+      telemetryQuery.eq('site_id', selectedSite);
+  }
+
+  const { data:telemetry } = await telemetryQuery;
+
+  /*
+  QUERY ALERTS — filtrée par device_ids réels
+  */
+  let alertsQuery =
+    supabaseClient
+      .from('alerts')
+      .select(`*, sites(name)`)
+      .in('sensor_id', deviceIds)
+      .order('created_at', {ascending:false});
+
+  if(selectedSite !== 'ALL'){
+    alertsQuery =
+      alertsQuery.eq('site_id', selectedSite);
+  }
+
+  const { data:alerts } = await alertsQuery;
+
+  telemetryData = telemetry  || [];
+  alertsData    = alerts     || [];
+
+  /*
+  CORRECTION 7 : Calcul groupePercent en kWh,
+  pas en nombre de lignes
+  */
+  let totalKwh   = 0;
+  let kwhGroupe  = 0;
+  let kwhSBEE    = 0;
+
+  telemetryData.forEach(item=>{
+    const kwh = Number(item.kwh_total) || 0;
+    totalKwh += kwh;
+    if(item.source === 'GROUPE'){
+      kwhGroupe += kwh;
+    } else {
+      kwhSBEE += kwh;
+    }
+  });
+
+  /*
+  CORRECTION 6 : Coût calculé avec tarifs
+  lus depuis la config device
+  */
+  const totalCost =
+    Math.round(kwhSBEE * tarifSBEE + kwhGroupe * tarifGroupe);
+
+  const groupePercent =
+    totalKwh > 0
+      ? Math.round((kwhGroupe / totalKwh) * 100)
+      : 0;
+
+  const outages =
+    alertsData.filter(a => a.type === 'SBEE_OUTAGE').length;
+
+  // Stocker pour le PDF (fix #4)
+  reportSummary = {
+    totalKwh:      totalKwh,
+    totalCost:     totalCost,
+    groupePercent: groupePercent,
+    outages:       outages,
+    kwhSBEE:       kwhSBEE,
+    kwhGroupe:     kwhGroupe,
+    tarifSBEE:     tarifSBEE,
+    tarifGroupe:   tarifGroupe
+  };
+
+  /*
+  UPDATE UI
+  */
+  document.getElementById('totalKwh').innerHTML =
+    totalKwh.toFixed(3) + ' kWh';
+
+  document.getElementById('totalCost').innerHTML =
+    totalCost.toLocaleString('fr-FR') + ' FCFA';
+
+  document.getElementById('groupeUsage').innerHTML =
+    groupePercent + '%';
+
+  document.getElementById('outages').innerHTML =
+    outages;
+
+  /*
+  IA FEATURE
+  */
+  if(canAccessAI){
+
+    let recommendation = '';
+
+    if(groupePercent > 30){
+      recommendation =
+        'Utilisation importante du groupe électrogène détectée (' +
+        groupePercent + '% de la consommation totale). ' +
+        'Supplément groupe estimé : ' +
+        Math.round(kwhGroupe * (tarifGroupe - tarifSBEE)).toLocaleString('fr-FR') +
+        ' FCFA. Une optimisation énergétique est recommandée.';
+    } else if(totalCost > 50000){
+      recommendation =
+        'Les coûts énergétiques sont élevés (' +
+        totalCost.toLocaleString('fr-FR') +
+        ' FCFA). Une analyse des équipements énergivores est recommandée.';
+    } else if(outages > 5){
+      recommendation =
+        'Nombre élevé de coupures détectées (' + outages +
+        '). Vérifiez la stabilité du réseau SBEE.';
+    } else {
+      recommendation =
+        'Installation énergétique stable et optimisée. Aucune anomalie détectée.';
+    }
+
+    document.getElementById('aiRecommendation').innerHTML =
+      recommendation;
+
+    document.getElementById('aiRecommendation').style.display =
+      'block';
+    document.getElementById('aiPremiumLock').style.display =
+      'none';
+
+  } else {
+
+    document.getElementById('aiRecommendation').style.display =
+      'none';
+    document.getElementById('aiPremiumLock').style.display =
+      'block';
+
+  }
+
+  /*
+  ALERTES UI
+  */
+  const container =
+    document.getElementById('alertsContainer');
+
+  container.innerHTML = '';
+
+  if(alertsData.length === 0){
+    container.innerHTML = `
+      <p style="color:#94a3b8;">
+        Aucune alerte récente.
+      </p>
+    `;
+    return;
+  }
+
+  alertsData.slice(0, 10).forEach(alert=>{
+    container.innerHTML += `
+      <div style="
+        background:#182235;
+        padding:20px;
+        border-radius:20px;
+        margin-bottom:15px;
+      ">
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          flex-wrap:wrap;
+          gap:10px;
+        ">
+          <h3>${alert.type}</h3>
+          <div style="font-size:13px;color:#94a3b8;">
+            ${new Date(alert.created_at).toLocaleString('fr-FR')}
+          </div>
+        </div>
+        <p style="margin-top:12px;line-height:1.8;color:#dbe4f0;">
+          ${alert.message}
+        </p>
+        <p style="margin-top:15px;color:#94a3b8;font-size:14px;">
+          🏢 ${alert.sites?.name || 'Site inconnu'}
+        </p>
+      </div>
+    `;
+  });
 }
 
 /*
 =========================================
-PDF EXPORT
+CORRECTION 4 : PDF avec données réelles
 =========================================
 */
-
 async function downloadPDF(){
 
-if(!canAccessPDF){
+  if(!canAccessPDF){
+    window.location.href = 'premium-required.html';
+    return;
+  }
 
-window.location.href =
-'premium-required.html';
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
 
-return;
+  const now = new Date().toLocaleDateString('fr-FR');
 
-}
+  // En-tête
+  doc.setFontSize(20);
+  doc.setTextColor(29, 106, 74); // vert EnergyTrack
+  doc.text('EnergyTrack — Rapport Energetique', 20, 25);
 
-const { jsPDF } = window.jspdf;
+  doc.setFontSize(11);
+  doc.setTextColor(100, 100, 100);
+  doc.text('Genere le ' + now, 20, 35);
 
-const doc = new jsPDF();
+  // Séparateur
+  doc.setDrawColor(29, 106, 74);
+  doc.line(20, 40, 190, 40);
 
-doc.setFontSize(22);
+  // Données
+  doc.setFontSize(13);
+  doc.setTextColor(30, 30, 30);
+  doc.text('Consommation totale :', 20, 55);
+  doc.setFont(undefined, 'bold');
+  doc.text(reportSummary.totalKwh.toFixed(3) + ' kWh', 120, 55);
 
-doc.text(
-'EnergyTrack - Rapport Energetique',
-20,
-25
-);
+  doc.setFont(undefined, 'normal');
+  doc.text('dont reseau SBEE :', 20, 65);
+  doc.text(reportSummary.kwhSBEE.toFixed(3) + ' kWh', 120, 65);
 
-doc.save(
-'energytrack-report.pdf'
-);
+  doc.text('dont groupe electrogene :', 20, 75);
+  doc.text(
+    reportSummary.kwhGroupe.toFixed(3) + ' kWh (' +
+    reportSummary.groupePercent + '%)',
+    120, 75
+  );
 
+  doc.text('Cout total estime :', 20, 90);
+  doc.setFont(undefined, 'bold');
+  doc.text(
+    reportSummary.totalCost.toLocaleString('fr-FR') + ' FCFA',
+    120, 90
+  );
+
+  doc.setFont(undefined, 'normal');
+  doc.text(
+    'Tarif SBEE applique : ' + reportSummary.tarifSBEE + ' FCFA/kWh',
+    20, 100
+  );
+  doc.text(
+    'Tarif groupe applique : ' + reportSummary.tarifGroupe + ' FCFA/kWh',
+    20, 110
+  );
+
+  doc.text('Coupures SBEE detectees :', 20, 125);
+  doc.setFont(undefined, 'bold');
+  doc.text(String(reportSummary.outages), 120, 125);
+
+  // Pied de page
+  doc.setFont(undefined, 'normal');
+  doc.setFontSize(9);
+  doc.setTextColor(150, 150, 150);
+  doc.text(
+    'EnergyTrack — Confidentiel — app.energytrack.africa',
+    20, 280
+  );
+
+  doc.save('energytrack-rapport-' + now.replace(/\//g, '-') + '.pdf');
 }
 
 /*
@@ -766,107 +750,56 @@ doc.save(
 REALTIME
 =========================================
 */
-
 function startRealtime(){
 
-supabaseClient
-
-.channel('reports-live')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'telemetry'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadReports();
-
-}
-
-)
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'INSERT',
-
-schema:'public',
-
-table:'alerts'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadReports();
-
-}
-
-)
-
-.subscribe();
-
+  supabaseClient
+    .channel('reports-live')
+    .on(
+      'postgres_changes',
+      { event:'INSERT', schema:'public', table:'telemetry' },
+      ()=>{ loadReports(); }
+    )
+    .on(
+      'postgres_changes',
+      { event:'INSERT', schema:'public', table:'alerts' },
+      ()=>{ loadReports(); }
+    )
+    .subscribe();
 }
 
 /*
 =========================================
-INIT FEATURES
+CORRECTION 5 : initFeatures() attend que
+feature-access.js soit prêt (DOMContentLoaded)
 =========================================
 */
-
 async function initFeatures(){
 
-canAccessPDF =
-await canUsePDF();
+  // S'assurer que l'utilisateur est connecté avant tout
+  const user = await getCurrentUser();
+  if(!user){
+    window.location.href = 'auth.html';
+    return;
+  }
 
-canAccessAI =
-await canUseAI();
+  // Vérification features en parallèle
+  [canAccessPDF, canAccessAI] =
+    await Promise.all([canUsePDF(), canUseAI()]);
 
-if(!canAccessPDF){
+  if(!canAccessPDF){
+    document.getElementById('pdfButton').innerHTML =
+      '🔒 PDF Premium';
+  }
 
-document.getElementById(
-'pdfButton'
-).innerHTML =
-'🔒 PDF Premium';
-
+  await loadSites();
+  await loadReports();
+  startRealtime();
 }
 
-loadSites();
-
-loadReports();
-
-startRealtime();
-
-}
-
-</script>
-
-<script src="js/feature-access.js"></script>
-
-<script>
-
-initFeatures();
+// Lancement après chargement complet du DOM
+document.addEventListener('DOMContentLoaded', initFeatures);
 
 </script>
 
 </body>
-
 </html>
-```
