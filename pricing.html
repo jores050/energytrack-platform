@@ -1,852 +1,495 @@
-
 <!DOCTYPE html>
 <html lang="fr">
 
 <head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tarifs EnergyTrack</title>
 
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-<title>Tarifs EnergyTrack</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
+  <script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
 
-<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/supabase.js"></script>
-<script src="https://cdn.fedapay.com/checkout.js?v=1.1.7"></script>
+    body {
+      background: #0b1220;
+      font-family: 'Poppins', sans-serif;
+      color: white;
+      overflow-x: hidden;
+    }
 
-<style>
+    .hero {
+      padding: 100px 8% 60px;
+      text-align: center;
+    }
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-}
+    .hero h1 {
+      font-family: 'Orbitron', sans-serif;
+      font-size: 64px;
+      line-height: 1.2;
+      margin-bottom: 25px;
+    }
 
-body{
-background:#0b1220;
-font-family:'Poppins',sans-serif;
-color:white;
-overflow-x:hidden;
-}
+    .hero p {
+      max-width: 850px;
+      margin: auto;
+      font-size: 20px;
+      line-height: 1.8;
+      color: #94a3b8;
+    }
 
-.hero{
-padding:100px 8% 60px;
-text-align:center;
-}
+    .pricing-section {
+      padding: 60px 8% 100px;
+    }
 
-.hero h1{
-font-family:'Orbitron',sans-serif;
-font-size:64px;
-line-height:1.2;
-margin-bottom:25px;
-}
+    .pricing-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 30px;
+      margin-top: 50px;
+    }
 
-.hero p{
-max-width:850px;
-margin:auto;
-font-size:20px;
-line-height:1.8;
-color:#94a3b8;
-}
+    .pricing-card {
+      background: linear-gradient(145deg, #182235, #101826);
+      padding: 40px;
+      border-radius: 32px;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: 0.4s;
+    }
 
-.pricing-section{
-padding:60px 8% 100px;
-}
+    .pricing-card:hover {
+      transform: translateY(-10px);
+      box-shadow: 0 30px 60px rgba(0, 0, 0, 0.4);
+    }
 
-.pricing-grid{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
-gap:30px;
-margin-top:50px;
-}
+    .popular {
+      border: 1px solid rgba(0, 200, 150, 0.4);
+      transform: scale(1.03);
+    }
 
-.pricing-card{
-background:linear-gradient(145deg,#182235,#101826);
-padding:40px;
-border-radius:32px;
-position:relative;
-overflow:hidden;
-border:1px solid rgba(255,255,255,0.05);
-transition:0.4s;
-}
+    .badge {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: #00c896;
+      padding: 10px 18px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 700;
+    }
 
-.pricing-card:hover{
-transform:translateY(-10px);
-box-shadow:0 30px 60px rgba(0,0,0,0.4);
-}
+    .plan-name {
+      font-size: 30px;
+      font-weight: 700;
+      margin-bottom: 15px;
+    }
 
-.popular{
-border:1px solid rgba(0,200,150,0.4);
-transform:scale(1.03);
-}
+    .plan-description {
+      color: #94a3b8;
+      line-height: 1.7;
+      margin-bottom: 25px;
+    }
 
-.badge{
-position:absolute;
-top:20px;
-right:20px;
-background:#00c896;
-padding:10px 18px;
-border-radius:999px;
-font-size:12px;
-font-weight:700;
-}
+    .price {
+      font-size: 68px;
+      font-family: 'Orbitron', sans-serif;
+      font-weight: 800;
+      margin-bottom: 10px;
+    }
 
-.plan-name{
-font-size:30px;
-font-weight:700;
-margin-bottom:15px;
-}
+    .price span {
+      font-size: 18px;
+      font-family: 'Poppins', sans-serif;
+      color: #94a3b8;
+    }
 
-.plan-description{
-color:#94a3b8;
-line-height:1.7;
-margin-bottom:25px;
-}
+    .features {
+      margin-top: 35px;
+    }
 
-.price{
-font-size:68px;
-font-family:'Orbitron',sans-serif;
-font-weight:800;
-margin-bottom:10px;
-}
+    .feature {
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 15px;
+    }
 
-.price span{
-font-size:18px;
-font-family:'Poppins',sans-serif;
-color:#94a3b8;
-}
+    button {
+      width: 100%;
+      padding: 18px;
+      border: none;
+      border-radius: 18px;
+      margin-top: 40px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.3s;
+      color: white;
+    }
 
-.features{
-margin-top:35px;
-}
+    button:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
 
-.feature{
-margin-bottom:18px;
-display:flex;
-align-items:center;
-gap:12px;
-font-size:15px;
-}
+    .btn-primary {
+      background: linear-gradient(135deg, #00c896, #00aeef);
+    }
 
-button{
-width:100%;
-padding:18px;
-border:none;
-border-radius:18px;
-margin-top:40px;
-font-size:16px;
-font-weight:700;
-cursor:pointer;
-transition:0.3s;
-color:white;
-}
+    .btn-primary:hover:not(:disabled) {
+      opacity: 0.85;
+      transform: scale(1.02);
+    }
 
-.btn-primary{
-background:linear-gradient(135deg,#00c896,#00aeef);
-}
+    .btn-secondary {
+      background: #1e293b;
+    }
 
-.btn-secondary{
-background:#1e293b;
-}
+    .btn-secondary:hover:not(:disabled) {
+      background: #263548;
+    }
 
-#subscriptionStatus{
-margin-top:40px;
-padding:25px;
-background:rgba(0,200,150,0.12);
-border:1px solid rgba(0,200,150,0.2);
-border-radius:22px;
-max-width:750px;
-margin-left:auto;
-margin-right:auto;
-display:none;
-}
+    #subscriptionStatus {
+      margin-top: 40px;
+      padding: 25px;
+      background: rgba(0, 200, 150, 0.12);
+      border: 1px solid rgba(0, 200, 150, 0.2);
+      border-radius: 22px;
+      max-width: 750px;
+      margin-left: auto;
+      margin-right: auto;
+      display: none;
+    }
 
-@media(max-width:768px){
+    /* Toast notification */
+    #toast {
+      position: fixed;
+      bottom: 30px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: #1e293b;
+      color: white;
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-size: 15px;
+      font-weight: 500;
+      z-index: 9999;
+      transition: transform 0.4s ease;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      min-width: 280px;
+      text-align: center;
+    }
 
-.hero h1{
-font-size:42px;
-}
+    #toast.show {
+      transform: translateX(-50%) translateY(0);
+    }
 
-.price{
-font-size:52px;
-}
+    #toast.success {
+      border-color: rgba(0, 200, 150, 0.4);
+      background: rgba(0, 200, 150, 0.15);
+    }
 
-}
+    #toast.error {
+      border-color: rgba(255, 80, 80, 0.4);
+      background: rgba(255, 80, 80, 0.12);
+    }
 
-</style>
+    @media (max-width: 768px) {
+      .hero h1 {
+        font-size: 42px;
+      }
 
+      .price {
+        font-size: 52px;
+      }
+    }
+  </style>
 </head>
 
 <body>
 
-<section class="hero">
-
-<h1>
-Les Tarifs EnergyTrack
-</h1>
-
-<p>
-Choisissez le plan idéal pour superviser vos installations énergétiques,
-analyser votre consommation et optimiser vos coûts.
-</p>
-
-<div id="subscriptionStatus"></div>
-
-</section>
-
-<section class="pricing-section">
-
-<div class="pricing-grid">
-
-<!-- ESSENTIAL -->
-
-<div class="pricing-card">
-
-<div style="
-display:inline-block;
-background:rgba(0,200,150,0.15);
-color:#00c896;
-padding:10px 18px;
-border-radius:999px;
-font-size:12px;
-font-weight:700;
-margin-bottom:20px;
-">
-GRATUIT
-</div>
-
-<div class="plan-name">
-Essential
-</div>
-
-<div class="plan-description">
-Parfait pour découvrir EnergyTrack.
-</div>
-
-<div class="price">
-0
-<span>
-FCFA / mois
-</span>
-</div>
-
-<div class="features">
-<div class="feature">✅ 1 site énergétique</div>
-<div class="feature">✅ Dashboard temps réel</div>
-<div class="feature">✅ Alertes basiques</div>
-<div class="feature">✅ Monitoring énergétique</div>
-</div>
-
-<button
-id="essentialButton"
-class="btn-secondary">
-Chargement...
-</button>
-
-</div>
-
-<!-- BUSINESS CLOUD -->
-
-<div class="pricing-card popular">
-
-<div class="badge">
-POPULAIRE
-</div>
-
-<div class="plan-name">
-Business Cloud
-</div>
-
-<div class="plan-description">
-Débloquez toute la puissance SaaS d’EnergyTrack.
-</div>
-
-<div class="price">
-5000
-<span>
-FCFA / mois
-</span>
-</div>
-
-<div class="features">
-<div class="feature">✅ Multi-sites</div>
-<div class="feature">✅ Analyse IA</div>
-<div class="feature">✅ Rapports PDF</div>
-<div class="feature">✅ Analytics avancés</div>
-<div class="feature">✅ Maintenance prédictive</div>
-</div>
-
-<button
-id="businessButton"
-class="btn-primary">
-Chargement...
-</button>
-
-</div>
-
-</div>
-
-</section>
-  
-<script>
-
-async function loadSubscription(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-setupGuestButtons();
-
-return;
-
-}
-
-const user =
-userData.user;
-
-const {
-
-data:subscription
-
-}
-
-=
-
-await supabaseClient
-
-.from('subscriptions')
-
-.select('*')
-
-.eq('user_id',user.id)
-
-.maybeSingle();
-
-if(!subscription){
-
-setupGuestButtons();
-
-return;
-
-}
-
-const {
-
-data:plan
-
-}
-
-=
-
-await supabaseClient
-
-.from('plans')
-
-.select('*')
-
-.eq('id',subscription.plan_id)
-
-.single();
-
-const now =
-new Date();
-
-const isActive =
-
-subscription.status==='active'
-
-&&
-
-new Date(
-subscription.expires_at
-)
-
->
-
-now;
-
-const statusBox =
-document.getElementById(
-'subscriptionStatus'
-);
-
-statusBox.style.display=
-'block';
-
-const essentialBtn =
-document.getElementById(
-'essentialButton'
-);
-
-const businessBtn =
-document.getElementById(
-'businessButton'
-);
-
-if(
-
-plan.name
-.toLowerCase()
-
-===
-
-'essential'
-
-){
-
-statusBox.innerHTML =
-
-`
-<h2>
-Plan actuel :
-Essential
-</h2>
-
-<p>
-
-Version gratuite active
-
-</p>
-`;
-
-essentialBtn.innerHTML =
-'Plan actuel';
-
-essentialBtn.disabled =
-true;
-
-businessBtn.innerHTML =
-'Passer Premium';
-
-businessBtn.onclick =
-activateBusiness;
-
-return;
-
-}
-
-if(
-
-plan.name
-.toLowerCase()
-
-===
-
-'business cloud'
-
-){
-
-statusBox.innerHTML =
-
-`
-<h2>
-
-${isActive
-
-?
-
-'Business actif'
-
-:
-
-'Expiré'
-
-}
-
-</h2>
-
-<p>
-
-Expire :
-
-${new Date(
-
-subscription.expires_at
-
-).toLocaleDateString()}
-
-</p>
-`;
-
-essentialBtn.innerHTML =
-'Essential';
-
-businessBtn.innerHTML =
-
-isActive
-
-?
-
-'Actuel'
-
-:
-
-'Réactiver';
-
-businessBtn.onclick =
-renewSubscription;
-
-}
-
-}
-
-function setupGuestButtons(){
-
-document
-
-.getElementById(
-'essentialButton'
-)
-
-.onclick=()=>{
-
-window.location.href=
-'auth.html';
-
-};
-
-document
-
-.getElementById(
-'businessButton'
-)
-
-.onclick=()=>{
-
-window.location.href=
-'auth.html';
-
-};
-
-}
-
-async function activateBusiness(){
-alert(
-"activateBusiness lancé"
-);
-const {
-
-data:userData
-
-}
-
-=
-
-await supabaseClient
-
-.auth
-
-.getUser();
-
-const user =
-userData.user;
-
-
-FedaPay.init({
-
-public_key:
-'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
-
-transaction:{
-
-amount:5000,
-
-description:
-'Business Cloud',
-
-currency:{
-iso:'XOF'
-}
-
-},
-
-customer:{
-email:user.email
-},
-
-
-onComplete:
-
-async function activateBusiness(){
-
-const {
-
-data:userData
-
-}
-
-=
-
-await supabaseClient
-
-.auth
-
-.getUser();
-
-
-const user =
-
-userData.user;
-
-
-if(
-
-!user
-
-){
-
-location.href=
-
-'auth.html';
-
-return;
-
-}
-
-
-FedaPay.init({
-
-public_key:
-
-'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
-
-
-transaction:{
-
-amount:
-
-5000,
-
-description:
-
-'Business Cloud',
-
-currency:{
-
-iso:
-
-'XOF'
-
-}
-
-},
-
-
-customer:{
-
-email:
-
-user.email
-
-},
-
-
-
-onComplete:
-
-async function(
-
-response
-
-){
-
-try{
-
-
-/*
-Vérifier si transaction existe
-*/
-
-if(
-
-!response
-
-||
-
-!response.transaction
-
-||
-
-!response.transaction.id
-
-){
-
-alert(
-
-'Paiement annulé'
-
-);
-
-return;
-
-}
-
-
-
-/*
-Vérifier paiement réel côté serveur
-*/
-
-const {
-
-data,
-
-error
-
-}
-
-=
-
-await supabaseClient
-
-.functions
-
-.invoke(
-
-'verify-fedapay-payment',
-
-{
-
-body:{
-
-transaction_id:
-
-response.transaction.id,
-
-user_id:
-
-user.id
-
-}
-
-}
-
-);
-
-
-
-if(
-
-error
-
-){
-
-console.log(
-
-error
-
-);
-
-alert(
-
-'Erreur vérification paiement'
-
-);
-
-return;
-
-}
-
-
-
-/*
-IMPORTANT :
-activer uniquement si payé
-*/
-
-if(
-
-!data
-
-||
-
-data.success!==true
-
-||
-
-data.status!=='approved'
-
-){
-
-alert(
-
-'Paiement non validé'
-
-);
-
-return;
-
-}
-
-
-
-/*
-OK
-*/
-
-alert(
-
-'✅ Business Cloud activé'
-
-);
-
-
-location.reload();
-
-
-}
-
-catch(
-
-e
-
-){
-
-console.log(
-
-e
-
-);
-
-
-alert(
-
-'Erreur inattendue'
-
-);
-
-}
-
-}
-
-}).open();
-
-}
-
-}).open();
- 
-
-}
-
-
-async function renewSubscription(){
-
-activateBusiness();
-
-}
-
-loadSubscription()
-
-.catch(
-
-console.log
-
-);
-
-</script>
+  <!-- Toast notification -->
+  <div id="toast"></div>
+
+  <section class="hero">
+    <h1>Les Tarifs EnergyTrack</h1>
+    <p>
+      Choisissez le plan idéal pour superviser vos installations énergétiques,
+      analyser votre consommation et optimiser vos coûts.
+    </p>
+    <div id="subscriptionStatus"></div>
+  </section>
+
+  <section class="pricing-section">
+    <div class="pricing-grid">
+
+      <!-- ESSENTIAL -->
+      <div class="pricing-card">
+        <div style="
+          display: inline-block;
+          background: rgba(0,200,150,0.15);
+          color: #00c896;
+          padding: 10px 18px;
+          border-radius: 999px;
+          font-size: 12px;
+          font-weight: 700;
+          margin-bottom: 20px;
+        ">GRATUIT</div>
+
+        <div class="plan-name">Essential</div>
+        <div class="plan-description">Parfait pour découvrir EnergyTrack.</div>
+
+        <div class="price">0 <span>FCFA / mois</span></div>
+
+        <div class="features">
+          <div class="feature">✅ 1 site énergétique</div>
+          <div class="feature">✅ Dashboard temps réel</div>
+          <div class="feature">✅ Alertes basiques</div>
+          <div class="feature">✅ Monitoring énergétique</div>
+        </div>
+
+        <button id="essentialButton" class="btn-secondary">Chargement...</button>
+      </div>
+
+      <!-- BUSINESS CLOUD -->
+      <div class="pricing-card popular">
+        <div class="badge">POPULAIRE</div>
+
+        <div class="plan-name">Business Cloud</div>
+        <div class="plan-description">Débloquez toute la puissance SaaS d'EnergyTrack.</div>
+
+        <div class="price">5000 <span>FCFA / mois</span></div>
+
+        <div class="features">
+          <div class="feature">✅ Multi-sites</div>
+          <div class="feature">✅ Analyse IA</div>
+          <div class="feature">✅ Rapports PDF</div>
+          <div class="feature">✅ Analytics avancés</div>
+          <div class="feature">✅ Maintenance prédictive</div>
+        </div>
+
+        <button id="businessButton" class="btn-primary">Chargement...</button>
+      </div>
+
+    </div>
+  </section>
+
+  <script>
+    /* =============================================
+       TOAST — remplace les alert() partout
+    ============================================= */
+    function showToast(message, type = 'info', duration = 4000) {
+      const toast = document.getElementById('toast');
+      toast.textContent = message;
+      toast.className = `show ${type}`;
+      setTimeout(() => {
+        toast.className = '';
+      }, duration);
+    }
+
+    /* =============================================
+       CHARGEMENT DE L'ABONNEMENT AU DÉMARRAGE
+    ============================================= */
+    async function loadSubscription() {
+      const { data: userData } = await supabaseClient.auth.getUser();
+
+      if (!userData.user) {
+        setupGuestButtons();
+        return;
+      }
+
+      const user = userData.user;
+
+      const { data: subscription } = await supabaseClient
+        .from('subscriptions')
+        .select('*')
+        .eq('user_id', user.id)
+        .maybeSingle();
+
+      if (!subscription) {
+        setupFreeButtons();
+        return;
+      }
+
+      const { data: plan } = await supabaseClient
+        .from('plans')
+        .select('*')
+        .eq('id', subscription.plan_id)
+        .single();
+
+      const now = new Date();
+      const isActive =
+        subscription.status === 'active' &&
+        new Date(subscription.expires_at) > now;
+
+      const statusBox = document.getElementById('subscriptionStatus');
+      statusBox.style.display = 'block';
+
+      const essentialBtn = document.getElementById('essentialButton');
+      const businessBtn  = document.getElementById('businessButton');
+
+      if (plan.name.toLowerCase() === 'essential') {
+        statusBox.innerHTML = `
+          <h2>Plan actuel : Essential</h2>
+          <p>Version gratuite active</p>
+        `;
+        essentialBtn.textContent = 'Plan actuel';
+        essentialBtn.disabled = true;
+
+        businessBtn.textContent = 'Passer Premium';
+        businessBtn.onclick = activateBusiness;
+        return;
+      }
+
+      if (plan.name.toLowerCase() === 'business cloud') {
+        statusBox.innerHTML = `
+          <h2>${isActive ? '✅ Business Cloud actif' : '⚠️ Abonnement expiré'}</h2>
+          <p>Expire le : ${new Date(subscription.expires_at).toLocaleDateString('fr-FR')}</p>
+        `;
+
+        essentialBtn.textContent = 'Essential';
+        essentialBtn.disabled = true;
+
+        businessBtn.textContent = isActive ? 'Plan actuel' : 'Réactiver';
+        if (isActive) {
+          businessBtn.disabled = true;
+        } else {
+          businessBtn.onclick = activateBusiness;
+        }
+      }
+    }
+
+    /* =============================================
+       BOUTONS POUR LES VISITEURS NON CONNECTÉS
+    ============================================= */
+    function setupGuestButtons() {
+      const essentialBtn = document.getElementById('essentialButton');
+      const businessBtn  = document.getElementById('businessButton');
+
+      essentialBtn.textContent = "S'inscrire gratuitement";
+      essentialBtn.onclick = () => { window.location.href = 'auth.html'; };
+
+      businessBtn.textContent = 'Commencer — 5 000 FCFA/mois';
+      businessBtn.onclick = () => { window.location.href = 'auth.html'; };
+    }
+
+    /* =============================================
+       BOUTONS POUR UN UTILISATEUR SANS ABONNEMENT
+    ============================================= */
+    function setupFreeButtons() {
+      const essentialBtn = document.getElementById('essentialButton');
+      const businessBtn  = document.getElementById('businessButton');
+
+      essentialBtn.textContent = 'Plan actuel';
+      essentialBtn.disabled = true;
+
+      businessBtn.textContent = 'Passer Premium';
+      businessBtn.onclick = activateBusiness;
+    }
+
+    /* =============================================
+       ACTIVATION / RENOUVELLEMENT BUSINESS CLOUD
+    ============================================= */
+    async function activateBusiness() {
+      const { data: userData } = await supabaseClient.auth.getUser();
+      const user = userData?.user;
+
+      if (!user) {
+        window.location.href = 'auth.html';
+        return;
+      }
+
+      // Désactiver le bouton pendant le processus
+      const businessBtn = document.getElementById('businessButton');
+      businessBtn.disabled = true;
+      businessBtn.textContent = 'Ouverture du paiement...';
+
+      FedaPay.init({
+        public_key: 'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
+        transaction: {
+          amount: 5000,
+          description: 'Business Cloud — EnergyTrack',
+          currency: { iso: 'XOF' }
+        },
+        customer: {
+          email: user.email
+        },
+
+        onComplete: async function (response) {
+          // Réactiver le bouton dans tous les cas
+          businessBtn.disabled = false;
+          businessBtn.textContent = 'Passer Premium';
+
+          // Paiement annulé ou fenêtre fermée sans payer
+          if (!response || !response.transaction || !response.transaction.id) {
+            showToast('Paiement annulé.', 'error');
+            return;
+          }
+
+          businessBtn.textContent = 'Vérification en cours...';
+          businessBtn.disabled = true;
+
+          try {
+            // Vérification côté serveur via Edge Function
+            const { data, error } = await supabaseClient.functions.invoke(
+              'verify-fedapay-payment',
+              {
+                body: {
+                  transaction_id: response.transaction.id,
+                  user_id: user.id
+                }
+              }
+            );
+
+            if (error) {
+              console.error('Erreur invoke:', error);
+              showToast('Erreur lors de la vérification du paiement.', 'error');
+              businessBtn.disabled = false;
+              businessBtn.textContent = 'Passer Premium';
+              return;
+            }
+
+            // ✅ Mise à jour UNIQUEMENT si le paiement est approuvé
+            if (data && data.success === true) {
+              showToast('✅ Business Cloud activé avec succès !', 'success', 5000);
+              setTimeout(() => location.reload(), 2000);
+            } else {
+              // ❌ Paiement non validé → on ne fait rien côté BDD
+              showToast(
+                `Paiement non validé (statut : ${data?.status || 'inconnu'}). Abonnement non activé.`,
+                'error'
+              );
+              businessBtn.disabled = false;
+              businessBtn.textContent = 'Passer Premium';
+            }
+
+          } catch (e) {
+            console.error('Erreur inattendue:', e);
+            showToast('Une erreur inattendue est survenue.', 'error');
+            businessBtn.disabled = false;
+            businessBtn.textContent = 'Passer Premium';
+          }
+        }
+
+      }).open();
+    }
+
+    /* =============================================
+       LANCEMENT
+    ============================================= */
+    loadSubscription().catch(console.error);
+  </script>
 
 </body>
 </html>
