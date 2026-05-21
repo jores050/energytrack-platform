@@ -570,13 +570,7 @@ email:user.email
 
 onComplete:
 
-async function(response){
-
-try{
-
-alert(
-"Paiement réussi"
-);
+async function activateBusiness(){
 
 const {
 
@@ -592,12 +586,114 @@ await supabaseClient
 
 .getUser();
 
+
 const user =
+
 userData.user;
+
+
+if(
+
+!user
+
+){
+
+location.href=
+
+'auth.html';
+
+return;
+
+}
+
+
+FedaPay.init({
+
+public_key:
+
+'pk_sandbox_OQH3f_2ubWmTWQmdut9m3RmI',
+
+
+transaction:{
+
+amount:
+
+5000,
+
+description:
+
+'Business Cloud',
+
+currency:{
+
+iso:
+
+'XOF'
+
+}
+
+},
+
+
+customer:{
+
+email:
+
+user.email
+
+},
+
+
+
+onComplete:
+
+async function(
+
+response
+
+){
+
+try{
+
+
+/*
+Vérifier si transaction existe
+*/
+
+if(
+
+!response
+
+||
+
+!response.transaction
+
+||
+
+!response.transaction.id
+
+){
+
+alert(
+
+'Paiement annulé'
+
+);
+
+return;
+
+}
+
+
+
+/*
+Vérifier paiement réel côté serveur
+*/
 
 const {
 
 data,
+
 error
 
 }
@@ -630,57 +726,103 @@ user.id
 
 );
 
-console.log(
-"Edge:",
-data
-);
 
-console.log(
-"Erreur:",
-error
-);
 
 if(
 
 error
 
-||
-
-!data
-
-||
-
-data.success===false
-
 ){
 
+console.log(
+
+error
+
+);
+
 alert(
-'Erreur activation'
+
+'Erreur vérification paiement'
+
 );
 
 return;
 
 }
 
+
+
+/*
+IMPORTANT :
+activer uniquement si payé
+*/
+
+if(
+
+!data
+
+||
+
+data.success!==true
+
+||
+
+data.status!=='approved'
+
+){
+
 alert(
-'Business activé'
+
+'Paiement non validé'
+
 );
+
+return;
+
+}
+
+
+
+/*
+OK
+*/
+
+alert(
+
+'✅ Business Cloud activé'
+
+);
+
 
 location.reload();
 
+
 }
 
-catch(error){
+catch(
+
+e
+
+){
 
 console.log(
-error
+
+e
+
 );
 
+
 alert(
+
 'Erreur inattendue'
+
 );
 
 }
+
+}
+
+}).open();
 
 }
 
