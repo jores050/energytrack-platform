@@ -427,15 +427,25 @@
         },
 
         onComplete: async function (response) {
+          // ══════════════════════════════════════
+          // 🔍 DEBUG — À SUPPRIMER APRÈS LE TEST
+          console.log('══════ FEDAPAY onComplete ══════');
+          console.log('response complète :', JSON.stringify(response, null, 2));
+          // ══════════════════════════════════════
+
           // Réactiver le bouton dans tous les cas
           businessBtn.disabled = false;
           businessBtn.textContent = 'Passer Premium';
 
           // Paiement annulé ou fenêtre fermée sans payer
           if (!response || !response.transaction || !response.transaction.id) {
+            console.warn('🔍 DEBUG — Pas de transaction dans la réponse FedaPay');
             showToast('Paiement annulé.', 'error');
             return;
           }
+
+          console.log('🔍 DEBUG — transaction_id :', response.transaction.id);
+          console.log('🔍 DEBUG — user_id :', user.id);
 
           businessBtn.textContent = 'Vérification en cours...';
           businessBtn.disabled = true;
@@ -452,8 +462,14 @@
               }
             );
 
+            // ══════════════════════════════════════
+            // 🔍 DEBUG — À SUPPRIMER APRÈS LE TEST
+            console.log('🔍 DEBUG — data reçu :', JSON.stringify(data, null, 2));
+            console.log('🔍 DEBUG — error reçu :', JSON.stringify(error, null, 2));
+            // ══════════════════════════════════════
+
             if (error) {
-              console.error('Erreur invoke:', error);
+              console.error('🔍 DEBUG — Erreur invoke détaillée :', error);
               showToast('Erreur lors de la vérification du paiement.', 'error');
               businessBtn.disabled = false;
               businessBtn.textContent = 'Passer Premium';
@@ -466,6 +482,7 @@
               setTimeout(() => location.reload(), 2000);
             } else {
               // ❌ Paiement non validé → on ne fait rien côté BDD
+              console.warn('🔍 DEBUG — Paiement refusé, data :', data);
               showToast(
                 `Paiement non validé (statut : ${data?.status || 'inconnu'}). Abonnement non activé.`,
                 'error'
@@ -475,7 +492,7 @@
             }
 
           } catch (e) {
-            console.error('Erreur inattendue:', e);
+            console.error('🔍 DEBUG — Exception catch :', e);
             showToast('Une erreur inattendue est survenue.', 'error');
             businessBtn.disabled = false;
             businessBtn.textContent = 'Passer Premium';
