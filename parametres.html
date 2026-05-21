@@ -390,28 +390,107 @@ async function upsertSettings(userId, fields){
 FIX : SAVE PROFILE (sauvegarde réelle)
 =========================================
 */
+/*
+=========================================
+SAVE PROFILE
+Version simplifiée :
+settings uniquement
+=========================================
+*/
+
 async function saveProfile(){
-  const user = await getUser();
-  if(!user) return;
 
-  const company_name = document.getElementById('companyName').value.trim();
-  const whatsapp     = document.getElementById('whatsapp').value.trim();
+const user =
+await getUser();
 
-  // Mettre à jour aussi la table clients (numéro WhatsApp pour alertes)
-  const [settErr, clientErr] = await Promise.all([
-    upsertSettings(user.id, { company_name, whatsapp }),
-    supabaseClient
-      .from('clients')
-      .upsert({ user_id: user.id, company_name, whatsapp },
-              { onConflict: 'user_id' })
-      .then(({ error }) => error)
-  ]);
+if(!user)
+return;
 
-  if(settErr || clientErr){
-    showMsg('msgProfile', '❌ Erreur : ' + (settErr || clientErr).message, false);
-    return;
-  }
-  showMsg('msgProfile', '✅ Profil enregistré avec succès.');
+
+const company_name =
+
+document
+
+.getElementById(
+
+'companyName'
+
+)
+
+.value
+
+.trim();
+
+
+
+const whatsapp =
+
+document
+
+.getElementById(
+
+'whatsapp'
+
+)
+
+.value
+
+.trim();
+
+
+
+const error =
+
+await upsertSettings(
+
+user.id,
+
+{
+
+company_name,
+
+whatsapp
+
+}
+
+);
+
+
+
+if(
+
+error
+
+){
+
+showMsg(
+
+'msgProfile',
+
+'❌ Erreur : '
+
++
+
+error.message,
+
+false
+
+);
+
+return;
+
+}
+
+
+
+showMsg(
+
+'msgProfile',
+
+'✅ Profil enregistré avec succès.'
+
+);
+
 }
 
 /*
