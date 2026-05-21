@@ -4,173 +4,137 @@
 <head>
 
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
-<meta
-name="viewport"
-content="width=device-width,initial-scale=1">
+<title>Capteurs IoT — EnergyTrack</title>
 
-<title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
-Capteurs IoT
-
-</title>
-
-<link
-rel="stylesheet"
-href="css/style.css">
-
-<script src="
-https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2
-"></script>
-
-<script src="
-js/supabase.js
-"></script>
+<!-- FIX : URLs sans espaces -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 
 <style>
 
 .sensor-card{
-
-background:
-linear-gradient(
-145deg,
-#182235,
-#101826
-);
-
-padding:
-25px;
-
-border-radius:
-24px;
-
-margin-bottom:
-25px;
-
+  background:linear-gradient(145deg,#182235,#101826);
+  padding:25px;
+  border-radius:24px;
+  margin-bottom:25px;
+  border:1px solid rgba(255,255,255,0.05);
 }
 
 .sensor{
-
-background:
-#0f1729;
-
-padding:
-18px;
-
-border-radius:
-16px;
-
-margin-top:
-15px;
-
+  background:#0f1729;
+  padding:18px;
+  border-radius:16px;
+  margin-top:15px;
+  border:1px solid rgba(255,255,255,0.04);
+  transition:.2s;
+}
+.sensor:hover{
+  border-color:rgba(0,200,150,.2);
 }
 
+/* FIX : statut ACTIVE/OFFLINE cohérent */
 .status{
-
-padding:
-8px 14px;
-
-border-radius:
-999px;
-
-display:
-inline-block;
-
-margin-top:
-10px;
-
+  padding:7px 14px;
+  border-radius:999px;
+  display:inline-block;
+  font-size:12px;
+  font-weight:600;
+}
+.status-active {
+  background:rgba(0,200,150,.15);
+  color:#00c896;
+}
+.status-offline{
+  background:rgba(255,76,97,.15);
+  color:#ff4c61;
+}
+.status-installing{
+  background:rgba(245,158,11,.15);
+  color:#f59e0b;
 }
 
-.online{
-
-background:
-rgba(
-0,200,150,.15
-);
-
-color:
-#00c896;
-
-}
-
-.offline{
-
-background:
-rgba(
-255,76,97,.15
-);
-
-color:
-#ff4c61;
-
+.last-seen{
+  font-size:12px;
+  color:#64748b;
+  margin-top:8px;
 }
 
 .form{
-
-background:
-#182235;
-
-padding:
-25px;
-
-border-radius:
-20px;
-
-margin:
-25px 0;
-
+  background:#182235;
+  padding:25px;
+  border-radius:20px;
+  margin:25px 0;
+  border:1px solid rgba(255,255,255,0.06);
 }
 
-input,
-select{
-
-width:
-100%;
-
-padding:
-16px;
-
-margin-top:
-15px;
-
-border:
-none;
-
-border-radius:
-12px;
-
-background:
-#101826;
-
-color:
-white;
-box-sizing: border-box;
-
+input, select{
+  width:100%;
+  padding:16px;
+  margin-top:15px;
+  border:none;
+  border-radius:12px;
+  background:#101826;
+  color:white;
+  box-sizing:border-box;
+  font-family:'Poppins',sans-serif;
 }
 
 button{
+  padding:14px 22px;
+  border:none;
+  border-radius:14px;
+  background:#00c896;
+  color:white;
+  cursor:pointer;
+  margin-top:15px;
+  font-family:'Poppins',sans-serif;
+  font-weight:600;
+}
 
-padding:
-14px 22px;
+.site-filter-bar{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  margin:20px 0;
+  flex-wrap:wrap;
+}
+.site-filter-bar select{
+  margin-top:0;
+  width:auto;
+  min-width:220px;
+  padding:10px 16px;
+  border:1px solid rgba(255,255,255,.08);
+}
 
-border:
-none;
+.empty-state{
+  text-align:center;
+  padding:40px;
+  color:#64748b;
+}
 
-border-radius:
-14px;
-
-background:
-#00c896;
-
-color:
-white;
-
-cursor:
-pointer;
-
-margin-top:
-15px;
-
+.sensor-meta{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(140px,1fr));
+  gap:10px;
+  margin-top:12px;
+}
+.sensor-meta-item{
+  background:rgba(255,255,255,.03);
+  border-radius:10px;
+  padding:10px 12px;
+  font-size:12px;
+  color:#94a3b8;
+}
+.sensor-meta-item strong{
+  display:block;
+  font-size:13px;
+  color:#e2e8f0;
+  margin-top:3px;
 }
 
 </style>
@@ -180,543 +144,393 @@ margin-top:
 <body>
 
 <div class="sidebar">
-
-<div class="logo">
-
-Energy<span>Track</span>
-
+  <div class="logo">Energy<span>Track</span></div>
+  <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+  <a class="nav-item" href="consommation.html">⚡ Consommation</a>
+  <a class="nav-item" href="alertes.html">🔔 Alertes</a>
+  <a class="nav-item" href="sites.html">🏢 Multi-sites</a>
+  <a class="nav-item active" href="capteurs.html">📡 Capteurs IoT</a>
+  <a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+  <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
+  <!-- FIX : logoutUser ajouté -->
+  <div class="nav-item" onclick="logoutUser()">🚪 Déconnexion</div>
 </div>
-
-<a
-class="nav-item"
-href="dashboard.html">
-
-🏠 Dashboard
-
-</a>
-
-<a
-class="nav-item"
-href="consommation.html">
-
-⚡ Consommation
-
-</a>
-
-<a
-class="nav-item"
-href="alertes.html">
-
-🔔 Alertes
-
-</a>
-
-
-<a
-class="nav-item"
-href="sites.html">
-
-🏢 Multi-sites
-
-</a>
-
-<a
-class="nav-item active"
-href="capteurs.html">
-
-📡 Capteurs IoT
-
-</a>
-
-<a
-class="nav-item"
-href="ia.html">
-
-🤖 Analyse IA
-
-</a>
-
-<a
-class="nav-item"
-href="parametres.html">
-
-⚙️ Paramètres
-
-</a>
-
-</div>
-
 
 <div class="main">
 
-<h1>
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:15px;margin-bottom:20px;">
+    <div>
+      <h1>📡 Capteurs IoT</h1>
+      <p style="color:#64748b;margin-top:8px;">Gestion des capteurs EnergyTrack installés sur vos sites.</p>
+    </div>
+    <button onclick="showAddSensor()">+ Ajouter capteur</button>
+  </div>
 
-📡 Capteurs IoT
+  <!-- FIX : filtre par site (supporte ?site=id depuis sites.html) -->
+  <div class="site-filter-bar">
+    <span style="font-size:13px;color:#64748b;">Filtrer par site :</span>
+    <select id="siteFilterGlobal" onchange="loadSensors()">
+      <option value="">Tous les sites</option>
+    </select>
+  </div>
 
-</h1>
-
-<button
-onclick="showAddSensor()">
-
-Ajouter capteur
-
-</button>
-
-<div
-id="formContainer">
-
-</div>
-
-<div
-id="container">
+  <div id="formContainer"></div>
+  <div id="container"></div>
 
 </div>
-
-</div>
-
 
 <script>
 
+/*
+=========================================
+LOGOUT
+=========================================
+*/
+async function logoutUser(){
+  localStorage.clear();
+  await supabaseClient.auth.signOut();
+  window.location.href = 'auth.html';
+}
+
+/*
+=========================================
+AUTH
+=========================================
+*/
+async function getUser(){
+  const { data:userData } = await supabaseClient.auth.getUser();
+  if(!userData.user){ location.href = 'auth.html'; return null; }
+  return userData.user;
+}
+
+/*
+=========================================
+FIX : lire ?site=<id> depuis l'URL
+(lien depuis sites.html)
+=========================================
+*/
+function getSiteIdFromURL(){
+  const params = new URLSearchParams(window.location.search);
+  return params.get('site') || '';
+}
+
+/*
+=========================================
+POPULATE SITE FILTER
+=========================================
+*/
+async function populateSiteFilter(user){
+  const { data:sites } = await supabaseClient
+    .from('sites')
+    .select('id, name')
+    .eq('user_id', user.id)
+    .order('created_at');
+
+  const sel = document.getElementById('siteFilterGlobal');
+
+  if(!sites || !sites.length) return;
+
+  sites.forEach(s => {
+    const opt = document.createElement('option');
+    opt.value = s.id;
+    opt.textContent = s.name;
+    sel.appendChild(opt);
+  });
+
+  // Pré-sélectionner si ?site=id dans l'URL
+  const urlSiteId = getSiteIdFromURL();
+  if(urlSiteId) sel.value = urlSiteId;
+}
+
+/*
+=========================================
+LOAD SENSORS
+=========================================
+*/
 async function loadSensors(){
 
-const {
+  const user = await getUser();
+  if(!user) return;
 
-data:userData
+  const selectedSite =
+    document.getElementById('siteFilterGlobal').value;
 
+  // Requête sites avec leurs capteurs
+  let query = supabaseClient
+    .from('sites')
+    .select('*, sensors(*)')
+    .eq('user_id', user.id);
+
+  if(selectedSite){
+    query = query.eq('id', selectedSite);
+  }
+
+  const { data:sites, error } = await query;
+  if(error){ console.error(error); return; }
+
+  const container = document.getElementById('container');
+  container.innerHTML = '';
+
+  if(!sites || sites.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <p>Aucun site trouvé. <a href="sites.html" style="color:#00c896;">Créer un site</a></p>
+      </div>`;
+    return;
+  }
+
+  sites.forEach(site => {
+
+    const sensorsHTML = site.sensors.length === 0
+      ? '<p style="color:#64748b;margin-top:12px;font-size:13px;">Aucun capteur sur ce site.</p>'
+      : site.sensors.map(sensor => {
+
+          // FIX : statut ACTIVE cohérent avec le reste de l'app
+          const statusClass =
+            sensor.status === 'ACTIVE'   ? 'status-active'    :
+            sensor.status === 'OFFLINE'  ? 'status-offline'   :
+            sensor.status === 'INSTALL'  ? 'status-installing':
+            'status-offline';
+
+          const statusLabel =
+            sensor.status === 'ACTIVE'   ? '🟢 Actif'         :
+            sensor.status === 'OFFLINE'  ? '🔴 Hors ligne'    :
+            sensor.status === 'INSTALL'  ? '🟡 Installation'  :
+            '⚫ Inconnu';
+
+          // FIX : last_seen depuis la table sensors
+          const lastSeenStr = sensor.last_seen
+            ? 'Dernière comm. : ' +
+              new Date(sensor.last_seen).toLocaleString('fr-FR')
+            : 'Jamais vu';
+
+          return `
+            <div class="sensor">
+              <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:10px;">
+                <h3>📡 ${sensor.name || sensor.sensor_name || 'Capteur'}</h3>
+                <span class="status ${statusClass}">${statusLabel}</span>
+              </div>
+
+              <div class="sensor-meta">
+                <div class="sensor-meta-item">
+                  Classe
+                  <strong>${sensor.sensor_class || '—'}</strong>
+                </div>
+                <div class="sensor-meta-item">
+                  Type
+                  <strong>${sensor.type || '—'}</strong>
+                </div>
+                <div class="sensor-meta-item">
+                  N° série
+                  <strong>${sensor.serial_number || '—'}</strong>
+                </div>
+                <div class="sensor-meta-item">
+                  Firmware
+                  <strong>${sensor.firmware_v || '—'}</strong>
+                </div>
+              </div>
+
+              <div class="last-seen">🕐 ${lastSeenStr}</div>
+
+              <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;">
+                <button
+                  onclick="goToConsommation('${sensor.id}')"
+                  style="background:rgba(0,200,150,.15);color:#00c896;border:1px solid rgba(0,200,150,.25);padding:8px 14px;font-size:12px;">
+                  📊 Voir données
+                </button>
+                <button
+                  onclick="deleteSensor('${sensor.id}')"
+                  style="background:rgba(255,76,97,.12);color:#ff4c61;border:1px solid rgba(255,76,97,.2);padding:8px 14px;font-size:12px;">
+                  🗑 Supprimer
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+    container.innerHTML += `
+      <div class="sensor-card">
+        <h2>🏠 ${site.name}
+          <span style="font-size:13px;font-weight:400;color:#64748b;margin-left:10px;">
+            ${site.sensors.length} capteur${site.sensors.length > 1 ? 's' : ''}
+          </span>
+        </h2>
+        ${sensorsHTML}
+      </div>
+    `;
+  });
 }
 
-=
-
-await supabaseClient
-
-.auth
-
-.getUser();
-
-const user=
-
-userData.user;
-
-if(
-
-!user
-
-){
-
-location.href=
-
-'auth.html';
-
-return;
-
+/*
+=========================================
+NAVIGATE TO CONSOMMATION WITH SENSOR
+=========================================
+*/
+function goToConsommation(sensorId){
+  window.location.href = 'consommation.html?sensor=' + sensorId;
 }
 
-const {
-
-data:sites
-
+/*
+=========================================
+DELETE SENSOR
+=========================================
+*/
+async function deleteSensor(sensorId){
+  if(!confirm('Supprimer ce capteur ? Les données historiques seront conservées.')){ return; }
+  const { error } = await supabaseClient
+    .from('sensors')
+    .delete()
+    .eq('id', sensorId);
+  if(error){ alert(error.message); return; }
+  loadSensors();
 }
 
-=
-
-await supabaseClient
-
-.from(
-
-'sites'
-
-)
-
-.select(`
-
-*,
-
-sensors(*)
-
-`)
-
-.eq(
-
-'user_id',
-
-user.id
-
-);
-
-const container=
-
-document.getElementById(
-
-'container'
-
-);
-
-container.innerHTML='';
-
-sites.forEach(
-
-site=>{
-
-container.innerHTML+=`
-
-<div class="sensor-card">
-
-<h2>
-
-🏠 ${site.name}
-
-</h2>
-
-${
-site.sensors.length===0
-
-?
-
-'<p>Aucun capteur</p>'
-
-:
-
-site.sensors.map(
-
-sensor=>`
-
-<div class="sensor">
-
-<h3>
-
-📡 ${sensor.name}
-
-</h3>
-<div
-
-style="
-display:inline-block;
-padding:6px 12px;
-background:#243247;
-border-radius:999px;
-margin-top:10px;
-">
-
-${sensor.sensor_class}
-
-</div>
-<p>
-
-Type :
-
-${sensor.type}
-
-</p>
-<p>
-
-Serial :
-
-${sensor.serial_number}
-
-</p>
-
-<p>
-
-Classe :
-
-${sensor.sensor_class}
-
-</p>
-<div class="status
-
-${
-sensor.status==='ONLINE'
-
-?
-
-'online'
-
-:
-
-'offline'
-
-}">
-
-${sensor.status}
-
-</div>
-
-</div>
-
-`
-
-).join('')
-
-}
-
-</div>
-
-`;
-
-}
-
-);
-
-}
-
-async function addSensor(){
-
-const site =
-
-document
-
-.getElementById(
-
-'site'
-
-).value;
-
-const name =
-
-document
-
-.getElementById(
-
-'name'
-
-).value;
-
-const serial =
-
-document
-
-.getElementById(
-
-'serial'
-
-).value;
-
-const sensorClass = 
-
-document
-
-.getElementById(
-
-'sensor_class'
-
-).value;
-
-/* Si la classe est 'Global', on attribue automatiquement la valeur 'Global' au type */
-const type = sensorClass === 'Global'
-    ? 'Global'
-    : document.getElementById('type').value;
-
-/* Sécurité : On valide l'ensemble des champs requis selon la situation */
-if (!site || !sensorClass || !name || !type || !serial) {
-    alert("Veuillez remplir tous les champs et faire les sélections requises.");
-    return;
-}
-
-const {
-
-error
-
-}
-
-=
-
-await supabaseClient
-
-.from(
-
-'sensors'
-
-)
-
-.insert([{
-
-site_id:
-site,
-
-name:
-name,
-
-type:
-type,
-
-serial_number:
-serial,
-
-sensor_class:
-sensorClass,
-
-status:
-'ONLINE'
-
-}]);
-
-
-if(error){
-
-alert(
-
-error.message
-
-);
-
-return;
-
-}
-
-document
-
-.getElementById(
-
-'formContainer'
-
-)
-
-.innerHTML='';
-
-loadSensors();
-
-}
-
-
+/*
+=========================================
+SHOW ADD SENSOR FORM
+=========================================
+*/
 async function showAddSensor(){
 
-const {
+  const user = await getUser();
+  if(!user) return;
 
-data:userData
+  const { data:sites } = await supabaseClient
+    .from('sites')
+    .select('id, name')
+    .eq('user_id', user.id);
 
+  if(!sites || !sites.length){
+    alert('Créez d\'abord un site dans Multi-sites.');
+    window.location.href = 'sites.html';
+    return;
+  }
+
+  // Pré-sélectionner le site du filtre global si actif
+  const selectedSite = document.getElementById('siteFilterGlobal').value;
+
+  document.getElementById('formContainer').innerHTML = `
+    <div class="form">
+
+      <h2 style="margin-bottom:5px;">Nouveau capteur</h2>
+      <p style="font-size:13px;color:#64748b;margin-bottom:5px;">
+        Référence matérielle : ESP32-WROOM-32D + SCT-013-030
+      </p>
+
+      <select id="site">
+        <option value="" disabled ${!selectedSite ? 'selected' : ''} hidden>
+          Sélectionner un site
+        </option>
+        ${sites.map(s =>
+          `<option value="${s.id}" ${s.id === selectedSite ? 'selected' : ''}>
+            ${s.name}
+          </option>`
+        ).join('')}
+      </select>
+
+      <select id="sensor_class" onchange="toggleTypeField()">
+        <option value="" disabled selected hidden>Type de capteur</option>
+        <option value="Global">Global — tableau électrique principal</option>
+        <option value="Appareil fixe">Appareil fixe — équipement spécifique</option>
+      </select>
+
+      <input id="name"   placeholder="Nom du capteur (ex: Tableau principal)">
+      <input id="type"   placeholder="Nom de l'appareil (ex: Climatiseur)">
+      <input id="serial" placeholder="N° série (ex: ET-BJ-001)">
+
+      <div style="display:flex;gap:10px;margin-top:5px;">
+        <button onclick="addSensor()">✅ Ajouter</button>
+        <button
+          onclick="document.getElementById('formContainer').innerHTML=''"
+          style="background:#182235;border:1px solid rgba(255,255,255,.1);">
+          Annuler
+        </button>
+      </div>
+
+    </div>
+  `;
+
+  // Appliquer état initial du champ type
+  toggleTypeField();
 }
 
-=
-
-await supabaseClient
-
-.auth
-
-.getUser();
-
-
-const {
-
-data:sites
-
+/*
+=========================================
+TOGGLE TYPE FIELD
+=========================================
+*/
+function toggleTypeField(){
+  const sensorClass = document.getElementById('sensor_class')?.value;
+  const typeInput   = document.getElementById('type');
+  if(!typeInput) return;
+  typeInput.style.display = sensorClass === 'Global' ? 'none' : 'block';
 }
 
-=
+/*
+=========================================
+ADD SENSOR
+FIX : status 'ACTIVE' cohérent avec le reste
+=========================================
+*/
+async function addSensor(){
 
-await supabaseClient
+  const site        = document.getElementById('site').value;
+  const sensorClass = document.getElementById('sensor_class').value;
+  const name        = document.getElementById('name').value.trim();
+  const serial      = document.getElementById('serial').value.trim();
+  const type        = sensorClass === 'Global'
+    ? 'Global'
+    : document.getElementById('type').value.trim();
 
-.from(
+  if(!site || !sensorClass || !name || !type || !serial){
+    alert('Veuillez remplir tous les champs requis.');
+    return;
+  }
 
-'sites'
+  const { error } = await supabaseClient
+    .from('sensors')
+    .insert([{
+      site_id:      site,
+      name:         name,
+      type:         type,
+      serial_number:serial,
+      sensor_class: sensorClass,
+      status:       'ACTIVE'   // FIX : ACTIVE pas ONLINE
+    }]);
 
-)
+  if(error){ alert(error.message); return; }
 
-.select('*')
-
-.eq(
-
-'user_id',
-
-userData.user.id
-
-);
-
-
-document.getElementById(
-
-'formContainer'
-
-).innerHTML=
-
-`<div class="form">
-
-<select id="site">
-<option value="" disabled selected hidden>Sélectionner un site</option>
-${
-
-sites.map(
-
-s=>
-
-`<option
-
-value="${s.id}"
-
->
-
-${s.name}
-
-</option>`
-
-
-
-).join('')
-
+  document.getElementById('formContainer').innerHTML = '';
+  loadSensors();
 }
 
-</select>
-
-
-<select id="sensor_class" onchange="toggleTypeField()">
-<option value="" disabled selected hidden>Sélectionner le type de capteur</option>
-
-<option value="Global">Global</option>
-
-<option value="Appareil fixe">Appareil fixe</option>
-
-</select>
-
-
-<input
-
-id="name"
-
-placeholder="Nom capteur">
-
-
-<input
-
-id="type"
-
-placeholder="Nom de l'appareil">
-
-
-<input
-
-id="serial"
-
-placeholder="Numéro série">
-
-
-<button
-
-onclick="addSensor()">
-
-Ajouter
-
-</button>
-
-
-</div>`
-
-;
-
+/*
+=========================================
+REALTIME
+=========================================
+*/
+function startRealtime(){
+  supabaseClient
+    .channel('capteurs-live')
+    .on('postgres_changes',
+      { event:'*', schema:'public', table:'sensors' },
+      () => { loadSensors(); }
+    )
+    .subscribe();
 }
 
-/* Fonction permettant de basculer l'affichage du champ type d'appareil */
-function toggleTypeField() {
-    const sensorClass = document.getElementById('sensor_class').value;
-    const typeInput = document.getElementById('type');
-    
-    if (sensorClass === 'Global') {
-        typeInput.style.display = 'none';
-    } else {
-        typeInput.style.display = 'block';
-    }
-}
-
-
-loadSensors();
+/*
+=========================================
+INIT
+=========================================
+*/
+(async () => {
+  const user = await getUser();
+  if(!user) return;
+  await populateSiteFilter(user);
+  await loadSensors();
+  startRealtime();
+})();
 
 </script>
 
