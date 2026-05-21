@@ -287,16 +287,70 @@ async function loadSensors(){
 
           // FIX : statut ACTIVE cohérent avec le reste de l'app
           const statusClass =
-            sensor.status === 'ACTIVE'   ? 'status-active'    :
-            sensor.status === 'OFFLINE'  ? 'status-offline'   :
-            sensor.status === 'INSTALL'  ? 'status-installing':
-            'status-offline';
 
-          const statusLabel =
-            sensor.status === 'ACTIVE'   ? '🟢 Actif'         :
-            sensor.status === 'OFFLINE'  ? '🔴 Hors ligne'    :
-            sensor.status === 'INSTALL'  ? '🟡 Installation'  :
-            '⚫ Inconnu';
+sensor.status==='ACTIVE'
+
+||
+
+sensor.status==='ONLINE'
+
+?
+
+'status-active'
+
+:
+
+sensor.status==='OFFLINE'
+
+?
+
+'status-offline'
+
+:
+
+sensor.status==='INSTALL'
+
+?
+
+'status-installing'
+
+:
+
+'status-offline';
+
+
+
+const statusLabel =
+
+sensor.status==='ACTIVE'
+
+||
+
+sensor.status==='ONLINE'
+
+?
+
+'🟢 Actif'
+
+:
+
+sensor.status==='OFFLINE'
+
+?
+
+'🔴 Hors ligne'
+
+:
+
+sensor.status==='INSTALL'
+
+?
+
+'🟡 Installation'
+
+:
+
+'⚫ Inconnu';
 
           // FIX : last_seen depuis la table sensors
           const lastSeenStr = sensor.last_seen
