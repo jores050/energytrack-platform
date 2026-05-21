@@ -1,4 +1,3 @@
-```html
 <!DOCTYPE html>
 <html lang="fr">
 
@@ -22,60 +21,139 @@ rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
 <script src="js/supabase.js"></script>
+<script src="js/feature-access.js"></script>
 
 <style>
 
 .site-grid{
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(320px,1fr));
-gap:20px;
-margin-top:25px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(320px,1fr));
+  gap:20px;
+  margin-top:25px;
 }
 
 .site-card{
-background:
-linear-gradient(145deg,#182235,#101826);
-padding:25px;
-border-radius:24px;
-border:1px solid rgba(255,255,255,0.05);
-transition:0.3s;
+  background:linear-gradient(145deg,#182235,#101826);
+  padding:25px;
+  border-radius:24px;
+  border:1px solid rgba(255,255,255,0.05);
+  transition:0.3s;
 }
 
 .site-card:hover{
-transform:translateY(-5px);
-box-shadow:
-0 20px 50px rgba(0,0,0,0.35);
+  transform:translateY(-5px);
+  box-shadow:0 20px 50px rgba(0,0,0,0.35);
 }
 
-.site-badge{
-padding:8px 14px;
-border-radius:999px;
-font-size:12px;
-font-weight:600;
-background:rgba(0,200,150,0.15);
-color:#00c896;
-display:inline-block;
+/* CORRECTION 3 : badge dynamique */
+.site-badge-active{
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  background:rgba(0,200,150,0.15);
+  color:#00c896;
+  display:inline-block;
+}
+.site-badge-offline{
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  background:rgba(100,116,139,0.15);
+  color:#64748b;
+  display:inline-block;
+}
+.site-badge-warning{
+  padding:8px 14px;
+  border-radius:999px;
+  font-size:12px;
+  font-weight:600;
+  background:rgba(245,158,11,0.15);
+  color:#f59e0b;
+  display:inline-block;
+}
+
+/* CORRECTION 1 : KPI mini dans les cartes site */
+.site-kpi-row{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:10px;
+  margin:18px 0;
+}
+.site-kpi{
+  background:rgba(255,255,255,0.03);
+  border:1px solid rgba(255,255,255,0.06);
+  border-radius:14px;
+  padding:12px;
+  text-align:center;
+}
+.site-kpi-label{
+  font-size:10px;
+  color:#64748b;
+  text-transform:uppercase;
+  letter-spacing:.06em;
+  margin-bottom:6px;
+}
+.site-kpi-value{
+  font-size:16px;
+  font-weight:700;
+  color:#e2e8f0;
+}
+
+/* CORRECTION 2 : lien capteurs */
+.site-sensors-row{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:12px 14px;
+  border-radius:14px;
+  background:rgba(59,130,246,0.06);
+  border:1px solid rgba(59,130,246,0.15);
+  margin-bottom:16px;
+  cursor:pointer;
+  transition:.2s;
+  text-decoration:none;
+  color:inherit;
+}
+.site-sensors-row:hover{
+  background:rgba(59,130,246,0.12);
+}
+.sensor-count{
+  font-size:13px;
+  font-weight:600;
+  color:#3b82f6;
 }
 
 .form-grid{
-display:grid;
-grid-template-columns:
-repeat(auto-fit,minmax(250px,1fr));
-gap:20px;
-margin-top:20px;
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+  gap:20px;
+  margin-top:20px;
 }
 
 .delete-btn{
-background:#ff4c61;
-margin-top:20px;
+  background:#ff4c61;
+  margin-top:20px;
 }
 
 .empty-state{
-text-align:center;
-padding:60px;
-color:#94a3b8;
+  text-align:center;
+  padding:60px;
+  color:#94a3b8;
 }
+
+.spinner-inline{
+  display:inline-block;
+  width:14px; height:14px;
+  border:2px solid rgba(255,255,255,.15);
+  border-top-color:#00c896;
+  border-radius:50%;
+  animation:spin .7s linear infinite;
+  vertical-align:middle;
+  margin-right:6px;
+}
+@keyframes spin{ to{ transform:rotate(360deg); } }
 
 </style>
 
@@ -85,145 +163,81 @@ color:#94a3b8;
 
 <div class="sidebar">
 
-<div class="logo">
-Energy<span>Track</span>
-</div>
+  <div class="logo">
+    Energy<span>Track</span>
+  </div>
 
-<a class="nav-item"
-href="dashboard.html">
-🏠 Dashboard
-</a>
+  <a class="nav-item" href="dashboard.html">🏠 Dashboard</a>
+  <a class="nav-item" href="consommation.html">⚡ Consommation</a>
+  <a class="nav-item" href="alertes.html">🔔 Alertes</a>
+  <!-- rapports.html supprimé -->
+  <a class="nav-item active" href="sites.html">🏢 Multi-sites</a>
+  <a class="nav-item" href="capteurs.html">📡 Capteurs IoT</a>
+  <a class="nav-item" href="ia.html">🤖 Analyse IA</a>
+  <a class="nav-item" href="parametres.html">⚙️ Paramètres</a>
 
-<a class="nav-item"
-href="consommation.html">
-⚡ Consommation
-</a>
-
-<a class="nav-item"
-href="alertes.html">
-🔔 Alertes
-</a>
-
-
-<a class="nav-item active"
-href="sites.html">
-🏢 Multi-sites
-</a>
-
-<a class="nav-item"
-href="capteurs.html">
-📡 Capteurs IoT
-</a>
-
-<a class="nav-item"
-href="ia.html">
-🤖 Analyse IA
-</a>
-
-<a class="nav-item"
-href="parametres.html">
-⚙️ Paramètres
-</a>
-
-<div class="nav-item"
-onclick="logoutUser()">
-🚪 Déconnexion
-</div>
+  <div class="nav-item" onclick="logoutUser()">
+    🚪 Déconnexion
+  </div>
 
 </div>
 
-<div class="main"
-style="display:block;">
+<div class="main" style="display:block;">
 
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:15px;
-margin-bottom:25px;
-">
+  <div style="
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    flex-wrap:wrap;
+    gap:15px;
+    margin-bottom:25px;
+  ">
+    <div>
+      <h1>Supervision Multi-sites</h1>
+      <p style="color:#94a3b8;margin-top:10px;">
+        Gestion centralisée des installations EnergyTrack.
+      </p>
+    </div>
+    <div class="site-badge-active">Temps réel actif</div>
+  </div>
 
-<div>
+  <div class="section">
 
-<h1>
-Supervision Multi-sites
-</h1>
+    <h2>Ajouter un site</h2>
 
-<p style="
-color:#94a3b8;
-margin-top:10px;
-">
+    <div class="form-grid">
+      <input type="text" id="siteName"    placeholder="Nom du site">
+      <input type="text" id="siteCity"    placeholder="Ville">
+    </div>
 
-Gestion centralisée
-des installations EnergyTrack.
+    <input type="text" id="siteAddress" placeholder="Adresse complète"
+      style="margin-top:12px;">
 
-</p>
+    <button
+      onclick="handleAddSite()"
+      style="
+        padding:16px 28px;
+        border:none;
+        border-radius:16px;
+        background:linear-gradient(90deg,#00c896,#00b4ff);
+        color:white;
+        font-weight:700;
+        font-size:16px;
+        cursor:pointer;
+        margin-top:16px;
+      ">
+      Ajouter le site
+    </button>
 
-</div>
+  </div>
 
-<div class="site-badge">
-Temps réel actif
-</div>
+  <div class="section">
 
-</div>
+    <h2>Sites surveillés</h2>
 
-<div class="section">
+    <div class="site-grid" id="sitesContainer"></div>
 
-<h2>
-Ajouter un site
-</h2>
-
-<div class="form-grid">
-
-<input type="text"
-id="siteName"
-placeholder="Nom du site">
-
-<input type="text"
-id="siteCity"
-placeholder="Ville">
-
-</div>
-
-<input type="text"
-id="siteAddress"
-placeholder="Adresse complète">
-
-<button
-
-onclick="handleAddSite()"
-
-style="
-padding:16px 28px;
-border:none;
-border-radius:16px;
-background:
-linear-gradient(90deg,#00c896,#00b4ff);
-color:white;
-font-weight:700;
-font-size:16px;
-cursor:pointer;
-">
-
-Ajouter le site
-
-</button>
-
-</div>
-
-<div class="section">
-
-<h2>
-Sites surveillés
-</h2>
-
-<div class="site-grid"
-id="sitesContainer">
-
-</div>
-
-</div>
+  </div>
 
 </div>
 
@@ -231,63 +245,50 @@ id="sitesContainer">
 
 /*
 =========================================
+CORRECTION 4 : résultat canUseMultiSite
+mis en cache — un seul appel à l'init
+=========================================
+*/
+let multiSiteAllowed = false;
+
+/*
+=========================================
 AUTH CHECK
 =========================================
 */
-
 async function checkAuth(){
-
-const { data:userData } =
-await supabaseClient.auth.getUser();
-
-if(!userData.user){
-
-window.location.href='auth.html';
-
-return null;
-
-}
-
-return userData.user;
-
+  const { data:userData } =
+    await supabaseClient.auth.getUser();
+  if(!userData.user){
+    window.location.href = 'auth.html';
+    return null;
+  }
+  return userData.user;
 }
 
 /*
 =========================================
-LOGOUT
+CORRECTION 5 : logoutUser avec clear localStorage
 =========================================
 */
-
 async function logoutUser(){
-
-await supabaseClient.auth.signOut();
-
-window.location.href='auth.html';
-
+  localStorage.clear();
+  await supabaseClient.auth.signOut();
+  window.location.href = 'auth.html';
 }
 
 /*
 =========================================
 HANDLE ADD SITE
+CORRECTION 4 : utilise la variable en cache
 =========================================
 */
-
 async function handleAddSite(){
-
-const allowed =
-await canUseMultiSite();
-
-if(!allowed){
-
-window.location.href =
-'premium-required.html';
-
-return;
-
-}
-
-createSite();
-
+  if(!multiSiteAllowed){
+    window.location.href = 'premium-required.html';
+    return;
+  }
+  createSite();
 }
 
 /*
@@ -295,96 +296,34 @@ createSite();
 CREATE SITE
 =========================================
 */
-
 async function createSite(){
 
-const user =
-await checkAuth();
+  const user = await checkAuth();
+  if(!user){ return; }
 
-if(!user){
+  const name    = document.getElementById('siteName').value.trim();
+  const city    = document.getElementById('siteCity').value.trim();
+  const address = document.getElementById('siteAddress').value.trim();
 
-return;
+  if(name==='' || city==='' || address===''){
+    alert('Veuillez remplir tous les champs.');
+    return;
+  }
 
-}
+  const { error } = await supabaseClient
+    .from('sites')
+    .insert([{ user_id:user.id, name, city, address }]);
 
-const name =
-document.getElementById(
-'siteName'
-).value;
+  if(error){
+    alert(error.message);
+    return;
+  }
 
-const city =
-document.getElementById(
-'siteCity'
-).value;
+  document.getElementById('siteName').value    = '';
+  document.getElementById('siteCity').value    = '';
+  document.getElementById('siteAddress').value = '';
 
-const address =
-document.getElementById(
-'siteAddress'
-).value;
-
-if(
-
-name===''
-
-||
-
-city===''
-
-||
-
-address===''
-
-){
-
-alert(
-'Veuillez remplir tous les champs.'
-);
-
-return;
-
-}
-
-const { error } =
-await supabaseClient
-
-.from('sites')
-
-.insert([{
-
-user_id:user.id,
-
-name:name,
-
-city:city,
-
-address:address
-
-}]);
-
-if(error){
-
-console.log(error);
-
-alert(error.message);
-
-return;
-
-}
-
-document.getElementById(
-'siteName'
-).value='';
-
-document.getElementById(
-'siteCity'
-).value='';
-
-document.getElementById(
-'siteAddress'
-).value='';
-
-loadSites();
-
+  loadSites();
 }
 
 /*
@@ -392,270 +331,299 @@ loadSites();
 DELETE SITE
 =========================================
 */
-
 async function deleteSite(siteId){
+  if(!confirm('Supprimer ce site et toutes ses données ?')){ return; }
 
-const confirmDelete =
-confirm(
-'Supprimer ce site ?'
-);
+  const { error } = await supabaseClient
+    .from('sites')
+    .delete()
+    .eq('id', siteId);
 
-if(!confirmDelete){
+  if(error){ console.error(error); return; }
 
-return;
-
-}
-
-const { error } =
-await supabaseClient
-
-.from('sites')
-
-.delete()
-
-.eq('id',siteId);
-
-if(error){
-
-console.log(error);
-
-return;
-
-}
-
-loadSites();
-
+  loadSites();
 }
 
 /*
 =========================================
-LOAD SITES
+CORRECTION 1+2+3 : LOAD SITES
+avec KPI consommation, statut dynamique
+et lien capteurs
 =========================================
 */
-
 async function loadSites(){
 
-const user =
-await checkAuth();
+  const user = await checkAuth();
+  if(!user){ return; }
 
-if(!user){
+  const { data:sites, error } = await supabaseClient
+    .from('sites')
+    .select('*')
+    .eq('user_id', user.id)
+    .order('created_at', {ascending:false});
 
-return;
+  if(error){ console.error(error); return; }
 
-}
+  const container = document.getElementById('sitesContainer');
+  container.innerHTML = '';
 
-const { data:sites, error } =
-await supabaseClient
+  if(!sites || sites.length === 0){
+    container.innerHTML = `
+      <div class="empty-state">
+        <h2>Aucun site enregistré</h2>
+        <p style="margin-top:15px;">
+          Ajoutez votre premier site EnergyTrack.
+        </p>
+      </div>
+    `;
+    return;
+  }
 
-.from('sites')
+  // Afficher les cartes avec spinner le temps de charger les KPI
+  sites.forEach(site => {
+    container.innerHTML += `
+      <div class="site-card" id="card-${site.id}">
 
-.select('*')
+        <div style="
+          display:flex;
+          justify-content:space-between;
+          align-items:center;
+          flex-wrap:wrap;
+          gap:10px;
+          margin-bottom:16px;
+        ">
+          <h2>${site.name}</h2>
+          <div id="badge-${site.id}" class="site-badge-offline">
+            <span class="spinner-inline"></span>Chargement
+          </div>
+        </div>
 
-.eq('user_id',user.id)
+        <p style="color:#94a3b8;line-height:1.8;margin-bottom:16px;">
+          📍 ${site.city}<br>${site.address}
+        </p>
 
-.order(
-'created_at',
-{ascending:false}
-);
+        <!-- CORRECTION 2 : lien vers capteurs filtrés par site -->
+        <a class="site-sensors-row"
+          href="capteurs.html?site=${site.id}">
+          <span>📡 Capteurs IoT</span>
+          <span id="sensors-${site.id}" class="sensor-count">
+            <span class="spinner-inline"></span>
+          </span>
+        </a>
 
-if(error){
+        <!-- CORRECTION 1 : KPI consommation -->
+        <div class="site-kpi-row">
+          <div class="site-kpi">
+            <div class="site-kpi-label">⚡ kWh / 24h</div>
+            <div class="site-kpi-value" id="kwh-${site.id}">—</div>
+          </div>
+          <div class="site-kpi">
+            <div class="site-kpi-label">💰 Coût FCFA</div>
+            <div class="site-kpi-value" id="cost-${site.id}">—</div>
+          </div>
+          <div class="site-kpi">
+            <div class="site-kpi-label">🏭 Groupe</div>
+            <div class="site-kpi-value" id="groupe-${site.id}">—</div>
+          </div>
+        </div>
 
-console.log(error);
+        <p style="font-size:13px;color:#94a3b8;margin-bottom:16px;">
+          Créé le : ${new Date(site.created_at).toLocaleString('fr-FR')}
+        </p>
 
-return;
+        <button class="delete-btn"
+          onclick="deleteSite('${site.id}')">
+          Supprimer
+        </button>
 
-}
+      </div>
+    `;
 
-const container =
-document.getElementById(
-'sitesContainer'
-);
-
-container.innerHTML='';
-
-if(sites.length===0){
-
-container.innerHTML = `
-
-<div class="empty-state">
-
-<h2>
-Aucun site enregistré
-</h2>
-
-<p style="margin-top:15px;">
-
-Ajoutez votre premier
-site EnergyTrack.
-
-</p>
-
-</div>
-
-`;
-
-return;
-
-}
-
-sites.forEach(site=>{
-
-container.innerHTML += `
-
-<div class="site-card">
-
-<div style="
-display:flex;
-justify-content:space-between;
-align-items:center;
-flex-wrap:wrap;
-gap:10px;
-margin-bottom:20px;
-">
-
-<h2>
-
-${site.name}
-
-</h2>
-
-<div class="site-badge">
-
-ACTIF
-
-</div>
-
-</div>
-
-<p style="
-color:#94a3b8;
-line-height:1.8;
-">
-
-📍 ${site.city}
-
-<br><br>
-
-${site.address}
-
-</p>
-
-<p style="
-margin-top:20px;
-font-size:13px;
-color:#94a3b8;
-">
-
-Créé le :
-${new Date(
-site.created_at
-).toLocaleString()}
-
-</p>
-
-<button
-class="delete-btn"
-onclick="deleteSite('${site.id}')">
-
-Supprimer
-
-</button>
-
-</div>
-
-`;
-
-});
-
+    // Charger les données de chaque site en parallèle
+    loadSiteStats(site.id);
+  });
 }
 
 /*
 =========================================
-START REALTIME
+CORRECTION 1+2+3 : LOAD SITE STATS
+Charge capteurs, KPI et statut pour un site
 =========================================
 */
+async function loadSiteStats(siteId){
 
+  // 1. Récupérer les capteurs du site
+  const { data:sensors } = await supabaseClient
+    .from('sensors')
+    .select('id, status, last_seen')
+    .eq('site_id', siteId);
+
+  const totalSensors  = sensors ? sensors.length : 0;
+  const activeSensors = sensors
+    ? sensors.filter(s => s.status === 'ACTIVE').length
+    : 0;
+
+  const sensorEl = document.getElementById('sensors-${siteId}');
+  if(document.getElementById(`sensors-${siteId}`)){
+    document.getElementById(`sensors-${siteId}`).innerHTML =
+      `${activeSensors} actif${activeSensors > 1 ? 's' : ''} / ${totalSensors}`;
+  }
+
+  if(totalSensors === 0){
+    setBadge(siteId, 'offline', 'Aucun capteur');
+    return;
+  }
+
+  // 2. Récupérer télémétrie des dernières 24h pour tous les capteurs du site
+  const sensorIds = sensors.map(s => s.id);
+  const since24h  = new Date(Date.now() - 24 * 3_600_000).toISOString();
+
+  const { data:telemetry } = await supabaseClient
+    .from('telemetry')
+    .select('power_w, kwh_total, sbee_ok, source, created_at')
+    .in('sensor_id', sensorIds)
+    .gte('created_at', since24h)
+    .order('created_at', { ascending:true });
+
+  if(!telemetry || telemetry.length === 0){
+    setBadge(siteId, 'offline', 'Hors ligne');
+    setKPI(siteId, '0 kWh', '0 FCFA', '0%');
+    return;
+  }
+
+  // 3. CORRECTION 3 : statut basé sur la dernière mesure (< 15 min = actif)
+  const lastMeasure = new Date(telemetry[telemetry.length - 1].created_at);
+  const minutesSinceLast = (Date.now() - lastMeasure) / 60000;
+
+  // 4. Calcul kWh (trapèze), coût, part groupe
+  let kwhSBEE = 0, kwhGroupe = 0;
+
+  telemetry.forEach((item, idx) => {
+    if(idx === 0) return;
+    const prev    = telemetry[idx - 1];
+    const dtH     = (new Date(item.created_at) - new Date(prev.created_at)) / 3_600_000;
+    const avgW    = ((Number(item.power_w)||0) + (Number(prev.power_w)||0)) / 2;
+    const kwh     = avgW * dtH / 1000;
+    const isGroupe = (item.sbee_ok === false) || (item.source === 'GROUPE');
+    if(isGroupe) kwhGroupe += kwh;
+    else         kwhSBEE  += kwh;
+  });
+
+  const totalKwh   = kwhSBEE + kwhGroupe;
+  const costTotal  = Math.round(kwhSBEE * 91 + kwhGroupe * 350);
+  const groupePct  = totalKwh > 0
+    ? Math.round((kwhGroupe / totalKwh) * 100)
+    : 0;
+
+  // 5. Badge statut dynamique
+  const lastItem = telemetry[telemetry.length - 1];
+  const isGroupe = (lastItem.sbee_ok === false) || (lastItem.source === 'GROUPE');
+
+  if(minutesSinceLast > 15){
+    setBadge(siteId, 'offline', 'Hors ligne');
+  } else if(isGroupe){
+    setBadge(siteId, 'warning', 'Groupe actif');
+  } else {
+    setBadge(siteId, 'active', 'SBEE actif');
+  }
+
+  // 6. Affichage KPI
+  setKPI(
+    siteId,
+    totalKwh.toFixed(2) + ' kWh',
+    fmtFCFA(costTotal) + ' F',
+    groupePct + '%'
+  );
+}
+
+/*
+=========================================
+HELPERS
+=========================================
+*/
+function setBadge(siteId, type, label){
+  const el = document.getElementById(`badge-${siteId}`);
+  if(!el) return;
+  const classMap = {
+    active:  'site-badge-active',
+    warning: 'site-badge-warning',
+    offline: 'site-badge-offline'
+  };
+  el.className = classMap[type] || 'site-badge-offline';
+  el.textContent = label;
+}
+
+function setKPI(siteId, kwh, cost, groupe){
+  const set = (id, val) => {
+    const el = document.getElementById(id);
+    if(el) el.textContent = val;
+  };
+  set(`kwh-${siteId}`,    kwh);
+  set(`cost-${siteId}`,   cost);
+  set(`groupe-${siteId}`, groupe);
+}
+
+function fmtFCFA(v){
+  return Math.round(v).toString()
+    .replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+}
+
+/*
+=========================================
+REALTIME
+=========================================
+*/
 function startRealtime(){
-
-supabaseClient
-
-.channel('sites-realtime')
-
-.on(
-
-'postgres_changes',
-
-{
-
-event:'*',
-
-schema:'public',
-
-table:'sites'
-
-},
-
-(payload)=>{
-
-console.log(payload);
-
-loadSites();
-
-}
-
-)
-
-.subscribe();
-
+  supabaseClient
+    .channel('sites-realtime')
+    .on(
+      'postgres_changes',
+      { event:'*', schema:'public', table:'sites' },
+      () => { loadSites(); }
+    )
+    .on(
+      'postgres_changes',
+      { event:'INSERT', schema:'public', table:'telemetry' },
+      (payload) => {
+        // Recharger uniquement les stats du site concerné
+        const sensorId = payload.new?.sensor_id;
+        if(!sensorId) return;
+        // Retrouver le site_id du capteur puis recharger ses stats
+        supabaseClient
+          .from('sensors')
+          .select('site_id')
+          .eq('id', sensorId)
+          .single()
+          .then(({ data }) => {
+            if(data?.site_id) loadSiteStats(data.site_id);
+          });
+      }
+    )
+    .subscribe();
 }
 
 /*
 =========================================
-PROTECT MULTISITE PAGE
+PROTECT + INIT
+CORRECTION 4 : canUseMultiSite() une seule fois
 =========================================
 */
-
 async function protectMultiSitePage(){
 
-const allowed =
-await canUseMultiSite();
+  multiSiteAllowed = await canUseMultiSite();
 
-if(!allowed){
+  if(!multiSiteAllowed){
+    window.location.href = 'premium-required.html';
+    return;
+  }
 
-window.location.href =
-'premium-required.html';
-
-return;
-
+  loadSites();
+  startRealtime();
 }
-
-/*
-AUTHORIZED
-*/
-
-loadSites();
-
-startRealtime();
-
-}
-
-</script>
-
-<script src="js/feature-access.js"></script>
-
-<script>
-
-/*
-=========================================
-START
-=========================================
-*/
 
 protectMultiSitePage();
 
 </script>
 
 </body>
-
 </html>
-```
