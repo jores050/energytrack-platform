@@ -140,6 +140,127 @@
 }
 .btn-danger:hover{ background:rgba(255,76,97,.15); }
 
+/* ── ABONNEMENT ── */
+.plan-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+  gap:12px;
+  margin:16px 0;
+}
+.plan-card{
+  border:2px solid rgba(255,255,255,.07);
+  border-radius:16px;
+  padding:18px 14px;
+  text-align:center;
+  cursor:pointer;
+  transition:.25s;
+  position:relative;
+  background:rgba(255,255,255,.02);
+}
+.plan-card:hover{
+  border-color:rgba(0,200,150,.35);
+  background:rgba(0,200,150,.05);
+}
+.plan-card.current{
+  border-color:#00c896;
+  background:rgba(0,200,150,.08);
+}
+.plan-card.current::after{
+  content:'Actuel';
+  position:absolute;
+  top:-10px; left:50%;
+  transform:translateX(-50%);
+  background:#00c896;
+  color:#090f1a;
+  font-size:10px;
+  font-weight:700;
+  padding:2px 10px;
+  border-radius:999px;
+  white-space:nowrap;
+}
+.plan-name{
+  font-family:'Orbitron',monospace;
+  font-size:12px;
+  font-weight:700;
+  letter-spacing:.06em;
+  color:#e2e8f0;
+  margin-bottom:8px;
+}
+.plan-price{
+  font-size:20px;
+  font-weight:700;
+  color:#00c896;
+  line-height:1;
+}
+.plan-price span{
+  font-size:11px;
+  color:#64748b;
+  font-weight:400;
+}
+.plan-features{
+  margin-top:10px;
+  font-size:11px;
+  color:#64748b;
+  line-height:1.8;
+  text-align:left;
+}
+.plan-features li{ list-style:none; }
+.plan-features li::before{ content:'✓ '; color:#00c896; }
+
+.sub-status-bar{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:14px 16px;
+  border-radius:14px;
+  border:1px solid rgba(255,255,255,.06);
+  background:rgba(255,255,255,.02);
+  margin-bottom:18px;
+  flex-wrap:wrap;
+  gap:10px;
+}
+.sub-status-dot{
+  width:8px; height:8px;
+  border-radius:50%;
+  background:#64748b;
+  display:inline-block;
+  margin-right:8px;
+}
+.sub-status-dot.active{ background:#00c896; box-shadow:0 0 6px #00c896; }
+.sub-status-dot.expired{ background:#ff4c61; }
+.sub-status-dot.none{ background:#64748b; }
+
+.btn-upgrade{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:14px;
+  background:linear-gradient(90deg,#7c3aed,#a78bfa);
+  color:white;
+  font-family:'Poppins',sans-serif;
+  font-weight:700;
+  font-size:14px;
+  cursor:pointer;
+  margin-top:4px;
+  transition:.2s;
+}
+.btn-upgrade:hover{ opacity:.9; }
+
+/* Abonnement — pleine largeur */
+.settings-card-full{
+  background:linear-gradient(145deg,#182235,#101826);
+  border:1px solid rgba(255,255,255,0.05);
+  border-radius:24px;
+  padding:28px;
+  grid-column: 1 / -1;
+}
+.settings-card-full h2{
+  font-size:15px;
+  font-weight:600;
+  margin-bottom:20px;
+  color:#e2e8f0;
+}
+
 </style>
 </head>
 <body>
@@ -279,7 +400,66 @@
       <div class="save-message" id="msgThresholds"></div>
     </div>
 
-    <!-- ── SECTION 4 : Informations compte ── -->
+    <!-- ── SECTION 4 : Abonnement ── -->
+    <div class="settings-card-full">
+      <h2>💳 Abonnement &amp; Plan</h2>
+
+      <!-- Statut actuel -->
+      <div class="sub-status-bar">
+        <div>
+          <span class="sub-status-dot" id="subDot"></span>
+          <span id="subStatusLabel" style="font-size:13px;font-weight:600;">Chargement…</span>
+        </div>
+        <div style="font-size:12px;color:#64748b;" id="subExpireLabel"></div>
+      </div>
+
+      <!-- Grille des plans -->
+      <div class="plan-grid" id="planGrid">
+
+        <div class="plan-card" id="planBasic" onclick="changePlan('basic')">
+          <div class="plan-name">Basic</div>
+          <div class="plan-price">8 000<span> FCFA/mois</span></div>
+          <ul class="plan-features">
+            <li>1 capteur</li>
+            <li>Dashboard temps réel</li>
+            <li>Alertes WhatsApp</li>
+            <li>Historique 30 jours</li>
+          </ul>
+        </div>
+
+        <div class="plan-card" id="planPro" onclick="changePlan('pro')">
+          <div class="plan-name">Pro</div>
+          <div class="plan-price">12 000<span> FCFA/mois</span></div>
+          <ul class="plan-features">
+            <li>5 capteurs</li>
+            <li>Export PDF</li>
+            <li>Analyse IA</li>
+            <li>Historique 1 an</li>
+          </ul>
+        </div>
+
+        <div class="plan-card" id="planEnterprise" onclick="changePlan('enterprise')">
+          <div class="plan-name">Enterprise</div>
+          <div class="plan-price">15 000<span> FCFA/mois</span></div>
+          <ul class="plan-features">
+            <li>Capteurs illimités</li>
+            <li>Multi-sites</li>
+            <li>IA avancée</li>
+            <li>Support prioritaire</li>
+          </ul>
+        </div>
+
+      </div>
+
+      <div id="msgPlan" style="font-size:13px;text-align:center;min-height:20px;margin:12px 0;"></div>
+
+      <button class="btn-upgrade" id="btnUpgrade" onclick="goToPricing()">
+        🚀 Changer de plan ou renouveler
+      </button>
+
+    </div>
+
+    <!-- ── SECTION 5 : Informations compte ── -->
     <div class="settings-card">
       <h2>👤 Informations compte</h2>
 
@@ -288,16 +468,8 @@
         <span class="device-info-value" id="infoEmail">—</span>
       </div>
       <div class="device-info-row">
-        <span class="device-info-label">Plan actif</span>
-        <span class="device-info-value" id="infoPlan">—</span>
-      </div>
-      <div class="device-info-row">
         <span class="device-info-label">Membre depuis</span>
         <span class="device-info-value" id="infoCreated">—</span>
-      </div>
-      <div class="device-info-row">
-        <span class="device-info-label">Abonnement expire</span>
-        <span class="device-info-value" id="infoExpires">—</span>
       </div>
 
       <hr class="divider">
@@ -390,107 +562,28 @@ async function upsertSettings(userId, fields){
 FIX : SAVE PROFILE (sauvegarde réelle)
 =========================================
 */
-/*
-=========================================
-SAVE PROFILE
-Version simplifiée :
-settings uniquement
-=========================================
-*/
-
 async function saveProfile(){
+  const user = await getUser();
+  if(!user) return;
 
-const user =
-await getUser();
+  const company_name = document.getElementById('companyName').value.trim();
+  const whatsapp     = document.getElementById('whatsapp').value.trim();
 
-if(!user)
-return;
+  // Mettre à jour aussi la table clients (numéro WhatsApp pour alertes)
+  const [settErr, clientErr] = await Promise.all([
+    upsertSettings(user.id, { company_name, whatsapp }),
+    supabaseClient
+      .from('clients')
+      .upsert({ user_id: user.id, company_name, whatsapp },
+              { onConflict: 'user_id' })
+      .then(({ error }) => error)
+  ]);
 
-
-const company_name =
-
-document
-
-.getElementById(
-
-'companyName'
-
-)
-
-.value
-
-.trim();
-
-
-
-const whatsapp =
-
-document
-
-.getElementById(
-
-'whatsapp'
-
-)
-
-.value
-
-.trim();
-
-
-
-const error =
-
-await upsertSettings(
-
-user.id,
-
-{
-
-company_name,
-
-whatsapp
-
-}
-
-);
-
-
-
-if(
-
-error
-
-){
-
-showMsg(
-
-'msgProfile',
-
-'❌ Erreur : '
-
-+
-
-error.message,
-
-false
-
-);
-
-return;
-
-}
-
-
-
-showMsg(
-
-'msgProfile',
-
-'✅ Profil enregistré avec succès.'
-
-);
-
+  if(settErr || clientErr){
+    showMsg('msgProfile', '❌ Erreur : ' + (settErr || clientErr).message, false);
+    return;
+  }
+  showMsg('msgProfile', '✅ Profil enregistré avec succès.');
 }
 
 /*
@@ -571,31 +664,88 @@ async function loadUserInfo(user){
       new Date(user.created_at).toLocaleDateString('fr-FR');
   }
 
-  // Plan et date d'expiration depuis subscriptions
+  // Abonnement — alimente la section 4
+  await loadSubscription(user.id);
+}
+
+/*
+=========================================
+LOAD SUBSCRIPTION — section abonnement
+=========================================
+*/
+async function loadSubscription(userId){
+
   const { data:sub } = await supabaseClient
     .from('subscriptions')
     .select('status, expires_at, plan_id')
-    .eq('user_id', user.id)
+    .eq('user_id', userId)
     .maybeSingle();
 
-  if(sub){
-    const { data:plan } = await supabaseClient
-      .from('plans')
-      .select('name')
-      .eq('id', sub.plan_id)
-      .maybeSingle();
+  const dot      = document.getElementById('subDot');
+  const label    = document.getElementById('subStatusLabel');
+  const expires  = document.getElementById('subExpireLabel');
 
-    document.getElementById('infoPlan').textContent =
-      plan?.name || sub.plan_id || '—';
+  // Récupérer tous les plans pour la grille
+  const { data:plans } = await supabaseClient
+    .from('plans')
+    .select('id, name, features');
 
-    document.getElementById('infoExpires').textContent =
-      sub.expires_at
-        ? new Date(sub.expires_at).toLocaleDateString('fr-FR')
-        : '—';
-  } else {
-    document.getElementById('infoPlan').textContent    = 'Aucun abonnement actif';
-    document.getElementById('infoExpires').textContent = '—';
+  // Marquer le plan actuel dans la grille
+  if(sub && sub.plan_id && plans){
+    const currentPlan = plans.find(p => p.id === sub.plan_id);
+    if(currentPlan){
+      const slug = currentPlan.name?.toLowerCase();
+      // Retirer .current de tous les plans
+      ['planBasic','planPro','planEnterprise'].forEach(id => {
+        document.getElementById(id)?.classList.remove('current');
+      });
+      // Ajouter .current au plan actif
+      const map = { basic:'planBasic', pro:'planPro', enterprise:'planEnterprise' };
+      if(map[slug]) document.getElementById(map[slug])?.classList.add('current');
+    }
   }
+
+  if(!sub){
+    dot.className   = 'sub-status-dot none';
+    label.textContent  = 'Aucun abonnement actif';
+    expires.textContent = '';
+    return;
+  }
+
+  const now       = new Date();
+  const expDate   = new Date(sub.expires_at);
+  const isActive  = sub.status === 'active' && expDate > now;
+  const daysLeft  = Math.ceil((expDate - now) / 86400000);
+
+  if(isActive){
+    dot.className      = 'sub-status-dot active';
+    label.textContent  = 'Abonnement actif';
+    expires.textContent = daysLeft <= 7
+      ? `⚠️ Expire dans ${daysLeft} jour${daysLeft > 1 ? 's' : ''}`
+      : `Expire le ${expDate.toLocaleDateString('fr-FR')}`;
+    if(daysLeft <= 7) expires.style.color = '#f59e0b';
+  } else {
+    dot.className      = 'sub-status-dot expired';
+    label.textContent  = 'Abonnement expiré';
+    expires.textContent = `Expiré le ${expDate.toLocaleDateString('fr-FR')}`;
+    expires.style.color = '#ff4c61';
+    // Proposer de renouveler
+    document.getElementById('btnUpgrade').textContent = '🔄 Renouveler mon abonnement';
+  }
+}
+
+/*
+=========================================
+CHANGE PLAN — navigation vers pricing
+avec plan pré-sélectionné
+=========================================
+*/
+function changePlan(planSlug){
+  window.location.href = 'pricing.html?plan=' + planSlug;
+}
+
+function goToPricing(){
+  window.location.href = 'pricing.html';
 }
 
 /*
