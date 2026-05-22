@@ -1685,16 +1685,51 @@ function resetKPIs() {
 }
   async function generatePDFReport(){
 
+if(!lastStats){
+
+toast(
+
+'Aucune donnée',
+
+'warn'
+
+);
+
+return;
+
+}
+
+
+const aiText=
+
+document
+
+.getElementById(
+
+'aiOutput'
+
+)
+
+.innerText
+
+||
+
+'';
+
 
 if(
 
-!lastStats
+aiText.includes(
+
+'Cliquez sur'
+
+)
 
 ){
 
 toast(
 
-'Aucune donnée',
+'Lancez une analyse IA avant PDF',
 
 'warn'
 
@@ -1719,16 +1754,7 @@ const pdf=
 new jsPDF();
 
 
-const today=
-
-new Date()
-
-.toLocaleString(
-
-'fr-FR'
-
-);
-
+let y=20;
 
 
 pdf.setFontSize(
@@ -1743,15 +1769,17 @@ pdf.text(
 
 20,
 
-20
+y
 
 );
 
 
+y+=10;
+
 
 pdf.setFontSize(
 
-12
+14
 
 );
 
@@ -1761,38 +1789,37 @@ pdf.text(
 
 20,
 
-30
+y
 
 );
 
 
-pdf.text(
+y+=15;
 
-`Date :
 
-${today}`,
+pdf.setDrawColor(
 
-20,
-
-40
+180
 
 );
-
-
 
 pdf.line(
 
 20,
 
-45,
+y,
 
 190,
 
-45
+y
 
 );
 
 
+y+=15;
+
+
+/* Résumé */
 
 pdf.setFontSize(
 
@@ -1802,14 +1829,16 @@ pdf.setFontSize(
 
 pdf.text(
 
-'Résumé',
+'Résumé énergétique',
 
 20,
 
-60
+y
 
 );
 
+
+y+=12;
 
 
 pdf.setFontSize(
@@ -1818,121 +1847,51 @@ pdf.setFontSize(
 
 );
 
+
+const resume=[
+
+`Score énergétique : ${lastStats.score_energetique}/100`,
+
+`Énergie totale : ${lastStats.energie_totale_kwh} kWh`,
+
+`Part groupe : ${lastStats.part_groupe_pct}%`,
+
+`Coupures SBEE : ${lastStats.coupures_sbee}`,
+
+`Surcoût : ${lastStats.surcout_groupe_fcfa} FCFA`,
+
+`Pic puissance : ${lastStats.pic_puissance_w} W`,
+
+`Facteur puissance : ${lastStats.facteur_puissance}`
+
+];
+
+
+resume.forEach(
+
+r=>{
+
 pdf.text(
 
-`Score :
-
-${lastStats.score_energetique}/100`,
+r,
 
 20,
 
-70
+y
+
+);
+
+y+=10;
+
+}
 
 );
 
 
-
-pdf.text(
-
-`Énergie :
-
-${lastStats.energie_totale_kwh} kWh`,
-
-20,
-
-80
-
-);
+y+=10;
 
 
-
-pdf.text(
-
-`Part groupe :
-
-${lastStats.part_groupe_pct}%`,
-
-20,
-
-90
-
-);
-
-
-
-pdf.text(
-
-`Coupures :
-
-${lastStats.coupures_sbee}`,
-
-20,
-
-100
-
-);
-
-
-
-pdf.text(
-
-`Surcoût :
-
-${lastStats.surcout_groupe_fcfa} FCFA`,
-
-20,
-
-110
-
-);
-
-
-
-pdf.text(
-
-`Pic puissance :
-
-${lastStats.pic_puissance_w} W`,
-
-20,
-
-120
-
-);
-
-
-
-pdf.text(
-
-`Facteur puissance :
-
-${lastStats.facteur_puissance}`,
-
-20,
-
-130
-
-);
-
-
-
-const ai=
-
-document
-
-.getElementById(
-
-'aiOutput'
-
-)
-
-.innerText
-
-||
-
-'Pas d’analyse';
-
-
+/* Analyse IA */
 
 pdf.setFontSize(
 
@@ -1946,10 +1905,12 @@ pdf.text(
 
 20,
 
-150
+y
 
 );
 
+
+y+=10;
 
 
 pdf.setFontSize(
@@ -1963,12 +1924,11 @@ const wrapped=
 
 pdf.splitTextToSize(
 
-ai,
+aiText,
 
-170
+165
 
 );
-
 
 
 pdf.text(
@@ -1977,10 +1937,9 @@ wrapped,
 
 20,
 
-160
+y
 
 );
-
 
 
 pdf.save(
@@ -1990,15 +1949,13 @@ pdf.save(
 );
 
 
-
 toast(
 
-'PDF généré',
+'Rapport PDF généré',
 
 'success'
 
 );
-
 
 }
 
