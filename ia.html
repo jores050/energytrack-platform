@@ -290,9 +290,34 @@ body{
       <button class="btn btn-history" id="btnHistory" onclick="toggleHistory()">
         🕓 Historique
       </button>
-      <button class="btn btn-ai" id="btnAnalyze" onclick="runAIAnalysis()">
-        🤖 Lancer l'analyse IA
-      </button>
+      <button
+class="btn btn-ai"
+
+id="btnAnalyze"
+
+onclick="runAIAnalysis()"
+
+>
+
+🤖 Lancer l'analyse IA
+
+</button>
+
+
+
+<button
+
+class="btn btn-export"
+
+id="btnPdf"
+
+onclick="generatePDFReport()"
+
+>
+
+📄 Rapport PDF
+
+</button>
     </div>
   </div>
 
@@ -1658,6 +1683,324 @@ function resetKPIs() {
   document.getElementById('ringFg').style.strokeDashoffset = 345.4;
   lastStats = null;
 }
+  async function generatePDFReport(){
+
+
+if(
+
+!lastStats
+
+){
+
+toast(
+
+'Aucune donnée',
+
+'warn'
+
+);
+
+return;
+
+}
+
+
+const {
+
+jsPDF
+
+}=
+
+window.jspdf;
+
+
+const pdf=
+
+new jsPDF();
+
+
+const today=
+
+new Date()
+
+.toLocaleString(
+
+'fr-FR'
+
+);
+
+
+
+pdf.setFontSize(
+
+22
+
+);
+
+pdf.text(
+
+'EnergyTrack',
+
+20,
+
+20
+
+);
+
+
+
+pdf.setFontSize(
+
+12
+
+);
+
+pdf.text(
+
+'Rapport énergétique IA',
+
+20,
+
+30
+
+);
+
+
+pdf.text(
+
+`Date :
+
+${today}`,
+
+20,
+
+40
+
+);
+
+
+
+pdf.line(
+
+20,
+
+45,
+
+190,
+
+45
+
+);
+
+
+
+pdf.setFontSize(
+
+16
+
+);
+
+pdf.text(
+
+'Résumé',
+
+20,
+
+60
+
+);
+
+
+
+pdf.setFontSize(
+
+11
+
+);
+
+pdf.text(
+
+`Score :
+
+${lastStats.score_energetique}/100`,
+
+20,
+
+70
+
+);
+
+
+
+pdf.text(
+
+`Énergie :
+
+${lastStats.energie_totale_kwh} kWh`,
+
+20,
+
+80
+
+);
+
+
+
+pdf.text(
+
+`Part groupe :
+
+${lastStats.part_groupe_pct}%`,
+
+20,
+
+90
+
+);
+
+
+
+pdf.text(
+
+`Coupures :
+
+${lastStats.coupures_sbee}`,
+
+20,
+
+100
+
+);
+
+
+
+pdf.text(
+
+`Surcoût :
+
+${lastStats.surcout_groupe_fcfa} FCFA`,
+
+20,
+
+110
+
+);
+
+
+
+pdf.text(
+
+`Pic puissance :
+
+${lastStats.pic_puissance_w} W`,
+
+20,
+
+120
+
+);
+
+
+
+pdf.text(
+
+`Facteur puissance :
+
+${lastStats.facteur_puissance}`,
+
+20,
+
+130
+
+);
+
+
+
+const ai=
+
+document
+
+.getElementById(
+
+'aiOutput'
+
+)
+
+.innerText
+
+||
+
+'Pas d’analyse';
+
+
+
+pdf.setFontSize(
+
+16
+
+);
+
+pdf.text(
+
+'Analyse IA',
+
+20,
+
+150
+
+);
+
+
+
+pdf.setFontSize(
+
+10
+
+);
+
+
+const wrapped=
+
+pdf.splitTextToSize(
+
+ai,
+
+170
+
+);
+
+
+
+pdf.text(
+
+wrapped,
+
+20,
+
+160
+
+);
+
+
+
+pdf.save(
+
+`rapport_energytrack_${Date.now()}.pdf`
+
+);
+
+
+
+toast(
+
+'PDF généré',
+
+'success'
+
+);
+
+
+}
 
 /* ══════════════════════════════════════════════
    INIT
@@ -1697,4 +2040,5 @@ function resetKPIs() {
 })();
 </script>
 </body>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </html>
