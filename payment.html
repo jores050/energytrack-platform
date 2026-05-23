@@ -1,195 +1,986 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
-
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Paiement EnergyTrack</title>
-
-<link rel="stylesheet" href="css/style.css">
-
+<title>Paiement — EnergyTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
 <script src="js/supabase.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#00c896;--blue:#00aeef;
+  --bg:#0b1220;--bg2:#101826;--bg3:#182235;
+  --text:#e2e8f0;--sub:#94a3b8;--muted:#64748b;
+  --red:#ff4c61;--amber:#ffb547;
+  --border:rgba(255,255,255,0.07);
+}
+body{
+  min-height:100vh;background:var(--bg);
+  font-family:'Poppins',sans-serif;color:var(--text);
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:flex-start;padding:40px 16px 60px;
+  background:
+    radial-gradient(circle at 10% 10%,rgba(0,200,150,0.05) 0%,transparent 40%),
+    radial-gradient(circle at 90% 90%,rgba(0,174,239,0.05) 0%,transparent 40%),
+    #0b1220;
+}
 
+/* ── TOPBAR ── */
+.topbar{
+  width:100%;max-width:960px;
+  display:flex;justify-content:space-between;align-items:center;
+  margin-bottom:36px;
+}
+.topbar-logo{
+  font-family:'Orbitron',sans-serif;font-size:20px;font-weight:700;
+  text-decoration:none;color:var(--text);
+}
+.topbar-logo span{color:var(--green);}
+.topbar-back{
+  display:flex;align-items:center;gap:6px;
+  color:var(--sub);text-decoration:none;font-size:13px;
+  transition:color 0.2s;
+}
+.topbar-back:hover{color:var(--green);}
+
+/* ── STEPPER ── */
+.stepper{
+  display:flex;align-items:center;gap:0;
+  margin-bottom:40px;width:100%;max-width:500px;
+}
+.step-item{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+  flex:1;position:relative;
+}
+.step-item:not(:last-child)::after{
+  content:'';position:absolute;top:16px;left:calc(50% + 18px);
+  width:calc(100% - 36px);height:2px;
+  background:var(--border);z-index:0;transition:background 0.4s;
+}
+.step-item.done:not(:last-child)::after,
+.step-item.active:not(:last-child)::after{background:var(--green);}
+.step-circle{
+  width:32px;height:32px;border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-size:13px;font-weight:700;z-index:1;
+  border:2px solid var(--border);background:var(--bg2);
+  color:var(--muted);transition:all 0.3s;
+}
+.step-item.active .step-circle{border-color:var(--green);background:rgba(0,200,150,0.12);color:var(--green);}
+.step-item.done  .step-circle{border-color:var(--green);background:var(--green);color:#101826;}
+.step-label{font-size:11px;color:var(--muted);font-weight:500;text-align:center;transition:color 0.3s;}
+.step-item.active .step-label{color:var(--green);}
+.step-item.done   .step-label{color:var(--sub);}
+
+/* ── LAYOUT 2 COL ── */
+.pay-wrap{
+  width:100%;max-width:960px;
+  display:grid;grid-template-columns:1fr 380px;
+  gap:24px;align-items:start;
+}
+@media(max-width:720px){.pay-wrap{grid-template-columns:1fr;}}
+
+/* ── CARTE GÉNÉRIQUE ── */
+.card{
+  background:var(--bg2);border-radius:24px;
+  border:1px solid var(--border);padding:30px;
+}
+.card-title{
+  font-size:15px;font-weight:700;margin-bottom:22px;
+  display:flex;align-items:center;gap:10px;color:var(--text);
+}
+.card-title-icon{
+  width:32px;height:32px;border-radius:10px;
+  background:rgba(0,200,150,0.12);
+  display:flex;align-items:center;justify-content:center;font-size:16px;
+}
+
+/* ── MÉTHODES DE PAIEMENT ── */
+.pay-methods{display:flex;flex-direction:column;gap:12px;margin-bottom:24px;}
+.pay-method{
+  display:flex;align-items:center;gap:14px;
+  padding:16px 18px;border-radius:16px;cursor:pointer;
+  border:1.5px solid var(--border);background:var(--bg);
+  transition:border-color 0.2s,background 0.2s;position:relative;
+}
+.pay-method:hover{border-color:rgba(0,200,150,0.3);}
+.pay-method.selected{
+  border-color:var(--green);
+  background:rgba(0,200,150,0.05);
+}
+.pay-method input[type=radio]{position:absolute;opacity:0;pointer-events:none;}
+.pay-method-logo{
+  width:40px;height:40px;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;
+}
+.pm-mtn{background:#FFC107;color:#000;}
+.pm-moov{background:#003087;color:#fff;}
+.pm-card{background:linear-gradient(135deg,var(--green),var(--blue));color:#fff;}
+.pay-method-info{flex:1;}
+.pay-method-name{font-weight:600;font-size:14px;}
+.pay-method-sub{font-size:12px;color:var(--sub);margin-top:2px;}
+.pay-method-check{
+  width:20px;height:20px;border-radius:50%;
+  border:2px solid var(--border);
+  display:flex;align-items:center;justify-content:center;
+  font-size:10px;color:transparent;
+  transition:all 0.2s;flex-shrink:0;
+}
+.pay-method.selected .pay-method-check{
+  border-color:var(--green);background:var(--green);color:#101826;
+}
+
+/* ── CHAMPS ── */
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:13px;font-weight:600;color:var(--sub);margin-bottom:8px;}
+.field-wrap{position:relative;}
+.field input{
+  width:100%;padding:13px 16px;
+  background:var(--bg);color:var(--text);
+  border:1.5px solid var(--border);border-radius:12px;
+  font-size:14px;font-family:'Poppins',sans-serif;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.field input:focus{border-color:var(--green);box-shadow:0 0 0 3px rgba(0,200,150,0.1);}
+.field input.error{border-color:var(--red);}
+.field-error{font-size:12px;color:var(--red);margin-top:5px;display:none;}
+.field-error.show{display:block;}
+.field-hint{font-size:11px;color:var(--muted);margin-top:5px;}
+
+/* Champs carte bancaire */
+.card-fields{
+  display:none;
+  grid-template-columns:1fr 1fr;gap:0 14px;
+}
+.card-fields.show{display:grid;}
+.card-fields .field-full{grid-column:1/-1;}
+
+/* ── PANEL MÉTHODE MOBILE MONEY ── */
+.momo-fields{display:none;}
+.momo-fields.show{display:block;}
+
+/* ── RÉSUMÉ COMMANDE ── */
+.order-summary{}
+.order-sensor{
+  display:flex;align-items:center;gap:14px;
+  padding:16px;background:var(--bg);border-radius:14px;
+  border:1px solid var(--border);margin-bottom:18px;
+}
+.order-sensor-icon{
+  width:48px;height:48px;border-radius:12px;
+  background:linear-gradient(135deg,rgba(0,200,150,0.15),rgba(0,174,239,0.1));
+  display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;
+}
+.order-sensor-name{font-weight:700;font-size:14px;}
+.order-sensor-sub{font-size:12px;color:var(--sub);margin-top:3px;}
+.order-sensor-change{
+  margin-left:auto;font-size:12px;color:var(--green);
+  cursor:pointer;text-decoration:underline;white-space:nowrap;
+}
+
+.order-lines{display:flex;flex-direction:column;gap:0;}
+.order-line{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:12px 0;border-bottom:1px solid var(--border);
+  font-size:13px;
+}
+.order-line:last-child{border-bottom:none;}
+.order-line-label{color:var(--sub);}
+.order-line-value{font-weight:600;}
+.order-line-value.green{color:var(--green);}
+.order-line-value.muted{color:var(--muted);}
+
+.order-total{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:16px;margin-top:14px;
+  background:rgba(0,200,150,0.06);
+  border:1px solid rgba(0,200,150,0.15);
+  border-radius:14px;
+}
+.order-total-label{font-weight:700;font-size:15px;}
+.order-total-value{
+  font-size:22px;font-weight:800;color:var(--green);
+  font-family:'Orbitron',sans-serif;
+}
+
+/* Badge ROI */
+.roi-badge{
+  display:flex;align-items:center;gap:10px;
+  background:rgba(255,181,71,0.08);border:1px solid rgba(255,181,71,0.2);
+  border-radius:12px;padding:12px 14px;margin-top:14px;
+  font-size:13px;color:var(--amber);line-height:1.5;
+}
+
+/* Badges sécurité */
+.security-badges{
+  display:flex;flex-direction:column;gap:8px;margin-top:18px;
+}
+.security-badge{
+  display:flex;align-items:center;gap:8px;
+  font-size:12px;color:var(--muted);
+}
+
+/* ── BOUTON PAYER ── */
+.btn-pay{
+  width:100%;padding:16px;border:none;border-radius:16px;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  color:#101826;font-weight:700;font-size:16px;cursor:pointer;
+  font-family:'Poppins',sans-serif;
+  transition:opacity 0.2s,transform 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:10px;
+  margin-top:6px;
+}
+.btn-pay:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);}
+.btn-pay:disabled{opacity:0.45;cursor:not-allowed;transform:none;}
+.btn-pay .spinner{
+  width:18px;height:18px;border-radius:50%;
+  border:2px solid rgba(0,0,0,0.15);border-top-color:#101826;
+  animation:spin 0.7s linear infinite;display:none;flex-shrink:0;
+}
+.btn-pay.loading .spinner{display:block;}
+.btn-pay.loading .btn-pay-text{opacity:0.6;}
+@keyframes spin{to{transform:rotate(360deg);}}
+
+/* ── MESSAGE ── */
+.pay-msg{
+  padding:14px 16px;border-radius:12px;
+  font-size:13px;font-weight:500;margin-top:16px;
+  display:none;align-items:flex-start;gap:10px;line-height:1.6;
+}
+.pay-msg.show{display:flex;}
+.pay-msg.success{background:rgba(0,200,150,0.1);color:var(--green);border:1px solid rgba(0,200,150,0.2);}
+.pay-msg.error{background:rgba(255,76,97,0.1);color:var(--red);border:1px solid rgba(255,76,97,0.2);}
+.pay-msg.info{background:rgba(0,174,239,0.1);color:var(--blue);border:1px solid rgba(0,174,239,0.2);}
+
+/* ── ÉCRAN SUCCÈS ── */
+.success-screen{
+  display:none;text-align:center;max-width:520px;
+  background:var(--bg2);border-radius:28px;
+  border:1px solid rgba(0,200,150,0.2);padding:50px 40px;
+}
+.success-screen.show{display:block;}
+.success-icon{font-size:72px;margin-bottom:24px;animation:popIn 0.5s cubic-bezier(0.34,1.56,0.64,1);}
+@keyframes popIn{from{transform:scale(0);opacity:0;}to{transform:scale(1);opacity:1;}}
+.success-screen h2{font-family:'Orbitron',sans-serif;font-size:24px;margin-bottom:14px;color:var(--green);}
+.success-screen p{color:var(--sub);line-height:1.8;font-size:14px;margin-bottom:28px;}
+.success-order{
+  background:var(--bg);border-radius:14px;padding:16px;margin-bottom:28px;
+  border:1px solid var(--border);text-align:left;
+}
+.success-order-row{display:flex;justify-content:space-between;font-size:13px;padding:8px 0;border-bottom:1px solid var(--border);}
+.success-order-row:last-child{border-bottom:none;}
+.success-order-row span:first-child{color:var(--sub);}
+.success-order-row span:last-child{font-weight:600;}
+.btn-next{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:var(--green);color:#101826;
+  font-weight:700;font-size:15px;cursor:pointer;
+  font-family:'Poppins',sans-serif;
+  transition:opacity 0.2s;margin-bottom:12px;
+}
+.btn-next:hover{opacity:0.88;}
+.btn-next.outline{
+  background:transparent;color:var(--sub);
+  border:1.5px solid var(--border);
+}
+
+/* ── ÉCRAN USSD (MoMo en attente) ── */
+.ussd-screen{
+  display:none;text-align:center;padding:28px 0;
+}
+.ussd-screen.show{display:block;}
+.ussd-code{
+  font-family:'Orbitron',sans-serif;font-size:28px;
+  color:var(--green);margin:16px 0;letter-spacing:2px;
+}
+.ussd-steps{text-align:left;display:flex;flex-direction:column;gap:10px;margin:20px 0;}
+.ussd-step{display:flex;align-items:flex-start;gap:10px;font-size:13px;color:var(--sub);}
+.ussd-step-num{
+  width:22px;height:22px;border-radius:50%;
+  background:rgba(0,200,150,0.12);border:1px solid rgba(0,200,150,0.2);
+  color:var(--green);font-size:11px;font-weight:700;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px;
+}
+.countdown{
+  font-size:13px;color:var(--amber);margin-top:16px;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+}
+.countdown-timer{font-weight:700;font-family:'Orbitron',sans-serif;}
+.btn-verify{
+  width:100%;padding:13px;border:none;border-radius:12px;
+  background:var(--green);color:#101826;
+  font-weight:700;font-size:14px;cursor:pointer;
+  font-family:'Poppins',sans-serif;margin-top:18px;
+  transition:opacity 0.2s;
+}
+.btn-verify:hover{opacity:0.88;}
+.btn-cancel-ussd{
+  margin-top:10px;background:none;border:none;
+  color:var(--muted);font-size:13px;cursor:pointer;
+  font-family:'Poppins',sans-serif;width:100%;
+  transition:color 0.2s;
+}
+.btn-cancel-ussd:hover{color:var(--sub);}
+
+@media(max-width:480px){
+  .card{padding:22px 18px;}
+  .topbar{margin-bottom:24px;}
+}
+</style>
 </head>
-
 <body>
 
-<section style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px;">
-
-<div style="width:100%;max-width:600px;background:#182235;padding:35px;border-radius:30px;">
-
-<h2 style="margin-bottom:25px;">
-Paiement sécurisé EnergyTrack
-</h2>
-
-<div style="background:#0f1729;padding:20px;border-radius:18px;margin-bottom:20px;">
-
-<h3 id="paymentSensor">
-Capteur : Starter PME
-</h3>
-
-<p style="margin-top:10px;color:#94a3b8;">
-Paiement via MTN Mobile Money / Moov Money / Carte bancaire.
-</p>
-
+<!-- TOPBAR -->
+<div class="topbar">
+  <a href="index.html" class="topbar-logo">Energy<span>Track</span></a>
+  <a href="index.html#pricing" class="topbar-back">← Retour au catalogue</a>
 </div>
 
-<input type="text" placeholder="Nom complet">
-
-<input type="text" placeholder="Numéro Mobile Money">
-
-<select id="selectedSensor">
-
-<option value="">
-Choisir un capteur
-</option>
-
-<option value="Starter Home">
-Starter Home
-</option>
-
-<option value="Starter PME">
-Starter PME
-</option>
-
-<option value="Industrial Pro">
-Industrial Pro
-</option>
-
-</select>
-
-<select>
-
-<option>
-MTN Mobile Money
-</option>
-
-<option>
-Moov Money
-</option>
-
-<option>
-Carte bancaire
-</option>
-
-</select>
-
-<button onclick="confirmPayment()" style="width:100%;">
-
-Confirmer le paiement
-
-</button>
-
-<button
-onclick="window.location.href='index.html'"
-style="width:100%;background:#0f1729;margin-top:10px;">
-
-Annuler
-
-</button>
-
+<!-- STEPPER -->
+<div class="stepper">
+  <div class="step-item done"   id="step1"><div class="step-circle">✓</div><div class="step-label">Choix capteur</div></div>
+  <div class="step-item done"   id="step2"><div class="step-circle">✓</div><div class="step-label">Compte créé</div></div>
+  <div class="step-item active" id="step3"><div class="step-circle">3</div><div class="step-label">Paiement</div></div>
+  <div class="step-item"        id="step4"><div class="step-circle">4</div><div class="step-label">Livraison</div></div>
 </div>
 
-</section>
+<!-- ══ ÉCRAN PRINCIPAL PAIEMENT ══ -->
+<div class="pay-wrap" id="payScreen">
+
+  <!-- COL GAUCHE — FORMULAIRE -->
+  <div>
+
+    <!-- Méthode de paiement -->
+    <div class="card" style="margin-bottom:20px;">
+      <div class="card-title">
+        <div class="card-title-icon">💳</div>
+        Méthode de paiement
+      </div>
+
+      <div class="pay-methods">
+
+        <label class="pay-method selected" onclick="selectMethod('mtn')" id="pm-mtn">
+          <input type="radio" name="payMethod" value="mtn" checked>
+          <div class="pay-method-logo pm-mtn">📱</div>
+          <div class="pay-method-info">
+            <div class="pay-method-name">MTN Mobile Money</div>
+            <div class="pay-method-sub">Paiement instantané · Confirmation par USSD</div>
+          </div>
+          <div class="pay-method-check">✓</div>
+        </label>
+
+        <label class="pay-method" onclick="selectMethod('moov')" id="pm-moov">
+          <input type="radio" name="payMethod" value="moov">
+          <div class="pay-method-logo pm-moov">📲</div>
+          <div class="pay-method-info">
+            <div class="pay-method-name">Moov Money</div>
+            <div class="pay-method-sub">Paiement instantané · Confirmation par USSD</div>
+          </div>
+          <div class="pay-method-check">✓</div>
+        </label>
+
+        <label class="pay-method" onclick="selectMethod('card')" id="pm-card">
+          <input type="radio" name="payMethod" value="card">
+          <div class="pay-method-logo pm-card">💳</div>
+          <div class="pay-method-info">
+            <div class="pay-method-name">Carte bancaire</div>
+            <div class="pay-method-sub">Visa · Mastercard · 3D Secure</div>
+          </div>
+          <div class="pay-method-check">✓</div>
+        </label>
+
+      </div>
+
+      <!-- Champs Mobile Money -->
+      <div class="momo-fields show" id="momoFields">
+        <div class="field">
+          <label for="momoNumber">Numéro Mobile Money <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="tel" id="momoNumber" placeholder="+229 XX XX XX XX"
+                   oninput="formatPhone(this)" autocomplete="tel">
+          </div>
+          <div class="field-error" id="err-momoNumber">Numéro invalide (ex: +229 96 XX XX XX).</div>
+          <div class="field-hint">Le numéro enregistré sur votre compte MoMo</div>
+        </div>
+        <div class="field">
+          <label for="momoName">Nom du titulaire du compte <span style="color:var(--red);">*</span></label>
+          <input type="text" id="momoName" placeholder="Tel qu'enregistré chez MTN/Moov">
+          <div class="field-error" id="err-momoName">Nom requis.</div>
+        </div>
+      </div>
+
+      <!-- Champs Carte Bancaire -->
+      <div class="card-fields" id="cardFields">
+        <div class="field field-full">
+          <label for="cardName">Nom sur la carte <span style="color:var(--red);">*</span></label>
+          <input type="text" id="cardName" placeholder="JEAN KOUASSI" autocomplete="cc-name">
+          <div class="field-error" id="err-cardName">Nom requis.</div>
+        </div>
+        <div class="field field-full">
+          <label for="cardNumber">Numéro de carte <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="text" id="cardNumber" placeholder="1234 5678 9012 3456"
+                   maxlength="19" oninput="formatCard(this)" autocomplete="cc-number">
+          </div>
+          <div class="field-error" id="err-cardNumber">Numéro de carte invalide.</div>
+        </div>
+        <div class="field">
+          <label for="cardExpiry">Date d'expiration <span style="color:var(--red);">*</span></label>
+          <input type="text" id="cardExpiry" placeholder="MM/AA"
+                 maxlength="5" oninput="formatExpiry(this)" autocomplete="cc-exp">
+          <div class="field-error" id="err-cardExpiry">Date invalide.</div>
+        </div>
+        <div class="field">
+          <label for="cardCvv">CVV <span style="color:var(--red);">*</span></label>
+          <input type="text" id="cardCvv" placeholder="123"
+                 maxlength="4" oninput="this.value=this.value.replace(/\D/g,'')" autocomplete="cc-csc">
+          <div class="field-error" id="err-cardCvv">CVV invalide.</div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Adresse de livraison -->
+    <div class="card">
+      <div class="card-title">
+        <div class="card-title-icon">📍</div>
+        Adresse de livraison
+      </div>
+
+      <div class="field">
+        <label for="deliveryName">Nom complet <span style="color:var(--red);">*</span></label>
+        <input type="text" id="deliveryName" placeholder="Jean Kouassi" autocomplete="name">
+        <div class="field-error" id="err-deliveryName">Nom requis.</div>
+      </div>
+
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">
+        <div class="field">
+          <label for="deliveryCity">Ville <span style="color:var(--red);">*</span></label>
+          <input type="text" id="deliveryCity" placeholder="Cotonou" value="Cotonou" autocomplete="address-level2">
+          <div class="field-error" id="err-deliveryCity">Ville requise.</div>
+        </div>
+        <div class="field">
+          <label for="deliveryPhone">Téléphone de livraison <span style="color:var(--red);">*</span></label>
+          <input type="tel" id="deliveryPhone" placeholder="+229 XX XX XX XX" autocomplete="tel">
+          <div class="field-error" id="err-deliveryPhone">Numéro requis.</div>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="deliveryAddress">Quartier / Adresse précise <span style="color:var(--red);">*</span></label>
+        <input type="text" id="deliveryAddress" placeholder="Ex: Cadjehoun, près du carrefour Shell" autocomplete="street-address">
+        <div class="field-error" id="err-deliveryAddress">Adresse requise.</div>
+      </div>
+
+      <div class="field">
+        <label for="deliveryNote">Note pour le livreur (optionnel)</label>
+        <input type="text" id="deliveryNote" placeholder="Ex: Appeler avant d'arriver">
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- COL DROITE — RÉSUMÉ -->
+  <div>
+    <div class="card" style="position:sticky;top:24px;">
+      <div class="card-title">
+        <div class="card-title-icon">🛒</div>
+        Récapitulatif
+      </div>
+
+      <!-- Capteur sélectionné -->
+      <div class="order-sensor">
+        <div class="order-sensor-icon">📡</div>
+        <div>
+          <div class="order-sensor-name" id="summaryName">Starter PME</div>
+          <div class="order-sensor-sub">Capteur IoT GSM/4G · Rail DIN</div>
+        </div>
+        <span class="order-sensor-change" onclick="window.location.href='index.html#pricing'">Changer</span>
+      </div>
+
+      <!-- Lignes de prix -->
+      <div class="order-lines">
+        <div class="order-line">
+          <span class="order-line-label">Capteur hardware</span>
+          <span class="order-line-value" id="summaryHardware">55 000 FCFA</span>
+        </div>
+        <div class="order-line">
+          <span class="order-line-label">Installation technicien</span>
+          <span class="order-line-value">15 000 FCFA</span>
+        </div>
+        <div class="order-line">
+          <span class="order-line-label">Abonnement mensuel</span>
+          <span class="order-line-value" id="summarySubscription">10 000 FCFA/mois</span>
+        </div>
+        <div class="order-line">
+          <span class="order-line-label">1er mois offert</span>
+          <span class="order-line-value green">− 10 000 FCFA</span>
+        </div>
+        <div class="order-line">
+          <span class="order-line-label">Livraison Cotonou</span>
+          <span class="order-line-value green">Gratuite</span>
+        </div>
+      </div>
+
+      <!-- Total -->
+      <div class="order-total">
+        <div class="order-total-label">Total à payer</div>
+        <div class="order-total-value" id="summaryTotal">70 000</div>
+      </div>
+      <div style="text-align:right;font-size:11px;color:var(--muted);margin-top:4px;">FCFA · Paiement unique</div>
+
+      <!-- ROI -->
+      <div class="roi-badge">
+        💡 <div>Si vous économisez <strong>30 000 FCFA/mois</strong>, ce capteur est remboursé en <strong>moins de 3 mois</strong>.</div>
+      </div>
+
+      <!-- Bouton payer -->
+      <button class="btn-pay" id="btnPay" onclick="initiatePayment()" style="margin-top:20px;">
+        <span class="spinner"></span>
+        <span class="btn-pay-text" id="btnPayText">🔒 Payer maintenant</span>
+      </button>
+
+      <div class="pay-msg" id="payMsg"></div>
+
+      <!-- Badges sécurité -->
+      <div class="security-badges">
+        <div class="security-badge">🔒 Paiement 100% sécurisé</div>
+        <div class="security-badge">📱 Confirmation par SMS/USSD</div>
+        <div class="security-badge">↩️ Remboursé si non livré sous 7 jours</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /pay-wrap -->
+
+<!-- ══ ÉCRAN USSD (attente confirmation MoMo) ══ -->
+<div class="card" id="ussdScreen" style="display:none;max-width:500px;width:100%;text-align:center;">
+  <div class="card-title" style="justify-content:center;">
+    <div class="card-title-icon">📲</div>
+    Confirmez le paiement
+  </div>
+
+  <p style="color:var(--sub);font-size:14px;line-height:1.7;margin-bottom:20px;">
+    Une demande de paiement a été envoyée à votre numéro.<br>
+    Composez le code USSD ci-dessous ou approuvez la notification push.
+  </p>
+
+  <div class="ussd-code" id="ussdCode">*880#</div>
+
+  <div class="ussd-steps">
+    <div class="ussd-step"><div class="ussd-step-num">1</div><span>Composez <strong id="ussdCodeInline">*880#</strong> sur votre téléphone MTN</span></div>
+    <div class="ussd-step"><div class="ussd-step-num">2</div><span>Sélectionnez "Confirmer le paiement" dans le menu</span></div>
+    <div class="ussd-step"><div class="ussd-step-num">3</div><span>Entrez votre PIN Mobile Money</span></div>
+    <div class="ussd-step"><div class="ussd-step-num">4</div><span>Cliquez "J'ai confirmé" ci-dessous</span></div>
+  </div>
+
+  <div class="countdown">
+    ⏱ Expire dans <span class="countdown-timer" id="countdownTimer">10:00</span>
+  </div>
+
+  <button class="btn-verify" onclick="verifyPayment()">
+    ✅ J'ai confirmé le paiement
+  </button>
+  <button class="btn-cancel-ussd" onclick="cancelUssd()">
+    Annuler et changer de méthode
+  </button>
+
+  <div class="pay-msg" id="ussdMsg" style="text-align:left;"></div>
+</div>
+
+<!-- ══ ÉCRAN SUCCÈS ══ -->
+<div class="success-screen" id="successScreen">
+  <div class="success-icon">🎉</div>
+  <h2>Paiement confirmé !</h2>
+  <p>
+    Votre commande a été enregistrée avec succès.<br>
+    Un technicien vous contactera sous <strong>24 à 48 heures</strong>
+    pour planifier l'installation de votre capteur.
+  </p>
+
+  <div class="success-order">
+    <div class="success-order-row">
+      <span>Référence commande</span>
+      <span id="orderRef" style="color:var(--green);font-family:'Orbitron',sans-serif;font-size:13px;">ET-2026-XXXX</span>
+    </div>
+    <div class="success-order-row">
+      <span>Capteur commandé</span>
+      <span id="orderSensor">Starter PME</span>
+    </div>
+    <div class="success-order-row">
+      <span>Montant payé</span>
+      <span id="orderAmount">70 000 FCFA</span>
+    </div>
+    <div class="success-order-row">
+      <span>Livraison prévue</span>
+      <span id="orderDelivery">—</span>
+    </div>
+    <div class="success-order-row">
+      <span>Confirmation envoyée sur</span>
+      <span style="color:var(--green);">WhatsApp ✓</span>
+    </div>
+  </div>
+
+  <button class="btn-next" onclick="window.location.href='delivery.html'">
+    Suivre ma livraison →
+  </button>
+  <button class="btn-next outline" onclick="window.location.href='dashboard.html'">
+    Accéder au dashboard
+  </button>
+</div>
 
 <script>
+/* ══════════════════════════════════════
+   CATALOGUE CAPTEURS
+   (doit être cohérent avec index.html)
+══════════════════════════════════════ */
+const SENSORS = {
+  'Starter Home': {
+    hardware:     45000,
+    install:      15000,
+    subscription: 8000,
+    subscriptionLabel: '8 000 FCFA/mois',
+    total:        60000,   // hardware + install - 1er mois offert
+  },
+  'Starter PME': {
+    hardware:     55000,
+    install:      15000,
+    subscription: 10000,
+    subscriptionLabel: '10 000–15 000 FCFA/mois',
+    total:        70000,
+  },
+  'Industrial Pro': {
+    hardware:     65000,
+    install:      20000,
+    subscription: 15000,
+    subscriptionLabel: '15 000 FCFA/mois',
+    total:        85000,
+  },
+};
 
-window.onload=function(){
-
-const sensor=localStorage.getItem('selectedSensor');
-
-if(sensor){
-
-document.getElementById('paymentSensor').innerHTML=
-'Capteur : '+sensor;
-
-document.getElementById('selectedSensor').value=sensor;
-
+function fmtFcfa(n) {
+  return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '\u202f');
 }
 
+/* ══════════════════════════════════════
+   INIT — LECTURE localStorage
+══════════════════════════════════════ */
+let currentSensor = 'Starter PME';
+
+function initPage() {
+  const stored = localStorage.getItem('selectedSensor');
+  if (stored && SENSORS[stored]) currentSensor = stored;
+  updateSummary();
 }
 
-async function confirmPayment(){
-
-const sensor =
-document.getElementById('selectedSensor').value;
-
-if(sensor===''){
-
-alert('Veuillez sélectionner un capteur.');
-
-return;
-
+function updateSummary() {
+  const s = SENSORS[currentSensor];
+  document.getElementById('summaryName').textContent         = currentSensor;
+  document.getElementById('summaryHardware').textContent     = fmtFcfa(s.hardware) + ' FCFA';
+  document.getElementById('summarySubscription').textContent = s.subscriptionLabel;
+  document.getElementById('summaryTotal').textContent        = fmtFcfa(s.total);
+  document.getElementById('btnPayText').textContent          = `🔒 Payer ${fmtFcfa(s.total)} FCFA`;
 }
 
-/*
-UTILISATEUR CONNECTÉ
-*/
+/* ══════════════════════════════════════
+   MÉTHODE DE PAIEMENT
+══════════════════════════════════════ */
+let selectedMethod = 'mtn';
 
-const { data:userData } =
-await supabaseClient.auth.getUser();
+function selectMethod(method) {
+  selectedMethod = method;
+  ['mtn','moov','card'].forEach(m => {
+    document.getElementById('pm-' + m).classList.toggle('selected', m === method);
+  });
 
-if(!userData.user){
+  const isMomo = (method === 'mtn' || method === 'moov');
+  document.getElementById('momoFields').classList.toggle('show', isMomo);
+  document.getElementById('cardFields').classList.toggle('show', method === 'card');
 
-alert('Utilisateur non connecté.');
-
-window.location.href='auth.html';
-
-return;
-
+  // Adapter le code USSD selon l'opérateur
+  const ussdCodes = { mtn: '*880#', moov: '*555#', card: '' };
+  document.getElementById('ussdCode').textContent       = ussdCodes[method] || '';
+  document.getElementById('ussdCodeInline').textContent = ussdCodes[method] || '';
 }
 
-const userId = userData.user.id;
-
-/*
-UPDATE SUPABASE
-*/
-
-const { error } =
-await supabaseClient
-.from('profiles')
-.update({
-
-selected_sensor:sensor,
-
-payment_status:'paid'
-
-})
-.eq('id',userId);
-
-if(error){
-
-alert(error.message);
-
-return;
-
+/* ══════════════════════════════════════
+   FORMATAGE CHAMPS
+══════════════════════════════════════ */
+function formatPhone(input) {
+  let v = input.value.replace(/[^\d+\s]/g,'');
+  input.value = v;
 }
 
-/*
-LOCAL STORAGE
-*/
-
-localStorage.setItem('selectedSensor',sensor);
-
-localStorage.setItem('paymentStatus','paid');
-
-/*
-SUCCESS
-*/
-
-alert('Paiement confirmé.');
-
-window.location.href='delivery.html';
-
+function formatCard(input) {
+  let v = input.value.replace(/\D/g,'').substring(0,16);
+  input.value = v.match(/.{1,4}/g)?.join(' ') || v;
 }
 
+function formatExpiry(input) {
+  let v = input.value.replace(/\D/g,'');
+  if (v.length >= 2) v = v.substring(0,2) + '/' + v.substring(2,4);
+  input.value = v;
+}
+
+/* ══════════════════════════════════════
+   VALIDATION
+══════════════════════════════════════ */
+function showErr(id, show) {
+  const el = document.getElementById('err-' + id);
+  if (el) el.classList.toggle('show', show);
+  const input = document.getElementById(id);
+  if (input) input.classList.toggle('error', show);
+}
+
+function isValidPhone(v) {
+  return v.replace(/[\s+]/g,'').length >= 8;
+}
+
+function validateForm() {
+  let ok = true;
+
+  // Livraison — toujours requis
+  if (!document.getElementById('deliveryName').value.trim())    { showErr('deliveryName', true);    ok = false; } else showErr('deliveryName', false);
+  if (!document.getElementById('deliveryCity').value.trim())    { showErr('deliveryCity', true);    ok = false; } else showErr('deliveryCity', false);
+  if (!isValidPhone(document.getElementById('deliveryPhone').value)) { showErr('deliveryPhone', true); ok = false; } else showErr('deliveryPhone', false);
+  if (!document.getElementById('deliveryAddress').value.trim()) { showErr('deliveryAddress', true); ok = false; } else showErr('deliveryAddress', false);
+
+  // Mobile Money
+  if (selectedMethod === 'mtn' || selectedMethod === 'moov') {
+    if (!isValidPhone(document.getElementById('momoNumber').value)) { showErr('momoNumber', true); ok = false; } else showErr('momoNumber', false);
+    if (!document.getElementById('momoName').value.trim())          { showErr('momoName', true);   ok = false; } else showErr('momoName', false);
+  }
+
+  // Carte bancaire
+  if (selectedMethod === 'card') {
+    if (!document.getElementById('cardName').value.trim())     { showErr('cardName', true);   ok = false; } else showErr('cardName', false);
+    const cn = document.getElementById('cardNumber').value.replace(/\s/g,'');
+    if (cn.length !== 16)                                       { showErr('cardNumber', true); ok = false; } else showErr('cardNumber', false);
+    const exp = document.getElementById('cardExpiry').value;
+    if (!/^\d{2}\/\d{2}$/.test(exp))                           { showErr('cardExpiry', true); ok = false; } else showErr('cardExpiry', false);
+    const cvv = document.getElementById('cardCvv').value;
+    if (cvv.length < 3)                                         { showErr('cardCvv', true);   ok = false; } else showErr('cardCvv', false);
+  }
+
+  return ok;
+}
+
+/* ══════════════════════════════════════
+   LANCEMENT DU PAIEMENT
+══════════════════════════════════════ */
+async function initiatePayment() {
+  clearMsg();
+
+  if (!validateForm()) {
+    showMsg('Veuillez corriger les champs en rouge avant de continuer.', 'error', 'payMsg');
+    return;
+  }
+
+  setLoading(true);
+
+  // Vérifier que l'utilisateur est connecté
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) {
+    setLoading(false);
+    showMsg('Session expirée. <a href="auth.html" style="color:var(--red);font-weight:700;">Reconnectez-vous →</a>', 'error', 'payMsg');
+    return;
+  }
+
+  try {
+    const sensor = SENSORS[currentSensor];
+
+    // Enregistrer la commande en base
+    const orderRef = 'ET-' + new Date().getFullYear() + '-' + Math.random().toString(36).substring(2,6).toUpperCase();
+
+    const { error: orderError } = await supabaseClient.from('orders').insert([{
+      user_id:          user.id,
+      reference:        orderRef,
+      sensor_type:      currentSensor,
+      amount:           sensor.total,
+      payment_method:   selectedMethod,
+      payment_status:   'pending',
+      delivery_name:    document.getElementById('deliveryName').value.trim(),
+      delivery_city:    document.getElementById('deliveryCity').value.trim(),
+      delivery_address: document.getElementById('deliveryAddress').value.trim(),
+      delivery_phone:   document.getElementById('deliveryPhone').value.trim(),
+      delivery_note:    document.getElementById('deliveryNote').value.trim() || null,
+      momo_number:      selectedMethod !== 'card' ? document.getElementById('momoNumber').value.trim() : null,
+      created_at:       new Date().toISOString(),
+    }]);
+
+    // Mise à jour du profil
+    await supabaseClient.from('profiles').update({
+      selected_sensor: currentSensor,
+      payment_status:  'pending',
+    }).eq('id', user.id);
+
+    localStorage.setItem('selectedSensor', currentSensor);
+    localStorage.setItem('currentOrderRef', orderRef);
+
+    setLoading(false);
+
+    if (selectedMethod === 'card') {
+      // Carte : simuler validation 3D Secure
+      await simulateCardPayment(user.id, orderRef);
+    } else {
+      // Mobile Money : afficher écran USSD
+      showUssdScreen(orderRef);
+    }
+
+  } catch (err) {
+    setLoading(false);
+    console.error(err);
+    showMsg('Une erreur est survenue. Réessayez ou contactez le support.', 'error', 'payMsg');
+  }
+}
+
+/* ══════════════════════════════════════
+   ÉCRAN USSD + COUNTDOWN
+══════════════════════════════════════ */
+let countdownInterval = null;
+
+function showUssdScreen(orderRef) {
+  document.getElementById('payScreen').style.display  = 'none';
+  document.getElementById('ussdScreen').style.display = 'block';
+  localStorage.setItem('currentOrderRef', orderRef);
+  startCountdown(10 * 60); // 10 minutes
+}
+
+function startCountdown(seconds) {
+  clearInterval(countdownInterval);
+  const el = document.getElementById('countdownTimer');
+  countdownInterval = setInterval(() => {
+    if (seconds <= 0) {
+      clearInterval(countdownInterval);
+      el.textContent = '00:00';
+      showMsg('Délai expiré. Revenez en arrière et réessayez.', 'error', 'ussdMsg');
+      document.querySelector('.btn-verify').disabled = true;
+      return;
+    }
+    const m = Math.floor(seconds / 60).toString().padStart(2,'0');
+    const s = (seconds % 60).toString().padStart(2,'0');
+    el.textContent = `${m}:${s}`;
+    seconds--;
+  }, 1000);
+}
+
+function cancelUssd() {
+  clearInterval(countdownInterval);
+  document.getElementById('ussdScreen').style.display = 'none';
+  document.getElementById('payScreen').style.display  = 'grid';
+}
+
+/* ══════════════════════════════════════
+   VÉRIFICATION PAIEMENT MOMO
+   (En prod : appel à votre API backend
+    qui interroge l'API MTN MoMo)
+══════════════════════════════════════ */
+async function verifyPayment() {
+  clearInterval(countdownInterval);
+  const btn = document.querySelector('.btn-verify');
+  btn.disabled = true;
+  btn.textContent = '⏳ Vérification en cours…';
+
+  // Simulation vérification (remplacer par appel API réel)
+  await new Promise(r => setTimeout(r, 2000));
+
+  const orderRef = localStorage.getItem('currentOrderRef');
+  await finalizePayment(orderRef, 'momo');
+}
+
+/* ══════════════════════════════════════
+   PAIEMENT CARTE (simulation)
+══════════════════════════════════════ */
+async function simulateCardPayment(userId, orderRef) {
+  // Afficher un loader pendant "3D Secure"
+  document.getElementById('payScreen').style.display = 'none';
+  // En production : rediriger vers gateway (Stripe, CinetPay, etc.)
+  await new Promise(r => setTimeout(r, 2500));
+  await finalizePayment(orderRef, 'card');
+}
+
+/* ══════════════════════════════════════
+   FINALISATION COMMANDE
+══════════════════════════════════════ */
+async function finalizePayment(orderRef, method) {
+  const { data: { user } } = await supabaseClient.auth.getUser();
+  if (!user) return;
+
+  // Mettre à jour le statut de la commande
+  await supabaseClient.from('orders')
+    .update({ payment_status: 'paid', paid_at: new Date().toISOString() })
+    .eq('reference', orderRef);
+
+  // Mettre à jour le profil
+  await supabaseClient.from('profiles').update({
+    payment_status: 'paid',
+    selected_sensor: currentSensor,
+  }).eq('id', user.id);
+
+  localStorage.setItem('paymentStatus', 'paid');
+  localStorage.setItem('selectedSensor', currentSensor);
+
+  // Calculer date de livraison estimée (+2 jours ouvrés)
+  const delivery = new Date();
+  delivery.setDate(delivery.getDate() + 2);
+  const deliveryStr = delivery.toLocaleDateString('fr-FR', { weekday:'long', day:'numeric', month:'long' });
+
+  // Afficher écran succès
+  showSuccessScreen(orderRef, deliveryStr);
+}
+
+/* ══════════════════════════════════════
+   ÉCRAN SUCCÈS
+══════════════════════════════════════ */
+function showSuccessScreen(orderRef, deliveryDate) {
+  clearInterval(countdownInterval);
+  document.getElementById('ussdScreen').style.display   = 'none';
+  document.getElementById('payScreen').style.display    = 'none';
+  document.getElementById('successScreen').style.display = 'none';
+  document.querySelector('.stepper').style.display       = 'none';
+
+  // Remplir les infos
+  document.getElementById('orderRef').textContent    = orderRef;
+  document.getElementById('orderSensor').textContent = currentSensor;
+  document.getElementById('orderAmount').textContent = fmtFcfa(SENSORS[currentSensor].total) + ' FCFA';
+  document.getElementById('orderDelivery').textContent = deliveryDate;
+
+  document.getElementById('successScreen').classList.add('show');
+}
+
+/* ══════════════════════════════════════
+   UTILITAIRES
+══════════════════════════════════════ */
+function setLoading(loading) {
+  const btn = document.getElementById('btnPay');
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+}
+
+function showMsg(text, type, targetId) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.className = 'pay-msg show ' + type;
+  const icons = { success:'✅', error:'❌', info:'ℹ️' };
+  el.innerHTML = `<span>${icons[type]||'ℹ️'}</span><span>${text}</span>`;
+}
+
+function clearMsg() {
+  ['payMsg','ussdMsg'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.className = 'pay-msg'; el.innerHTML = ''; }
+  });
+}
+
+/* ══════════════════════════════════════
+   INIT
+══════════════════════════════════════ */
+initPage();
 </script>
 
 </body>
