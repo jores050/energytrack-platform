@@ -1,601 +1,841 @@
 <!DOCTYPE html>
 <html lang="fr">
-
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
-<title>Authentification • EnergyTrack</title>
-
-<link rel="stylesheet" href="css/style.css">
-
+<title>Authentification — EnergyTrack</title>
 <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="js/supabase.js"></script>
 
 <style>
-
-.auth-container{
-min-height:100vh;
-display:flex;
-align-items:center;
-justify-content:center;
-padding:40px 20px;
-background:
-radial-gradient(circle at top left,rgba(0,200,150,0.15),transparent 30%),
-radial-gradient(circle at bottom right,rgba(0,174,239,0.12),transparent 30%),
-#0b1220;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --green:#00c896;--blue:#00aeef;
+  --bg:#0b1220;--bg2:#101826;--bg3:#182235;
+  --text:#e2e8f0;--sub:#94a3b8;--muted:#64748b;
+  --red:#ff4c61;--amber:#ffb547;
+  --border:rgba(255,255,255,0.07);
+}
+body{
+  min-height:100vh;background:var(--bg);
+  font-family:'Poppins',sans-serif;color:var(--text);
+  display:flex;align-items:center;justify-content:center;
+  padding:24px 16px;
+  background:
+    radial-gradient(circle at 15% 20%,rgba(0,200,150,0.07) 0%,transparent 40%),
+    radial-gradient(circle at 85% 80%,rgba(0,174,239,0.06) 0%,transparent 40%),
+    #0b1220;
 }
 
-.auth-card{
-width:100%;
-max-width:520px;
-background:linear-gradient(145deg,#182235,#101826);
-border:1px solid rgba(255,255,255,0.05);
-border-radius:32px;
-padding:40px;
-box-shadow:0 25px 80px rgba(0,0,0,0.45);
+/* ── LAYOUT 2 COLONNES ── */
+.auth-wrap{
+  display:flex;width:100%;max-width:960px;
+  border-radius:28px;overflow:hidden;
+  border:1px solid var(--border);
+  box-shadow:0 30px 80px rgba(0,0,0,0.5);
 }
 
-.auth-logo{
-font-family:'Orbitron',sans-serif;
-font-size:36px;
-color:#00c896;
-text-align:center;
-margin-bottom:10px;
+/* ── PANNEAU GAUCHE — VISUEL ── */
+.auth-left{
+  flex:1;min-width:0;
+  background:linear-gradient(145deg,#0d1f30,#091420);
+  padding:48px 40px;
+  display:flex;flex-direction:column;justify-content:space-between;
+  border-right:1px solid var(--border);
 }
-
-.auth-logo span{
-color:#fff;
+@media(max-width:700px){.auth-left{display:none;}}
+.auth-left-logo{
+  font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;
+  text-decoration:none;color:var(--text);
 }
-
-.auth-subtitle{
-text-align:center;
-color:#94a3b8;
-margin-bottom:35px;
-line-height:1.7;
+.auth-left-logo span{color:var(--green);}
+.auth-left-tagline{
+  font-size:28px;font-weight:700;line-height:1.3;
+  font-family:'Orbitron',sans-serif;margin-bottom:16px;
 }
+.auth-left-tagline span{color:var(--green);}
+.auth-left-sub{color:var(--sub);font-size:14px;line-height:1.8;margin-bottom:36px;}
+.auth-stats{display:flex;flex-direction:column;gap:14px;}
+.auth-stat{
+  display:flex;align-items:center;gap:14px;
+  background:rgba(255,255,255,0.03);
+  border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;
+}
+.auth-stat-icon{font-size:22px;flex-shrink:0;}
+.auth-stat-value{font-size:18px;font-weight:700;color:var(--green);font-family:'Orbitron',sans-serif;}
+.auth-stat-label{font-size:12px;color:var(--sub);margin-top:2px;}
+.auth-left-footer{font-size:12px;color:var(--muted);}
+.auth-left-footer a{color:var(--green);text-decoration:none;}
 
+/* ── PANNEAU DROIT — FORMULAIRE ── */
+.auth-right{
+  flex:1;min-width:320px;
+  background:var(--bg2);
+  padding:48px 40px;
+  display:flex;flex-direction:column;
+}
+@media(max-width:700px){.auth-right{padding:36px 24px;border-radius:28px;}}
+
+.auth-logo-mobile{
+  display:none;
+  font-family:'Orbitron',sans-serif;font-size:22px;font-weight:700;
+  text-align:center;margin-bottom:28px;color:var(--text);
+}
+.auth-logo-mobile span{color:var(--green);}
+@media(max-width:700px){.auth-logo-mobile{display:block;}}
+
+/* ── ONGLETS ── */
 .auth-tabs{
-display:flex;
-gap:12px;
-margin-bottom:30px;
+  display:flex;gap:0;margin-bottom:32px;
+  background:var(--bg);border-radius:14px;padding:5px;
+  border:1px solid var(--border);
 }
-
 .auth-tab{
-flex:1;
-padding:16px;
-border-radius:14px;
-background:#0f1729;
-border:none;
-color:#94a3b8;
-font-weight:600;
-cursor:pointer;
-transition:0.3s;
+  flex:1;padding:12px;border-radius:10px;border:none;
+  background:transparent;color:var(--sub);
+  font-weight:600;font-size:14px;cursor:pointer;
+  font-family:'Poppins',sans-serif;transition:all 0.2s;
 }
-
 .auth-tab.active{
-background:linear-gradient(135deg,#00c896,#00aeef);
-color:#fff;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  color:#101826;
 }
 
-.auth-form{
-display:none;
+/* ── FORMS ── */
+.auth-form{display:none;flex-direction:column;gap:0;}
+.auth-form.active{display:flex;}
+
+.field{margin-bottom:18px;}
+.field label{
+  display:block;font-size:13px;font-weight:600;
+  color:var(--sub);margin-bottom:8px;
+}
+.field-wrap{position:relative;}
+.field input{
+  width:100%;padding:14px 16px;
+  background:var(--bg);color:var(--text);
+  border:1.5px solid var(--border);border-radius:12px;
+  font-size:14px;font-family:'Poppins',sans-serif;
+  outline:none;transition:border-color 0.2s,box-shadow 0.2s;
+}
+.field input:focus{
+  border-color:var(--green);
+  box-shadow:0 0 0 3px rgba(0,200,150,0.1);
+}
+.field input.error{border-color:var(--red);}
+.field input.success{border-color:var(--green);}
+.field-error{
+  font-size:12px;color:var(--red);margin-top:6px;
+  display:none;align-items:center;gap:5px;
+}
+.field-error.show{display:flex;}
+
+/* Toggle mot de passe */
+.field-eye{
+  position:absolute;right:14px;top:50%;transform:translateY(-50%);
+  background:none;border:none;cursor:pointer;
+  color:var(--muted);font-size:16px;padding:4px;
+  transition:color 0.2s;
+}
+.field-eye:hover{color:var(--sub);}
+
+/* ── FORCE MOT DE PASSE ── */
+.pwd-strength{margin-top:8px;}
+.pwd-strength-bar{
+  display:flex;gap:4px;height:4px;margin-bottom:6px;
+}
+.pwd-segment{
+  flex:1;border-radius:2px;background:rgba(255,255,255,0.07);
+  transition:background 0.3s;
+}
+.pwd-segment.active-1{background:var(--red);}
+.pwd-segment.active-2{background:var(--amber);}
+.pwd-segment.active-3{background:var(--green);}
+.pwd-label{font-size:11px;color:var(--muted);}
+
+/* ── CRITÈRES MOT DE PASSE ── */
+.pwd-criteria{
+  display:grid;grid-template-columns:1fr 1fr;gap:5px;
+  margin-top:8px;
+}
+.pwd-rule{
+  display:flex;align-items:center;gap:6px;
+  font-size:12px;color:var(--muted);transition:color 0.2s;
+}
+.pwd-rule.ok{color:var(--green);}
+.pwd-rule-dot{
+  width:6px;height:6px;border-radius:50%;
+  background:var(--muted);flex-shrink:0;transition:background 0.2s;
+}
+.pwd-rule.ok .pwd-rule-dot{background:var(--green);}
+
+/* ── DIVIDER ── */
+.auth-divider{
+  display:flex;align-items:center;gap:12px;
+  margin:6px 0 18px;color:var(--muted);font-size:12px;
+}
+.auth-divider::before,.auth-divider::after{
+  content:'';flex:1;height:1px;background:var(--border);
 }
 
-.auth-form.active{
-display:block;
+/* ── BOUTON PRINCIPAL ── */
+.btn-auth{
+  width:100%;padding:15px;border:none;border-radius:14px;
+  background:linear-gradient(135deg,var(--green),var(--blue));
+  color:#101826;font-weight:700;font-size:15px;cursor:pointer;
+  font-family:'Poppins',sans-serif;transition:opacity 0.2s,transform 0.2s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-top:4px;
 }
-
-.auth-footer{
-margin-top:25px;
-text-align:center;
+.btn-auth:hover:not(:disabled){opacity:0.88;transform:translateY(-1px);}
+.btn-auth:disabled{opacity:0.5;cursor:not-allowed;transform:none;}
+.btn-auth .spinner{
+  width:16px;height:16px;border-radius:50%;
+  border:2px solid rgba(0,0,0,0.2);border-top-color:#101826;
+  animation:spin 0.7s linear infinite;display:none;
 }
+.btn-auth.loading .spinner{display:block;}
+.btn-auth.loading .btn-text{opacity:0.6;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-.auth-footer a{
-color:#00c896;
-text-decoration:none;
-font-weight:500;
+/* ── MESSAGE ── */
+.auth-msg{
+  padding:14px 16px;border-radius:12px;
+  font-size:13px;font-weight:500;margin-top:16px;
+  display:none;align-items:flex-start;gap:10px;line-height:1.5;
 }
+.auth-msg.show{display:flex;}
+.auth-msg.success{background:rgba(0,200,150,0.1);color:var(--green);border:1px solid rgba(0,200,150,0.2);}
+.auth-msg.error{background:rgba(255,76,97,0.1);color:var(--red);border:1px solid rgba(255,76,97,0.2);}
+.auth-msg.info{background:rgba(0,174,239,0.1);color:var(--blue);border:1px solid rgba(0,174,239,0.2);}
+.auth-msg-icon{font-size:16px;flex-shrink:0;}
 
-.auth-message{
-margin-top:18px;
-padding:14px;
-border-radius:14px;
-display:none;
-font-weight:500;
+/* ── LIEN RESET ── */
+.auth-forgot{
+  text-align:right;margin-top:-10px;margin-bottom:18px;
 }
-
-.success{
-background:rgba(0,200,150,0.15);
-color:#00c896;
+.auth-forgot a{
+  color:var(--green);font-size:12px;text-decoration:none;
+  font-weight:500;cursor:pointer;
 }
+.auth-forgot a:hover{text-decoration:underline;}
 
-.error{
-background:rgba(255,76,97,0.15);
-color:#ff4c61;
+/* ── EMAIL CONFIRMATION ── */
+.email-confirm-box{
+  display:none;text-align:center;padding:24px 0;
 }
-
-.loading{
-opacity:0.7;
-pointer-events:none;
+.email-confirm-box .confirm-icon{font-size:56px;margin-bottom:16px;}
+.email-confirm-box h3{font-size:18px;font-weight:700;margin-bottom:10px;}
+.email-confirm-box p{color:var(--sub);font-size:14px;line-height:1.7;}
+.email-confirm-box .resend-btn{
+  margin-top:20px;background:none;border:1.5px solid var(--border);
+  color:var(--sub);padding:10px 20px;border-radius:10px;
+  cursor:pointer;font-family:'Poppins',sans-serif;font-size:13px;
+  transition:border-color 0.2s,color 0.2s;
 }
+.email-confirm-box .resend-btn:hover{border-color:var(--green);color:var(--green);}
 
+/* ── FOOTER FORM ── */
+.auth-form-footer{
+  margin-top:20px;text-align:center;
+  font-size:13px;color:var(--muted);
+}
+.auth-form-footer a{color:var(--green);text-decoration:none;font-weight:500;}
+.auth-form-footer a:hover{text-decoration:underline;}
+
+/* ── BACK LINK ── */
+.auth-back{
+  margin-top:24px;text-align:center;
+  font-size:13px;color:var(--muted);
+}
+.auth-back a{color:var(--sub);text-decoration:none;}
+.auth-back a:hover{color:var(--green);}
+
+/* ── TERMS ── */
+.auth-terms{
+  font-size:11px;color:var(--muted);text-align:center;
+  margin-top:14px;line-height:1.6;
+}
+.auth-terms a{color:var(--sub);text-decoration:none;}
+.auth-terms a:hover{color:var(--green);}
 </style>
-
 </head>
-
 <body>
 
-<div class="auth-container">
+<div class="auth-wrap">
 
-<div class="auth-card">
+  <!-- ══ PANNEAU GAUCHE ══ -->
+  <div class="auth-left">
+    <div>
+      <a href="index.html" class="auth-left-logo">Energy<span>Track</span></a>
+    </div>
 
-<div class="auth-logo">
-Energy<span>Track</span>
-</div>
+    <div>
+      <div class="auth-left-tagline">
+        Maîtrisez votre énergie.<br>
+        Réduisez vos <span>coûts en FCFA</span>.
+      </div>
+      <p class="auth-left-sub">
+        Capteur IoT GSM/4G + plateforme cloud.<br>
+        Alertes WhatsApp instantanées. ROI en moins de 3 mois.
+      </p>
 
-<p class="auth-subtitle">
+      <div class="auth-stats">
+        <div class="auth-stat">
+          <div class="auth-stat-icon">💰</div>
+          <div>
+            <div class="auth-stat-value">− 22%</div>
+            <div class="auth-stat-label">de facture électrique en moyenne</div>
+          </div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-icon">⚡</div>
+          <div>
+            <div class="auth-stat-value">&lt; 30s</div>
+            <div class="auth-stat-label">pour recevoir une alerte coupure SBEE</div>
+          </div>
+        </div>
+        <div class="auth-stat">
+          <div class="auth-stat-icon">📡</div>
+          <div>
+            <div class="auth-stat-value">72h</div>
+            <div class="auth-stat-label">de buffer offline — zéro perte de données</div>
+          </div>
+        </div>
+      </div>
+    </div>
 
-Plateforme SaaS intelligente de monitoring énergétique
-et optimisation IoT en temps réel.
+    <div class="auth-left-footer">
+      Pas encore client ?
+      <a href="index.html#pricing">Voir les capteurs →</a>
+    </div>
+  </div>
 
-</p>
+  <!-- ══ PANNEAU DROIT ══ -->
+  <div class="auth-right">
 
-<div class="auth-tabs">
+    <div class="auth-logo-mobile">Energy<span>Track</span></div>
 
-<button id="loginTab"
-class="auth-tab active"
-onclick="switchTab('login')">
+    <!-- ONGLETS -->
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="tab-login"  onclick="switchTab('login')">Se connecter</button>
+      <button class="auth-tab"        id="tab-signup" onclick="switchTab('signup')">Créer un compte</button>
+    </div>
 
-Connexion
+    <!-- ══════════════════════
+         FORMULAIRE CONNEXION
+    ══════════════════════ -->
+    <div class="auth-form active" id="form-login">
 
-</button>
+      <div class="field">
+        <label for="loginEmail">Adresse email</label>
+        <div class="field-wrap">
+          <input type="email" id="loginEmail" placeholder="vous@entreprise.bj" autocomplete="email">
+        </div>
+        <div class="field-error" id="err-loginEmail">Email invalide.</div>
+      </div>
 
-<button id="signupTab"
-class="auth-tab"
-onclick="switchTab('signup')">
+      <div class="field">
+        <label for="loginPassword">Mot de passe</label>
+        <div class="field-wrap">
+          <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+          <button class="field-eye" type="button" onclick="togglePwd('loginPassword',this)" title="Afficher/masquer">👁</button>
+        </div>
+        <div class="field-error" id="err-loginPassword">Mot de passe requis.</div>
+      </div>
 
-Inscription
+      <div class="auth-forgot">
+        <a onclick="showReset()">Mot de passe oublié ?</a>
+      </div>
 
-</button>
+      <button class="btn-auth" id="btn-login" onclick="loginUser()">
+        <span class="spinner"></span>
+        <span class="btn-text">Se connecter</span>
+      </button>
 
-</div>
+      <div class="auth-msg" id="msg-login"></div>
 
-<!-- LOGIN -->
+      <div class="auth-form-footer">
+        Pas encore de compte ?
+        <a onclick="switchTab('signup')">Créer un compte gratuit</a>
+      </div>
 
-<div id="loginForm"
-class="auth-form active">
+    </div>
 
-<input type="email"
-id="loginEmail"
-placeholder="Adresse email">
+    <!-- ══════════════════════
+         FORMULAIRE INSCRIPTION
+    ══════════════════════ -->
+    <div class="auth-form" id="form-signup">
 
-<input type="password"
-id="loginPassword"
-placeholder="Mot de passe">
+      <!-- Écran de confirmation email (affiché après inscription réussie) -->
+      <div class="email-confirm-box" id="emailConfirmBox">
+        <div class="confirm-icon">📧</div>
+        <h3>Vérifiez votre email</h3>
+        <p>
+          Un lien de confirmation a été envoyé à<br>
+          <strong id="confirmEmailAddr" style="color:var(--green);"></strong><br><br>
+          Cliquez sur le lien dans l'email pour activer votre compte,
+          puis revenez vous connecter.
+        </p>
+        <button class="resend-btn" onclick="resendConfirmation()">
+          Renvoyer l'email de confirmation
+        </button>
+      </div>
 
-<button
-style="width:100%;"
-onclick="loginUser()">
+      <!-- Formulaire réel -->
+      <div id="signupFormFields">
 
-Se connecter
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0 14px;">
+          <div class="field">
+            <label for="signupName">Prénom &amp; Nom <span style="color:var(--red);">*</span></label>
+            <input type="text" id="signupName" placeholder="Jean Kouassi" autocomplete="name">
+            <div class="field-error" id="err-signupName">Nom complet requis.</div>
+          </div>
+          <div class="field">
+            <label for="signupCompany">Entreprise</label>
+            <input type="text" id="signupCompany" placeholder="Ma PME (optionnel)" autocomplete="organization">
+          </div>
+        </div>
 
-</button>
+        <div class="field">
+          <label for="signupEmail">Adresse email <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="email" id="signupEmail" placeholder="vous@entreprise.bj" autocomplete="email">
+          </div>
+          <div class="field-error" id="err-signupEmail">Email invalide.</div>
+        </div>
 
-<div class="auth-footer">
+        <div class="field">
+          <label for="signupPhone">Numéro WhatsApp <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="tel" id="signupPhone" placeholder="+229 XX XX XX XX" autocomplete="tel">
+          </div>
+          <div class="field-error" id="err-signupPhone">Numéro WhatsApp requis (pour les alertes).</div>
+        </div>
 
-<a href="#"
-onclick="resetPassword()">
+        <div class="field">
+          <label for="signupPassword">Mot de passe <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="password" id="signupPassword" placeholder="8 caractères minimum"
+                   autocomplete="new-password" oninput="checkPasswordStrength(this.value)">
+            <button class="field-eye" type="button" onclick="togglePwd('signupPassword',this)" title="Afficher/masquer">👁</button>
+          </div>
+          <div class="field-error" id="err-signupPassword">Mot de passe trop court (8 caractères min.).</div>
 
-Mot de passe oublié ?
+          <!-- Barre de force -->
+          <div class="pwd-strength" id="pwdStrength" style="display:none;">
+            <div class="pwd-strength-bar">
+              <div class="pwd-segment" id="seg1"></div>
+              <div class="pwd-segment" id="seg2"></div>
+              <div class="pwd-segment" id="seg3"></div>
+            </div>
+            <div class="pwd-label" id="pwdLabel">Trop court</div>
+          </div>
 
-</a>
+          <!-- Critères -->
+          <div class="pwd-criteria" id="pwdCriteria" style="display:none;">
+            <div class="pwd-rule" id="rule-len"><span class="pwd-rule-dot"></span>8 caractères min.</div>
+            <div class="pwd-rule" id="rule-upper"><span class="pwd-rule-dot"></span>Une majuscule</div>
+            <div class="pwd-rule" id="rule-num"><span class="pwd-rule-dot"></span>Un chiffre</div>
+            <div class="pwd-rule" id="rule-special"><span class="pwd-rule-dot"></span>Un caractère spécial</div>
+          </div>
+        </div>
 
-</div>
+        <div class="field">
+          <label for="signupPasswordConfirm">Confirmer le mot de passe <span style="color:var(--red);">*</span></label>
+          <div class="field-wrap">
+            <input type="password" id="signupPasswordConfirm" placeholder="Répétez votre mot de passe"
+                   autocomplete="new-password">
+            <button class="field-eye" type="button" onclick="togglePwd('signupPasswordConfirm',this)" title="Afficher/masquer">👁</button>
+          </div>
+          <div class="field-error" id="err-signupPasswordConfirm">Les mots de passe ne correspondent pas.</div>
+        </div>
 
-</div>
+        <button class="btn-auth" id="btn-signup" onclick="completeSignup()">
+          <span class="spinner"></span>
+          <span class="btn-text">Créer mon compte</span>
+        </button>
 
-<!-- SIGNUP -->
+        <div class="auth-msg" id="msg-signup"></div>
 
-<div id="signupForm"
-class="auth-form">
+        <div class="auth-terms">
+          En créant un compte, vous acceptez nos
+          <a href="#">Conditions d'utilisation</a> et notre
+          <a href="#">Politique de confidentialité</a>.
+        </div>
 
-<input type="text"
-id="signupName"
-placeholder="Nom complet">
+        <div class="auth-form-footer" style="margin-top:14px;">
+          Déjà un compte ?
+          <a onclick="switchTab('login')">Se connecter</a>
+        </div>
 
-<input type="email"
-id="signupEmail"
-placeholder="Adresse email">
+      </div><!-- /signupFormFields -->
+    </div>
 
-<input type="password"
-id="signupPassword"
-placeholder="Mot de passe">
+    <!-- ══════════════════════
+         FORMULAIRE RESET MOT DE PASSE
+    ══════════════════════ -->
+    <div class="auth-form" id="form-reset">
 
-<input type="text"
-id="signupCompany"
-placeholder="Entreprise (optionnel)">
+      <div style="margin-bottom:24px;">
+        <h3 style="font-size:18px;font-weight:700;margin-bottom:8px;">Réinitialiser le mot de passe</h3>
+        <p style="color:var(--sub);font-size:14px;line-height:1.6;">
+          Entrez votre email. Vous recevrez un lien pour créer un nouveau mot de passe.
+        </p>
+      </div>
 
-<button
-style="width:100%;"
-onclick="completeSignup()">
+      <div class="field">
+        <label for="resetEmail">Adresse email</label>
+        <input type="email" id="resetEmail" placeholder="vous@entreprise.bj" autocomplete="email">
+        <div class="field-error" id="err-resetEmail">Email invalide.</div>
+      </div>
 
-Créer mon compte
+      <button class="btn-auth" id="btn-reset" onclick="resetPassword()">
+        <span class="spinner"></span>
+        <span class="btn-text">Envoyer le lien</span>
+      </button>
 
-</button>
+      <div class="auth-msg" id="msg-reset"></div>
 
-</div>
+      <div class="auth-form-footer" style="margin-top:16px;">
+        <a onclick="switchTab('login')">← Retour à la connexion</a>
+      </div>
 
-<div id="authMessage"
-class="auth-message">
+    </div>
 
-</div>
+    <div class="auth-back">
+      <a href="index.html">← Retour à l'accueil</a>
+    </div>
 
-<div class="auth-footer">
-
-<a href="index.html">
-
-← Retour accueil
-
-</a>
-
-</div>
-
-</div>
-
-</div>
+  </div><!-- /auth-right -->
+</div><!-- /auth-wrap -->
 
 <script>
+/* ══════════════════════════════════════
+   NAVIGATION ONGLETS
+══════════════════════════════════════ */
+function switchTab(tab) {
+  ['login','signup','reset'].forEach(t => {
+    document.getElementById('form-' + t).classList.remove('active');
+  });
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
 
-const supabaseUrl='https://prvsatpdgybnevolzhhf.supabase.co';
+  document.getElementById('form-' + tab).classList.add('active');
+  const tabBtn = document.getElementById('tab-' + tab);
+  if (tabBtn) tabBtn.classList.add('active');
 
-const supabaseKey='sb_publishable_7_4_m1j5CWGD196X8e0LVw_gJC9xgCf';
-
-const supabaseClient=supabase.createClient(
-supabaseUrl,
-supabaseKey
-);
-
-function switchTab(tab){
-
-document.getElementById('loginTab').classList.remove('active');
-document.getElementById('signupTab').classList.remove('active');
-
-document.getElementById('loginForm').classList.remove('active');
-document.getElementById('signupForm').classList.remove('active');
-
-if(tab==='login'){
-
-document.getElementById('loginTab').classList.add('active');
-document.getElementById('loginForm').classList.add('active');
-
-}else{
-
-document.getElementById('signupTab').classList.add('active');
-document.getElementById('signupForm').classList.add('active');
-
+  clearAllMessages();
 }
 
+function showReset() {
+  ['login','signup','reset'].forEach(t => {
+    document.getElementById('form-' + t).classList.remove('active');
+  });
+  document.querySelectorAll('.auth-tab').forEach(b => b.classList.remove('active'));
+  document.getElementById('form-reset').classList.add('active');
 }
 
-function showMessage(message,type){
-
-const box=document.getElementById('authMessage');
-
-box.style.display='block';
-
-box.className='auth-message '+type;
-
-box.innerHTML=message;
-
+/* ══════════════════════════════════════
+   UTILITAIRES
+══════════════════════════════════════ */
+function showMsg(id, text, type) {
+  const el = document.getElementById(id);
+  el.className = 'auth-msg show ' + type;
+  const icons = { success: '✅', error: '❌', info: 'ℹ️' };
+  el.innerHTML = `<span class="auth-msg-icon">${icons[type]||'ℹ️'}</span><span>${text}</span>`;
 }
 
-async function completeSignup(){
-
-const name =
-document.getElementById('signupName').value;
-
-const email =
-document.getElementById('signupEmail').value;
-
-const password =
-document.getElementById('signupPassword').value;
-
-const company =
-document.getElementById('signupCompany').value;
-
-if(name==='' || email==='' || password===''){
-
-showMessage(
-'Veuillez remplir tous les champs.',
-'error'
-);
-
-return;
-
+function clearMsg(id) {
+  const el = document.getElementById(id);
+  if (el) { el.className = 'auth-msg'; el.innerHTML = ''; }
 }
 
-/*
-=========================================
-CREATE AUTH USER
-=========================================
-*/
+function clearAllMessages() {
+  ['msg-login','msg-signup','msg-reset'].forEach(clearMsg);
+}
 
-const { data, error } =
-await supabaseClient.auth.signUp({
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (!btn) return;
+  btn.disabled = loading;
+  btn.classList.toggle('loading', loading);
+}
 
-email:email,
-password:password
+function showFieldError(id, show) {
+  const el = document.getElementById('err-' + id);
+  if (el) el.classList.toggle('show', show);
+  const input = document.getElementById(id);
+  if (input) {
+    input.classList.toggle('error', show);
+    input.classList.toggle('success', !show && input.value.length > 0);
+  }
+}
 
+function isValidEmail(email) {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+function togglePwd(inputId, btn) {
+  const input = document.getElementById(inputId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁';
+  }
+}
+
+/* ══════════════════════════════════════
+   FORCE DU MOT DE PASSE
+══════════════════════════════════════ */
+function checkPasswordStrength(pwd) {
+  const strength = document.getElementById('pwdStrength');
+  const criteria = document.getElementById('pwdCriteria');
+
+  if (!pwd) { strength.style.display='none'; criteria.style.display='none'; return; }
+  strength.style.display = 'block';
+  criteria.style.display = 'grid';
+
+  const rules = {
+    len:     pwd.length >= 8,
+    upper:   /[A-Z]/.test(pwd),
+    num:     /[0-9]/.test(pwd),
+    special: /[^A-Za-z0-9]/.test(pwd)
+  };
+
+  Object.keys(rules).forEach(r => {
+    const el = document.getElementById('rule-' + r);
+    if (el) el.classList.toggle('ok', rules[r]);
+  });
+
+  const score = Object.values(rules).filter(Boolean).length;
+  const segs = ['seg1','seg2','seg3'];
+  const labels = ['','Trop court','Moyen','Fort'];
+  const cls = ['','active-1','active-2','active-3'];
+
+  segs.forEach((id, i) => {
+    const el = document.getElementById(id);
+    el.className = 'pwd-segment' + (i < Math.max(0, score - 1) ? ' ' + cls[score] : '');
+  });
+  document.getElementById('pwdLabel').textContent = labels[score] || 'Trop court';
+  document.getElementById('pwdLabel').style.color =
+    score >= 3 ? 'var(--green)' : score === 2 ? 'var(--amber)' : 'var(--red)';
+}
+
+/* ══════════════════════════════════════
+   CONNEXION
+══════════════════════════════════════ */
+async function loginUser() {
+  clearMsg('msg-login');
+  const email    = document.getElementById('loginEmail').value.trim();
+  const password = document.getElementById('loginPassword').value;
+
+  // Validation
+  let valid = true;
+  if (!isValidEmail(email)) { showFieldError('loginEmail', true); valid = false; }
+  else showFieldError('loginEmail', false);
+  if (!password) { showFieldError('loginPassword', true); valid = false; }
+  else showFieldError('loginPassword', false);
+  if (!valid) return;
+
+  setLoading('btn-login', true);
+
+  const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+
+  if (error) {
+    setLoading('btn-login', false);
+    // Messages d'erreur traduits en français
+    const msgs = {
+      'Invalid login credentials': 'Email ou mot de passe incorrect.',
+      'Email not confirmed': 'Votre email n\'est pas encore confirmé. Vérifiez votre boîte mail.',
+      'Too many requests': 'Trop de tentatives. Attendez quelques minutes avant de réessayer.',
+    };
+    showMsg('msg-login', msgs[error.message] || error.message, 'error');
+    return;
+  }
+
+  // Redirection selon l'état du compte
+  const userId = data.user.id;
+  const { data: sites } = await supabaseClient
+    .from('sites').select('id').eq('user_id', userId).limit(1);
+
+  setLoading('btn-login', false);
+
+  if (sites && sites.length > 0) {
+    window.location.href = 'dashboard.html';
+  } else {
+    window.location.href = 'setup.html';
+  }
+}
+
+/* ══════════════════════════════════════
+   INSCRIPTION
+══════════════════════════════════════ */
+async function completeSignup() {
+  clearMsg('msg-signup');
+
+  const name     = document.getElementById('signupName').value.trim();
+  const company  = document.getElementById('signupCompany').value.trim();
+  const email    = document.getElementById('signupEmail').value.trim();
+  const phone    = document.getElementById('signupPhone').value.trim();
+  const password = document.getElementById('signupPassword').value;
+  const confirm  = document.getElementById('signupPasswordConfirm').value;
+
+  // Validation champ par champ
+  let valid = true;
+
+  if (!name) { showFieldError('signupName', true); valid = false; }
+  else showFieldError('signupName', false);
+
+  if (!isValidEmail(email)) { showFieldError('signupEmail', true); valid = false; }
+  else showFieldError('signupEmail', false);
+
+  if (!phone || phone.length < 8) { showFieldError('signupPhone', true); valid = false; }
+  else showFieldError('signupPhone', false);
+
+  if (password.length < 8) { showFieldError('signupPassword', true); valid = false; }
+  else showFieldError('signupPassword', false);
+
+  if (password !== confirm) { showFieldError('signupPasswordConfirm', true); valid = false; }
+  else showFieldError('signupPasswordConfirm', false);
+
+  if (!valid) return;
+
+  setLoading('btn-signup', true);
+
+  // 1. Créer l'utilisateur Supabase Auth
+  const { data, error } = await supabaseClient.auth.signUp({ email, password });
+
+  if (error) {
+    setLoading('btn-signup', false);
+    const msgs = {
+      'User already registered': 'Un compte existe déjà avec cet email. Connectez-vous.',
+      'Password should be at least 6 characters': 'Le mot de passe doit contenir au moins 8 caractères.',
+    };
+    showMsg('msg-signup', msgs[error.message] || error.message, 'error');
+    return;
+  }
+
+  const user = data.user;
+  if (!user) {
+    setLoading('btn-signup', false);
+    showMsg('msg-signup', 'Erreur lors de la création du compte. Réessayez.', 'error');
+    return;
+  }
+
+  // 2. Créer le profil avec toutes les infos utiles
+  const { error: profileError } = await supabaseClient.from('profiles').insert([{
+    id:        user.id,
+    full_name: name,
+    email:     email,
+    company:   company || null,
+    whatsapp:  phone,
+  }]);
+
+  if (profileError) {
+    console.error('Profil error:', profileError);
+    // Non bloquant — continuer quand même
+  }
+
+  // 3. Attribuer le plan Essential (abonnement 30 jours gratuit)
+  const { data: plan } = await supabaseClient
+    .from('plans').select('id').eq('name','Essential').single();
+
+  if (plan) {
+    await supabaseClient.from('subscriptions').insert([{
+      user_id:    user.id,
+      plan_id:    plan.id,
+      status:     'active',
+      started_at: new Date().toISOString(),
+      expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+    }]);
+  }
+
+  // 4. Sauvegarder localement
+  localStorage.setItem('energytrackUser', JSON.stringify({ name, email, company, phone }));
+
+  setLoading('btn-signup', false);
+
+  // 5. Afficher l'écran de confirmation email
+  // (Supabase envoie un email de confirmation par défaut)
+  document.getElementById('signupFormFields').style.display = 'none';
+  document.getElementById('confirmEmailAddr').textContent   = email;
+  document.getElementById('emailConfirmBox').style.display  = 'block';
+}
+
+/* ══════════════════════════════════════
+   RENVOYER EMAIL DE CONFIRMATION
+══════════════════════════════════════ */
+async function resendConfirmation() {
+  const email = document.getElementById('signupEmail').value.trim();
+  if (!email) return;
+  const { error } = await supabaseClient.auth.resend({ type: 'signup', email });
+  if (!error) {
+    const btn = document.querySelector('.resend-btn');
+    btn.textContent = '✅ Email renvoyé !';
+    btn.disabled = true;
+    setTimeout(() => { btn.textContent = 'Renvoyer l\'email de confirmation'; btn.disabled = false; }, 5000);
+  }
+}
+
+/* ══════════════════════════════════════
+   RESET MOT DE PASSE
+══════════════════════════════════════ */
+async function resetPassword() {
+  clearMsg('msg-reset');
+  const email = document.getElementById('resetEmail').value.trim();
+
+  if (!isValidEmail(email)) {
+    showFieldError('resetEmail', true);
+    return;
+  }
+  showFieldError('resetEmail', false);
+
+  setLoading('btn-reset', true);
+
+  const { error } = await supabaseClient.auth.resetPasswordForEmail(email, {
+    redirectTo: window.location.origin + '/auth.html',
+  });
+
+  setLoading('btn-reset', false);
+
+  if (error) {
+    showMsg('msg-reset', error.message, 'error');
+    return;
+  }
+
+  showMsg('msg-reset',
+    `Un lien de réinitialisation a été envoyé à <strong>${email}</strong>. Vérifiez votre boîte mail (et les spams).`,
+    'success'
+  );
+}
+
+/* ══════════════════════════════════════
+   ENTRÉE CLAVIER — ENVOI FORMULAIRE
+══════════════════════════════════════ */
+document.addEventListener('keydown', e => {
+  if (e.key !== 'Enter') return;
+  const activeForm = document.querySelector('.auth-form.active');
+  if (!activeForm) return;
+  if (activeForm.id === 'form-login')  loginUser();
+  if (activeForm.id === 'form-signup') completeSignup();
+  if (activeForm.id === 'form-reset')  resetPassword();
 });
 
-if(error){
-
-showMessage(error.message,'error');
-
-return;
-
-}
-
-const user = data.user;
-
-if(!user){
-
-showMessage(
-'Erreur création utilisateur.',
-'error'
-);
-
-return;
-
-}
-
-/*
-=========================================
-CREATE PROFILE
-=========================================
-*/
-
-const { error:profileError } =
-await supabaseClient
-
-.from('profiles')
-
-.insert([{
-
-id:user.id,
-
-full_name:name,
-
-email:email,
-
-company:company
-
-}]);
-
-if(profileError){
-
-console.log(profileError);
-
-showMessage(
-profileError.message,
-'error'
-);
-
-return;
-
-}
-
-/*
-=========================================
-GET ESSENTIAL PLAN
-=========================================
-*/
-
-const { data:plan } =
-await supabaseClient
-
-.from('plans')
-
-.select('*')
-
-.eq('name','Essential')
-
-.single();
-
-/*
-=========================================
-CREATE SUBSCRIPTION
-=========================================
-*/
-
-if(plan){
-
-await supabaseClient
-
-.from('subscriptions')
-
-.insert([{
-
-user_id:user.id,
-
-plan_id:plan.id,
-
-status:'active',
-
-started_at:new Date(),
-
-expires_at:
-new Date(
-Date.now() + 30*24*60*60*1000
-)
-
-}]);
-
-}
-
-/*
-=========================================
-LOCAL STORAGE
-=========================================
-*/
-
-localStorage.setItem(
-
-'energytrackUser',
-
-JSON.stringify({
-
-name:name,
-email:email
-
-})
-
-);
-
-/*
-=========================================
-SUCCESS
-=========================================
-*/
-
-showMessage(
-'Compte créé avec succès.',
-'success'
-);
-
-setTimeout(()=>{
-
-window.location.href='payment.html';
-
-},1500);
-
-}
-async function loginUser(){
-
-const email =
-document.getElementById('loginEmail').value;
-
-const password =
-document.getElementById('loginPassword').value;
-
-if(email==='' || password===''){
-
-showMessage(
-'Veuillez entrer votre email et mot de passe.',
-'error'
-);
-
-return;
-
-}
-
-const { data, error } =
-await supabaseClient.auth.signInWithPassword({
-
-email:email,
-password:password
-
-});
-
-if(error){
-
-showMessage(
-'Email ou mot de passe incorrect.',
-'error'
-);
-
-return;
-
-}
-
-const userId = data.user.id;
-
-/*
-VÉRIFIER SI UTILISATEUR
-A DÉJÀ UN SITE
-*/
-
-const { data:sites, error:siteError } =
-await supabaseClient
-
-.from('sites')
-
-.select('*')
-
-.eq('user_id',userId);
-
-if(siteError){
-
-console.log(siteError);
-
-showMessage(
-'Erreur chargement utilisateur.',
-'error'
-);
-
-return;
-
-}
-
-/*
-SI SITE EXISTE
-→ DASHBOARD
-*/
-
-if(sites && sites.length > 0){
-
-window.location.href='dashboard.html';
-
-return;
-
-}
-
-/*
-SINON
-→ SETUP
-*/
-
-window.location.href='setup.html';
-
-}
-
-async function resetPassword(){
-
-const email=document.getElementById('loginEmail').value;
-
-if(email===''){
-
-showMessage(
-'Veuillez entrer votre email.',
-'error'
-);
-
-return;
-
-}
-
-const { error } =
-await supabaseClient.auth.resetPasswordForEmail(email);
-
-if(error){
-
-showMessage(error.message,'error');
-
-return;
-
-}
-
-showMessage(
-'Email de réinitialisation envoyé.',
-'success'
-);
-
-}
-
+/* ══════════════════════════════════════
+   AUTO-REDIRECT SI DÉJÀ CONNECTÉ
+══════════════════════════════════════ */
+(async () => {
+  const { data: { session } } = await supabaseClient.auth.getSession();
+  if (session) {
+    const { data: sites } = await supabaseClient
+      .from('sites').select('id').eq('user_id', session.user.id).limit(1);
+    window.location.href = (sites && sites.length > 0) ? 'dashboard.html' : 'setup.html';
+  }
+})();
 </script>
-
 </body>
 </html>
