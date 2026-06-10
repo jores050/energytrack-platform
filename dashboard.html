@@ -257,7 +257,126 @@ body {
 .split-groupe { background: var(--accent-amber); height: 100%; border-radius: 0 4px 4px 0; transition: width 0.6s ease; }
 
 /* ===================================================================
-   ROI
+   ROI CUMULÉ — NOUVEAU MODULE
+   =================================================================== */
+.roi-cumul-box {
+  background: linear-gradient(135deg, rgba(0,212,160,0.08) 0%, rgba(0,212,160,0.01) 100%);
+  border: 1px solid rgba(0,212,160,0.25);
+  border-radius: var(--radius-box);
+  padding: 16px 18px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.roi-cumul-icon {
+  font-size: 30px;
+  flex-shrink: 0;
+  line-height: 1;
+}
+.roi-cumul-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-green);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.roi-cumul-value {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--accent-green);
+  font-variant-numeric: tabular-nums;
+  line-height: 1.1;
+}
+.roi-cumul-sub {
+  font-size: 10px;
+  color: var(--text-secondary);
+  margin-top: 3px;
+  line-height: 1.4;
+}
+.roi-cumul-meta {
+  font-size: 10px;
+  color: var(--text-muted);
+  margin-top: 2px;
+}
+
+/* ===================================================================
+   DÉTECTION GROUPE INUTILE — NOUVEAU MODULE
+   =================================================================== */
+.groupe-alert-box {
+  border-radius: var(--radius-box);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  transition: opacity 0.3s;
+}
+.groupe-alert-box.danger {
+  background: linear-gradient(135deg, rgba(255,77,106,0.08) 0%, rgba(255,77,106,0.01) 100%);
+  border: 1px solid rgba(255,77,106,0.25);
+}
+.groupe-alert-box.ok {
+  background: var(--bg-inset);
+  border: 1px solid var(--border-subtle);
+}
+.groupe-icon { font-size: 24px; flex-shrink: 0; line-height: 1; margin-top: 1px; }
+.groupe-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 4px;
+}
+.groupe-title.danger { color: var(--accent-red); }
+.groupe-title.ok     { color: var(--accent-green); }
+.groupe-body { font-size: 12px; color: var(--text-secondary); line-height: 1.5; }
+.groupe-cost {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--accent-amber);
+  margin-top: 4px;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===================================================================
+   ACTION CONCRÈTE — NOUVEAU MODULE
+   =================================================================== */
+.action-box {
+  background: linear-gradient(135deg, rgba(59,130,246,0.08) 0%, rgba(59,130,246,0.01) 100%);
+  border: 1px solid rgba(59,130,246,0.22);
+  border-radius: var(--radius-box);
+  padding: 14px 16px;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+.action-icon { font-size: 22px; flex-shrink: 0; line-height: 1; margin-top: 2px; }
+.action-title {
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+}
+.action-text { font-size: 12px; color: var(--text-primary); line-height: 1.55; }
+.action-saving {
+  display: inline-block;
+  margin-top: 7px;
+  padding: 4px 10px;
+  background: rgba(59,130,246,0.12);
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--accent-blue);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===================================================================
+   ROI PÉRIODE (ancien bloc)
    =================================================================== */
 .roi-box {
   background: linear-gradient(135deg, rgba(59,130,246,0.07) 0%, rgba(59,130,246,0.01) 100%);
@@ -577,38 +696,34 @@ body {
      ================================================================ -->
 <script>
 /* =================================================================
-   CONSTANTES MÉTIER — valeurs par défaut (fallback si DB vide)
-   Les tarifs et seuils RÉELS viennent de la base de données :
-     - tarif_sbee   → table settings (user)  + site.config (par site)
-     - tarif_groupe → table settings (user)  + site.config (par site)
-     - power_max    → site.config.power_max
-     - v_low/v_high → site.config.v_low / site.config.v_high
+   CONSTANTES MÉTIER
    ================================================================= */
-const DEFAULT_TARIF_SBEE   = 91;    // FCFA/kWh fallback
-const DEFAULT_TARIF_GROUPE = 350;   // FCFA/kWh fallback
-const DEFAULT_V_OUTAGE     = 50;    // V seuil coupure (fixe — physique)
-const DEFAULT_V_LOW        = 190;   // V basse tension fallback
-const DEFAULT_V_HIGH       = 250;   // V surtension fallback
-const DEFAULT_P_MAX_W      = 5000;  // W surconsommation fallback
-const OFFLINE_MIN          = 15;    // minutes avant DEVICE_OFFLINE
-const TELEMETRY_LIMIT      = 200;   // lignes max — protège Supabase free tier
-const CHART_POINTS         = 14;    // points graphique
-const SYNC_FULL_MS         = 60000; // resync complète toutes les 60s
-const DEBOUNCE_ALERT       = 500;   // debounce alerte realtime (ms)
+const DEFAULT_TARIF_SBEE   = 91;
+const DEFAULT_TARIF_GROUPE = 350;
+const DEFAULT_V_OUTAGE     = 50;
+const DEFAULT_V_LOW        = 190;
+const DEFAULT_V_HIGH       = 250;
+const DEFAULT_P_MAX_W      = 5000;
+const OFFLINE_MIN          = 15;
+const TELEMETRY_LIMIT      = 200;
+const CHART_POINTS         = 14;
+const SYNC_FULL_MS         = 60000;
+const DEBOUNCE_ALERT       = 500;
 
-/* Config résolue par site — alimentée depuis la DB à chaque loadDashboard */
-const siteConfig = {};
-/*
-  siteConfig[siteId] = {
-    tarifSbee:   number,   // depuis settings.tariff_sbee  || site.config.tarif_sbee
-    tarifGroupe: number,   // depuis settings.tariff_groupe || site.config.tarif_groupe
-    vLow:        number,
-    vHigh:       number,
-    pMaxW:       number,
-  }
-*/
+const siteConfig    = {};
+const charts        = {};
+const cachedData    = {};
+const sensorIndex   = {};
+const renderedSites = new Set();
+const alertCooldown = {};
+let syncFullTimer      = null;
+let alertDebounceTimer = null;
+let canAccessMultiSite   = false;
+let canAccessMultiSensor = false;
+const activePeriod  = {};
+const activeSensor  = {};
+let lastFullUpdate  = {};
 
-/** Retourne la config résolue d'un site, avec fallback sur les défauts */
 function getSiteConfig(siteId) {
   return siteConfig[siteId] || {
     tarifSbee:   DEFAULT_TARIF_SBEE,
@@ -619,32 +734,16 @@ function getSiteConfig(siteId) {
   };
 }
 
-/** Construit et stocke la config d'un site depuis les données DB */
 function buildSiteConfig(siteId, userSettings, siteRow) {
   const cfg = siteRow?.config || {};
   siteConfig[siteId] = {
     tarifSbee:   Number(userSettings?.tariff_sbee   || cfg.tarif_sbee   || DEFAULT_TARIF_SBEE),
     tarifGroupe: Number(userSettings?.tariff_groupe || cfg.tarif_groupe || DEFAULT_TARIF_GROUPE),
-    vLow:        Number(cfg.v_low   || DEFAULT_V_LOW),
-    vHigh:       Number(cfg.v_high  || DEFAULT_V_HIGH),
+    vLow:        Number(cfg.v_low    || DEFAULT_V_LOW),
+    vHigh:       Number(cfg.v_high   || DEFAULT_V_HIGH),
     pMaxW:       Number(cfg.power_max || DEFAULT_P_MAX_W),
   };
 }
-
-/* =================================================================
-   ÉTAT GLOBAL
-   ================================================================= */
-const charts        = {};   // instances Chart.js — jamais recréées
-const cachedData    = {};   // données par siteId { site, sensors, telemetry, alerts, aiEnabled }
-const sensorIndex   = {};   // index rapide sensor_id → siteId pour le Realtime
-const renderedSites = new Set();
-const alertCooldown = {};   // anti-flooding alertes locales { key: timestamp }
-let syncFullTimer   = null; // timer resync complète 60s
-let alertDebounceTimer = null;
-let canAccessMultiSite   = false;
-let canAccessMultiSensor = false;
-const activePeriod  = {};   // { siteId: period }
-const activeSensor  = {};   // { siteId: sensorId | 'ALL' }
 
 /* =================================================================
    UTILITAIRES FORMATAGE
@@ -677,10 +776,10 @@ function setStyle(id, prop, val) {
 }
 
 function resolveStatus(t) {
-  if (!t)                                    return { text: 'HORS LIGNE',   cls: 'badge-red'    };
-  if (t.voltage < DEFAULT_V_OUTAGE)          return { text: 'COUPURE SBEE', cls: 'badge-red'    };
-  if (t.source === 'GROUPE')                 return { text: 'GROUPE ACTIF', cls: 'badge-orange' };
-  return                                            { text: 'SBEE OK',       cls: 'badge-green'  };
+  if (!t)                           return { text: 'HORS LIGNE',   cls: 'badge-red'    };
+  if (t.voltage < DEFAULT_V_OUTAGE) return { text: 'COUPURE SBEE', cls: 'badge-red'    };
+  if (t.source === 'GROUPE')        return { text: 'GROUPE ACTIF', cls: 'badge-orange' };
+  return                                   { text: 'SBEE OK',       cls: 'badge-green'  };
 }
 function hColor(pct) {
   if (pct >= 80) return 'var(--accent-green)';
@@ -692,9 +791,6 @@ function isOffline(sensor) {
   return (Date.now() - new Date(sensor.last_seen).getTime()) / 60000 > OFFLINE_MIN;
 }
 
-/* =================================================================
-   FILTRAGE PAR PÉRIODE
-   ================================================================= */
 function filterByPeriod(telemetry, period) {
   const now = Date.now();
   let cutoff;
@@ -709,10 +805,145 @@ function filterByPeriod(telemetry, period) {
 }
 
 /* =================================================================
+   NOUVEAU — ROI CUMULÉ DEPUIS INSTALLATION
+   Calcule les économies réalisées depuis la date d'installation
+   du premier capteur. Logique : si la plateforme n'avait pas
+   détecté les coupures et le groupe inutile, le client aurait
+   payé (kWhGroupe × tarifGroupe) au lieu de (kWhGroupe × tarifSbee).
+   L'économie = surcoût groupe évité sur toute la durée.
+   ================================================================= */
+function computeROICumul(allTelemetry, cfg, installDate) {
+  /* Toute la télémétrie depuis l'installation */
+  const since = installDate ? new Date(installDate) : new Date(Date.now() - 90 * 86400000);
+  const data  = allTelemetry.filter(t => new Date(t.created_at) >= since);
+  if (data.length === 0) return { saved: 0, kwhGroupe: 0, daysActive: 0 };
+
+  let kwhGroupeTotal = 0;
+  data.forEach(t => {
+    kwhGroupeTotal += Number(t.kwh_groupe || 0);
+  });
+
+  /* Inférence si champ kwh_groupe absent */
+  if (kwhGroupeTotal === 0) {
+    const gRows = data.filter(t => t.source === 'GROUPE');
+    gRows.forEach(t => { kwhGroupeTotal += Number(t.kwh_total || 0) * (gRows.length / data.length); });
+  }
+
+  const surCoutGroupe = kwhGroupeTotal * (cfg.tarifGroupe - cfg.tarifSbee);
+  const daysActive    = Math.max(1, Math.round((Date.now() - since.getTime()) / 86400000));
+
+  return {
+    saved:       Math.max(0, surCoutGroupe),
+    kwhGroupe:   kwhGroupeTotal,
+    daysActive,
+  };
+}
+
+/* =================================================================
+   NOUVEAU — DÉTECTION GROUPE INUTILE
+   Détecte si le groupe tourne alors que la SBEE est disponible.
+   Critère : source === 'GROUPE' ET voltage > DEFAULT_V_OUTAGE
+   (c.-à-d. la tension SBEE est mesurable mais le groupe est actif).
+   ================================================================= */
+function detectGroupeInutile(latestRow, kpis, cfg) {
+  if (!latestRow) return { inutile: false };
+
+  /* Groupe actif ET SBEE disponible (tension > seuil coupure) */
+  const groupeActif  = latestRow.source === 'GROUPE';
+  const sbeePresente = latestRow.voltage > DEFAULT_V_OUTAGE;
+
+  if (!groupeActif || !sbeePresente) {
+    return { inutile: false };
+  }
+
+  /* Coût estimé du groupe inutile ce mois */
+  const coutHeure   = (latestRow.power_w || 1000) / 1000 * cfg.tarifGroupe;
+  /* Estimation : si le groupe tourne depuis le début de la période sur SBEE */
+  const gPct        = kpis.totalKwh > 0 ? kpis.kwhGroupe / kpis.totalKwh : 0;
+  const coutInutile = kpis.kwhGroupe * (cfg.tarifGroupe - cfg.tarifSbee);
+
+  return {
+    inutile:      true,
+    coutHeure:    Math.round(coutHeure),
+    coutInutile:  Math.max(0, Math.round(coutInutile)),
+    powerW:       Math.round(latestRow.power_w || 0),
+    groupePct:    Math.round(gPct * 100),
+  };
+}
+
+/* =================================================================
+   NOUVEAU — ACTION CONCRÈTE SUGGÉRÉE
+   Génère une recommandation actionnable unique, classée par
+   priorité d'économie potentielle.
+   ================================================================= */
+function computeAction(kpis, groupeInfo, cfg, latestRow) {
+  const actions = [];
+
+  /* Action 1 — groupe inutile (priorité max) */
+  if (groupeInfo.inutile) {
+    actions.push({
+      priority: 4,
+      icon: '⛽',
+      text: `Le groupe tourne alors que le réseau SBEE est actif (${fmtV(latestRow?.voltage)}). Coupez-le maintenant et basculez sur SBEE.`,
+      saving: groupeInfo.coutInutile,
+      label: `Économie potentielle ce mois`,
+    });
+  }
+
+  /* Action 2 — groupe représente > 30% de la consommation */
+  if (!groupeInfo.inutile && kpis.totalKwh > 0 && kpis.kwhGroupe / kpis.totalKwh > 0.3) {
+    const eco = Math.max(0, kpis.kwhGroupe * 0.5 * (cfg.tarifGroupe - cfg.tarifSbee));
+    actions.push({
+      priority: 3,
+      icon: '🌙',
+      text: `Le groupe représente ${Math.round(kpis.kwhGroupe/kpis.totalKwh*100)}% de votre consommation. Éteignez-le la nuit (22h–6h) pour réduire ce surcoût.`,
+      saving: Math.round(eco),
+      label: `Économie estimée si nuit sans groupe`,
+    });
+  }
+
+  /* Action 3 — facteur de puissance faible */
+  if (kpis.latestPF !== null && kpis.latestPF < 0.85 && kpis.latestPF > 0) {
+    const perteEstimee = Math.round(kpis.costTotal * (1 - kpis.latestPF) * 0.3);
+    actions.push({
+      priority: 2,
+      icon: '⚡',
+      text: `Facteur de puissance faible (${fmtPF(kpis.latestPF)}). Des équipements comme les climatiseurs vétustes dégradent le PF. Un condensateur de compensation peut réduire votre facture.`,
+      saving: perteEstimee,
+      label: `Économie estimée par correction PF`,
+    });
+  }
+
+  /* Action 4 — surconsommation instantanée */
+  if (kpis.latestP > cfg.pMaxW) {
+    actions.push({
+      priority: 2,
+      icon: '🔴',
+      text: `Surconsommation détectée : ${Math.round(kpis.latestP)} W dépasse votre seuil de ${cfg.pMaxW} W. Identifiez l'équipement actif et réduisez la charge.`,
+      saving: 0,
+      label: null,
+    });
+  }
+
+  /* Action 5 — tout va bien */
+  if (actions.length === 0) {
+    return {
+      icon: '✅',
+      text: `Bonne gestion. Consommation équilibrée, groupe utilisé seulement en cas de coupure SBEE.`,
+      saving: 0,
+      label: null,
+    };
+  }
+
+  /* Retourner l'action de plus haute priorité */
+  actions.sort((a, b) => b.priority - a.priority);
+  return actions[0];
+}
+
+/* =================================================================
    CALCULS MÉTIER COMPLETS
    ================================================================= */
 function computeKPIs(telemetry, cfg) {
-  /* cfg = getSiteConfig(siteId) — tarifs et seuils depuis la DB */
   const tarifSbee   = cfg?.tarifSbee   ?? DEFAULT_TARIF_SBEE;
   const tarifGroupe = cfg?.tarifGroupe ?? DEFAULT_TARIF_GROUPE;
 
@@ -725,7 +956,7 @@ function computeKPIs(telemetry, cfg) {
     latestV: null, latestI: null, latestP: 0, latestPF: null,
     latestFreq: null, latestSource: null,
     consumptionBySensor: {},
-    tarifSbee, tarifGroupe,   // exposés pour l'affichage des labels
+    tarifSbee, tarifGroupe,
   };
 
   if (!telemetry || telemetry.length === 0) return r;
@@ -741,23 +972,18 @@ function computeKPIs(telemetry, cfg) {
     hour: '2-digit', minute: '2-digit', second: '2-digit'
   });
 
-  /* Tri chronologique pour détecter transitions coupures */
-  const chrono = [...telemetry].sort((a,b) =>
-    new Date(a.created_at) - new Date(b.created_at)
-  );
+  const chrono = [...telemetry].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
 
   let inOutage = false, outageStart = null;
 
   chrono.forEach(item => {
     const sName = item.sensors?.name || 'Général';
-    if (!r.consumptionBySensor[sName]) {
+    if (!r.consumptionBySensor[sName])
       r.consumptionBySensor[sName] = { kwh: 0, kwhSbee: 0, kwhGroupe: 0 };
-    }
 
     const kwh = Number(item.kwh_total || 0);
-    if (kwh > r.consumptionBySensor[sName].kwh) {
+    if (kwh > r.consumptionBySensor[sName].kwh)
       r.consumptionBySensor[sName].kwh = kwh;
-    }
 
     if (item.source === 'GROUPE') {
       const kG = Number(item.kwh_groupe || kwh);
@@ -769,7 +995,6 @@ function computeKPIs(telemetry, cfg) {
         r.consumptionBySensor[sName].kwhSbee = kS;
     }
 
-    /* Détection transitions coupure SBEE */
     if (item.voltage < DEFAULT_V_OUTAGE && !inOutage) {
       inOutage = true;
       outageStart = new Date(item.created_at);
@@ -777,34 +1002,28 @@ function computeKPIs(telemetry, cfg) {
       r.lastPowerCutTime = outageStart.toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' });
     } else if (item.voltage >= DEFAULT_V_OUTAGE && inOutage) {
       inOutage = false;
-      if (outageStart) {
+      if (outageStart)
         r.outageTotalMin += Math.round((new Date(item.created_at) - outageStart) / 60000);
-      }
     }
   });
 
-  /* Agrégation globale */
   Object.values(r.consumptionBySensor).forEach(v => {
     r.totalKwh  += v.kwh;
     r.kwhSbee   += v.kwhSbee;
     r.kwhGroupe += v.kwhGroupe;
   });
 
-  /* Inférence SBEE/Groupe si champs absents en base */
   if (r.kwhSbee === 0 && r.kwhGroupe === 0 && r.totalKwh > 0) {
     const gRatio = chrono.filter(t => t.source === 'GROUPE').length / chrono.length;
     r.kwhGroupe = r.totalKwh * gRatio;
     r.kwhSbee   = r.totalKwh * (1 - gRatio);
   }
 
-  r.costSbee   = r.kwhSbee   * tarifSbee;
-  r.costGroupe = r.kwhGroupe * tarifGroupe;
-  r.costTotal  = r.costSbee + r.costGroupe;
-
-  /* Économie possible : coût réel vs si tout était sur SBEE */
+  r.costSbee        = r.kwhSbee   * tarifSbee;
+  r.costGroupe      = r.kwhGroupe * tarifGroupe;
+  r.costTotal       = r.costSbee + r.costGroupe;
   r.economyPossible = Math.max(0, r.costTotal - (r.totalKwh * tarifSbee));
 
-  /* Top consommateur (puissance instantanée) */
   const byPow = [...telemetry].sort((a,b) => b.power_w - a.power_w);
   if (byPow[0]) {
     r.topSensorName  = byPow[0].sensors?.name || 'Général';
@@ -815,8 +1034,7 @@ function computeKPIs(telemetry, cfg) {
 }
 
 /* =================================================================
-   ALERTES LOCALES (seuils) — complément aux alertes Supabase
-   Reçoit cfg = getSiteConfig(siteId) pour utiliser les seuils DB
+   ALERTES LOCALES
    ================================================================= */
 function generateLocalAlerts(sensors, kpis, cfg) {
   const vLow  = cfg?.vLow  ?? DEFAULT_V_LOW;
@@ -824,7 +1042,6 @@ function generateLocalAlerts(sensors, kpis, cfg) {
   const pMaxW = cfg?.pMaxW ?? DEFAULT_P_MAX_W;
   const alerts = [];
 
-  /* DEVICE_OFFLINE */
   sensors.filter(s => isOffline(s)).forEach(s => {
     alerts.push({
       id: `offline-${s.id}`,
@@ -835,29 +1052,26 @@ function generateLocalAlerts(sensors, kpis, cfg) {
     });
   });
 
-  /* LOW_VOLTAGE */
   if (kpis.latestV !== null && kpis.latestV >= DEFAULT_V_OUTAGE && kpis.latestV < vLow) {
     alerts.push({
       id: 'low-voltage',
       severity: 'warning',
       sensors: { name: 'Réseau SBEE' },
-      description: `Basse tension détectée : ${fmtV(kpis.latestV)} (seuil : ${vLow} V)`,
+      description: `Basse tension : ${fmtV(kpis.latestV)} (seuil : ${vLow} V)`,
       synthetic: true
     });
   }
 
-  /* HIGH_VOLTAGE */
   if (kpis.latestV !== null && kpis.latestV > vHigh) {
     alerts.push({
       id: 'high-voltage',
       severity: 'critical',
       sensors: { name: 'Réseau SBEE' },
-      description: `Surtension détectée : ${fmtV(kpis.latestV)} — risque matériel (seuil : ${vHigh} V)`,
+      description: `Surtension : ${fmtV(kpis.latestV)} — risque matériel (seuil : ${vHigh} V)`,
       synthetic: true
     });
   }
 
-  /* OVERCONSUMPTION */
   if (kpis.latestP > pMaxW) {
     alerts.push({
       id: 'overconsumption',
@@ -868,7 +1082,6 @@ function generateLocalAlerts(sensors, kpis, cfg) {
     });
   }
 
-  /* HIGH_GROUPE_COST (>30% du total) */
   const gPct = kpis.totalKwh > 0 ? (kpis.kwhGroupe / kpis.totalKwh) * 100 : 0;
   if (gPct > 30) {
     alerts.push({
@@ -966,6 +1179,43 @@ function buildSiteCardHTML(site, sensors, aiEnabled) {
       <span>🟢 <b id="health-pct-${sid}">—%</b></span>
     </div>
 
+    <!-- ============================================================
+         NOUVEAU — ROI CUMULÉ DEPUIS INSTALLATION
+         ============================================================ -->
+    <div class="roi-cumul-box" id="roi-cumul-box-${sid}">
+      <div class="roi-cumul-icon">💰</div>
+      <div style="flex:1; min-width:0;">
+        <div class="roi-cumul-title">Économies réalisées grâce à EnergyTrack</div>
+        <div class="roi-cumul-value" id="roi-cumul-val-${sid}">— F</div>
+        <div class="roi-cumul-sub"  id="roi-cumul-sub-${sid}">Calcul en cours…</div>
+        <div class="roi-cumul-meta" id="roi-cumul-meta-${sid}"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         NOUVEAU — DÉTECTION GROUPE INUTILE
+         ============================================================ -->
+    <div class="groupe-alert-box ok" id="groupe-alert-${sid}">
+      <div class="groupe-icon" id="groupe-icon-${sid}">⛽</div>
+      <div style="flex:1; min-width:0;">
+        <div class="groupe-title ok" id="groupe-title-${sid}">Groupe électrogène</div>
+        <div class="groupe-body"     id="groupe-body-${sid}">Vérification en cours…</div>
+        <div class="groupe-cost"     id="groupe-cost-${sid}" style="display:none;"></div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         NOUVEAU — ACTION CONCRÈTE SUGGÉRÉE
+         ============================================================ -->
+    <div class="action-box" id="action-box-${sid}">
+      <div class="action-icon" id="action-icon-${sid}">💡</div>
+      <div style="flex:1; min-width:0;">
+        <div class="action-title">Recommandation — action maintenant</div>
+        <div class="action-text"   id="action-text-${sid}">Analyse en cours…</div>
+        <div id="action-saving-${sid}"></div>
+      </div>
+    </div>
+
     <!-- KPI 3 tuiles -->
     <div class="kpi-grid-3">
       <div class="kpi-box kg">
@@ -1002,13 +1252,13 @@ function buildSiteCardHTML(site, sensors, aiEnabled) {
     <div class="cost-row">
       <div class="cost-box">
         <div class="cost-label c-green">💡 Réseau SBEE</div>
-        <div class="kpi-sub" id="kwh-sbee-${sid}">— kWh</div>
+        <div class="kpi-sub"   id="kwh-sbee-${sid}">— kWh</div>
         <div class="cost-value c-green" id="cost-sbee-${sid}">— F</div>
         <div class="cost-meta" id="tarif-sbee-lbl-${sid}">à — FCFA/kWh</div>
       </div>
       <div class="cost-box">
         <div class="cost-label c-amber">⛽ Groupe élect.</div>
-        <div class="kpi-sub" id="kwh-groupe-${sid}">— kWh</div>
+        <div class="kpi-sub"   id="kwh-groupe-${sid}">— kWh</div>
         <div class="cost-value c-amber" id="cost-groupe-${sid}">— F</div>
         <div class="cost-meta" id="tarif-groupe-lbl-${sid}">à — FCFA/kWh</div>
       </div>
@@ -1021,12 +1271,12 @@ function buildSiteCardHTML(site, sensors, aiEnabled) {
         <span id="split-lbl-grp-${sid}">Groupe —%</span>
       </div>
       <div class="split-track">
-        <div class="split-sbee"   id="split-sbee-${sid}"  style="width:50%;"></div>
-        <div class="split-groupe" id="split-grp-${sid}"   style="width:50%;"></div>
+        <div class="split-sbee"   id="split-sbee-${sid}" style="width:50%;"></div>
+        <div class="split-groupe" id="split-grp-${sid}"  style="width:50%;"></div>
       </div>
     </div>
 
-    <!-- ROI -->
+    <!-- ROI PÉRIODE -->
     <div class="roi-box">
       <div class="roi-icon">💡</div>
       <div>
@@ -1089,7 +1339,7 @@ function buildSiteCardHTML(site, sensors, aiEnabled) {
       </div>
     </div>
 
-    <!-- ALERTES (avec badge sévérité + bouton Acquitter) -->
+    <!-- ALERTES -->
     <div class="analysis-section" style="border-color:rgba(255,77,106,0.07);">
       <div class="analysis-title" style="color:var(--accent-red);">🔔 Diagnostics & Alertes</div>
       <div id="alerts-list-${sid}">
@@ -1134,14 +1384,14 @@ function buildSiteCardHTML(site, sensors, aiEnabled) {
 }
 
 /* =================================================================
-   MISE À JOUR IN-PLACE — zéro reconstruction DOM
+   MISE À JOUR IN-PLACE
    ================================================================= */
 function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   const sid    = site.id;
-  const cfg    = getSiteConfig(sid);           // ← tarifs et seuils depuis la DB
+  const cfg    = getSiteConfig(sid);
   const period = activePeriod[sid] || 'today';
   const filt   = filterByPeriod(telemetry, period);
-  const kpis   = computeKPIs(filt, cfg);       // ← cfg transmis
+  const kpis   = computeKPIs(filt, cfg);
 
   /* ── Status badge ─────────────────────────────────────── */
   const { text: stText, cls: stCls } = resolveStatus(filt[0] || telemetry[0] || null);
@@ -1159,17 +1409,104 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   const fill = document.getElementById(`health-fill-${sid}`);
   if (fill) { fill.style.width = `${pct}%`; fill.style.background = hc; }
 
+  /* ============================================================
+     NOUVEAU — ROI CUMULÉ
+     ============================================================ */
+  const installDate = sensors[0]?.installed_at || site.created_at;
+  const roi = computeROICumul(telemetry, cfg, installDate);
+
+  setText(`roi-cumul-val-${sid}`,
+    roi.saved > 0 ? `${fmtFcfa(roi.saved)} FCFA` : 'Données insuffisantes'
+  );
+  const roiValEl = document.getElementById(`roi-cumul-val-${sid}`);
+  if (roiValEl) roiValEl.style.color = roi.saved > 0 ? 'var(--accent-green)' : 'var(--text-muted)';
+
+  setText(`roi-cumul-sub-${sid}`,
+    roi.saved > 0
+      ? `Surcoût groupe évité depuis l'installation (${roi.kwhGroupe.toFixed(1)} kWh groupe × ${cfg.tarifGroupe - cfg.tarifSbee} FCFA/kWh de surcoût)`
+      : `Continuez à utiliser EnergyTrack pour accumuler des économies mesurées.`
+  );
+  setText(`roi-cumul-meta-${sid}`,
+    roi.daysActive > 0 ? `Actif depuis ${roi.daysActive} jour${roi.daysActive > 1 ? 's' : ''}` : ''
+  );
+
+  /* ============================================================
+     NOUVEAU — DÉTECTION GROUPE INUTILE
+     ============================================================ */
+  const latestRow  = filt[0] || telemetry[0] || null;
+  const groupeInfo = detectGroupeInutile(latestRow, kpis, cfg);
+
+  const groupeBox   = document.getElementById(`groupe-alert-${sid}`);
+  const groupeIcon  = document.getElementById(`groupe-icon-${sid}`);
+  const groupeTitle = document.getElementById(`groupe-title-${sid}`);
+  const groupeBody  = document.getElementById(`groupe-body-${sid}`);
+  const groupeCost  = document.getElementById(`groupe-cost-${sid}`);
+
+  if (groupeBox && groupeTitle && groupeBody) {
+    if (groupeInfo.inutile) {
+      groupeBox.className  = 'groupe-alert-box danger';
+      groupeTitle.className = 'groupe-title danger';
+      groupeTitle.textContent = '⚠️ Groupe inutile — SBEE disponible';
+      groupeBody.textContent  =
+        `Le groupe tourne (${groupeInfo.powerW} W) alors que le réseau SBEE est présent. ` +
+        `Vous brûlez de l'argent : ${groupeInfo.coutHeure} FCFA/heure de surcoût inutile.`;
+      if (groupeCost) {
+        groupeCost.textContent = `Surcoût ce mois : ${fmtFcfa(groupeInfo.coutInutile)} FCFA`;
+        groupeCost.style.display = 'block';
+      }
+    } else if (latestRow?.source === 'GROUPE') {
+      groupeBox.className  = 'groupe-alert-box danger';
+      groupeTitle.className = 'groupe-title danger';
+      groupeTitle.textContent = '⛽ Groupe actif — coupure SBEE';
+      groupeBody.textContent  =
+        `Coupure SBEE confirmée. Le groupe prend le relais normalement. ` +
+        `Coût en cours : ${Math.round((latestRow.power_w || 0) / 1000 * cfg.tarifGroupe)} FCFA/heure.`;
+      if (groupeCost) {
+        groupeCost.textContent = `Coût groupe période : ${fmtFcfa(kpis.costGroupe)} FCFA`;
+        groupeCost.style.display = 'block';
+      }
+    } else {
+      groupeBox.className  = 'groupe-alert-box ok';
+      groupeTitle.className = 'groupe-title ok';
+      groupeTitle.textContent = '✅ Groupe — utilisation normale';
+      groupeBody.textContent  = kpis.kwhGroupe > 0
+        ? `${fmtEnergy(kpis.kwhGroupe)} consommés sur groupe (coupures SBEE uniquement). Coût : ${fmtFcfa(kpis.costGroupe)} FCFA.`
+        : `Aucune consommation groupe détectée sur la période.`;
+      if (groupeCost) groupeCost.style.display = 'none';
+    }
+  }
+
+  /* ============================================================
+     NOUVEAU — ACTION CONCRÈTE SUGGÉRÉE
+     ============================================================ */
+  const action = computeAction(kpis, groupeInfo, cfg, latestRow);
+
+  const actionIconEl  = document.getElementById(`action-icon-${sid}`);
+  const actionTextEl  = document.getElementById(`action-text-${sid}`);
+  const actionSavingEl = document.getElementById(`action-saving-${sid}`);
+
+  if (actionIconEl)  actionIconEl.textContent  = action.icon;
+  if (actionTextEl)  actionTextEl.textContent  = action.text;
+  if (actionSavingEl) {
+    if (action.saving > 0 && action.label) {
+      actionSavingEl.innerHTML =
+        `<span class="action-saving">${action.label} : ${fmtFcfa(action.saving)} FCFA</span>`;
+    } else {
+      actionSavingEl.innerHTML = '';
+    }
+  }
+
   /* ── KPI puissance ────────────────────────────────────── */
-  setText(`kpi-power-${sid}`,   `${Math.round(kpis.latestP)} W`);
-  setText(`kpi-source-${sid}`,  `Source : ${kpis.latestSource || '—'}`);
+  setText(`kpi-power-${sid}`,  `${Math.round(kpis.latestP)} W`);
+  setText(`kpi-source-${sid}`, `Source : ${kpis.latestSource || '—'}`);
 
   /* ── KPI énergie ──────────────────────────────────────── */
   setText(`kpi-energy-${sid}`,     fmtEnergy(kpis.totalKwh));
   const gPct = kpis.totalKwh > 0 ? Math.round((kpis.kwhGroupe/kpis.totalKwh)*100) : 0;
   setText(`kpi-energy-sub-${sid}`, `${gPct}% groupe`);
 
-  /* ── KPI alertes + coupures ───────────────────────────── */
-  const localAlerts = generateLocalAlerts(sensors, kpis, cfg); // ← cfg transmis
+  /* ── KPI alertes ──────────────────────────────────────── */
+  const localAlerts = generateLocalAlerts(sensors, kpis, cfg);
   const allAlerts   = [...localAlerts, ...dbAlerts];
   setText(`kpi-alerts-${sid}`,  allAlerts.length);
   setText(`kpi-outages-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
@@ -1186,8 +1523,6 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   setText(`cost-sbee-${sid}`,   `${fmtFcfa(kpis.costSbee)} F`);
   setText(`kwh-groupe-${sid}`,  `${kpis.kwhGroupe.toFixed(2)} kWh`);
   setText(`cost-groupe-${sid}`, `${fmtFcfa(kpis.costGroupe)} F`);
-
-  /* ── Labels tarifs dynamiques (depuis DB, pas des constantes) ── */
   setText(`tarif-sbee-lbl-${sid}`,   `à ${cfg.tarifSbee} FCFA/kWh`);
   setText(`tarif-groupe-lbl-${sid}`, `à ${cfg.tarifGroupe} FCFA/kWh`);
 
@@ -1201,7 +1536,7 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   setText(`split-lbl-sbee-${sid}`, `SBEE ${pSbee}%`);
   setText(`split-lbl-grp-${sid}`,  `Groupe ${pGrp}%`);
 
-  /* ── ROI ──────────────────────────────────────────────── */
+  /* ── ROI période ──────────────────────────────────────── */
   setText(`roi-val-${sid}`,  `${fmtFcfa(kpis.economyPossible)} F`);
   setText(`roi-desc-${sid}`,
     kpis.economyPossible > 0
@@ -1215,7 +1550,6 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   setText(`elec-pf-${sid}`, fmtPF(kpis.latestPF));
   setText(`elec-hz-${sid}`, fmtHz(kpis.latestFreq));
 
-  /* Couleur tension selon seuils DB (cfg.vLow / cfg.vHigh) */
   const vEl = document.getElementById(`elec-v-${sid}`);
   if (vEl) {
     if      (!kpis.latestV || kpis.latestV < DEFAULT_V_OUTAGE) vEl.style.color = 'var(--accent-red)';
@@ -1224,10 +1558,8 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
     else                                                        vEl.style.color = 'var(--accent-green)';
   }
   const pfEl = document.getElementById(`elec-pf-${sid}`);
-  if (pfEl && kpis.latestPF !== null) {
-    pfEl.style.color = kpis.latestPF < 0.85
-      ? 'var(--accent-amber)' : 'var(--text-primary)';
-  }
+  if (pfEl && kpis.latestPF !== null)
+    pfEl.style.color = kpis.latestPF < 0.85 ? 'var(--accent-amber)' : 'var(--text-primary)';
 
   /* ── Réseau / coupures ────────────────────────────────── */
   setText(`last-emit-${sid}`, kpis.lastTransmitTime);
@@ -1235,7 +1567,7 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
   setText(`outage-dur-${sid}`, fmtMin(kpis.outageTotalMin));
   setText(`outage-cnt-${sid}`, `${kpis.outageCount} coupure${kpis.outageCount!==1?'s':''}`);
 
-  /* ── Breakdown par appareil (coûts calculés avec tarifs DB) ── */
+  /* ── Breakdown par appareil ───────────────────────────── */
   const brkEl = document.getElementById(`breakdown-${sid}`);
   if (brkEl) {
     const entries = Object.entries(kpis.consumptionBySensor)
@@ -1245,7 +1577,6 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
     brkEl.innerHTML = entries.length === 0
       ? `<div style="font-size:12px; color:var(--text-muted); padding:8px 0;">Aucune donnée disponible.</div>`
       : entries.map(([name, d]) => {
-          /* ← tarifs DB, plus TARIF_SBEE/TARIF_GROUPE hardcodés */
           const cost = Math.round(d.kwhSbee * cfg.tarifSbee + d.kwhGroupe * cfg.tarifGroupe);
           const pct  = kpis.totalKwh > 0 ? Math.round((d.kwh / kpis.totalKwh) * 100) : 0;
           return `<div class="data-row">
@@ -1265,7 +1596,7 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
         }).join('');
   }
 
-  /* ── Alertes (sévérité + bouton Acquitter) ────────────── */
+  /* ── Alertes ──────────────────────────────────────────── */
   const alertsEl = document.getElementById(`alerts-list-${sid}`);
   if (alertsEl) {
     if (allAlerts.length === 0) {
@@ -1292,7 +1623,7 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
     }
   }
 
-  /* ── Statut IoT — last_seen mis à jour en temps réel ─── */
+  /* ── Statut IoT ───────────────────────────────────────── */
   const iotGrid = document.getElementById(`iot-grid-${sid}`);
   if (iotGrid) {
     iotGrid.innerHTML = sensors.slice(0, 4).map(s => {
@@ -1320,12 +1651,11 @@ function updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled) {
     }
   }
 
-  /* ── Graphique (in-place, pas de destroy) ─────────────── */
   updateChart(sid);
 }
 
 /* =================================================================
-   CHART.JS — JAMAIS destroy(), toujours .update()
+   CHART.JS
    ================================================================= */
 function updateChart(siteId) {
   const allTel = cachedData[siteId]?.telemetry || [];
@@ -1339,8 +1669,6 @@ function updateChart(siteId) {
   if (sensorId !== 'ALL') data = data.filter(t => t.sensor_id === sensorId);
 
   const chrono = [...data].sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
-
-  /* Decimation automatique si trop de points */
   let pts = chrono;
   if (chrono.length > CHART_POINTS * 3) {
     const step = Math.floor(chrono.length / CHART_POINTS);
@@ -1350,11 +1678,10 @@ function updateChart(siteId) {
   }
 
   const labels    = pts.map(t => new Date(t.created_at).toLocaleTimeString('fr-FR', { hour:'2-digit', minute:'2-digit' }));
-  const powerData = pts.map(t => t.power_w   || 0);
-  const voltData  = pts.map(t => t.voltage   || 0);
+  const powerData = pts.map(t => t.power_w  || 0);
+  const voltData  = pts.map(t => t.voltage  || 0);
 
   if (charts[siteId]) {
-    /* ✅ Mise à jour in-place — aucun flash, aucune perte */
     const c = charts[siteId];
     c.data.labels             = labels;
     c.data.datasets[0].data   = powerData;
@@ -1362,7 +1689,6 @@ function updateChart(siteId) {
     c.data.datasets[0].label  = sensorId === 'ALL' ? 'Puissance totale (W)' : 'Puissance appareil (W)';
     c.update('none');
   } else {
-    /* Premier rendu */
     charts[siteId] = new Chart(ctx, {
       type: 'line',
       data: {
@@ -1427,7 +1753,6 @@ function updateChart(siteId) {
   }
 }
 
-/* Handlers contrôles graphique */
 function onSensorChange(siteId) {
   const el = document.getElementById(`sel-sensor-${siteId}`);
   if (el) activeSensor[siteId] = el.value;
@@ -1435,11 +1760,9 @@ function onSensorChange(siteId) {
 }
 function setPeriod(siteId, period, btn) {
   activePeriod[siteId] = period;
-  /* Mise à jour boutons */
   const wrap = document.getElementById(`period-btns-${siteId}`);
   if (wrap) wrap.querySelectorAll('.period-btn').forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
-  /* Recalcul complet avec nouvelle période */
   const c = cachedData[siteId];
   if (c) updateSiteCard(c.site, c.sensors, c.telemetry, c.alerts, c.aiEnabled);
 }
@@ -1463,34 +1786,21 @@ async function acknowledgeAlert(alertId, siteId) {
 }
 
 /* =================================================================
-   VITESSE 1 — INSTANTANÉE
-   Reçoit payload.new directement depuis Supabase Realtime.
-   Zéro requête réseau. Mise à jour DOM < 16ms.
+   REALTIME — VITESSE 1 (instantané)
    ================================================================= */
-
-/**
- * Injecte une nouvelle ligne de télémétrie reçue en temps réel
- * dans le cache du site concerné, puis rafraîchit les KPI instantanés.
- * Aucune requête Supabase n'est effectuée.
- */
-// Ajouter cette variable en haut avec les autres variables globales
-let lastFullUpdate = {};
-
 function applyRealtimeTelemetry(newRow) {
   const sid = sensorIndex[newRow.sensor_id];
   if (!sid || !cachedData[sid] || !renderedSites.has(sid)) return;
 
-  const cache = cachedData[sid];
+  const cache  = cachedData[sid];
   const sensor = cache.sensors.find(s => s.id === newRow.sensor_id);
   newRow.sensors = sensor ? { name: sensor.name } : { name: 'Général' };
 
   cache.telemetry.unshift(newRow);
   if (cache.telemetry.length > TELEMETRY_LIMIT) cache.telemetry.length = TELEMETRY_LIMIT;
 
-  // Mise à jour instantanée (puissance, tension, courant)
   applyInstantKPIs(sid, newRow, cache);
 
-  // Recalcul des agrégats toutes les 10s (énergie, coûts, SBEE/groupe)
   const now = Date.now();
   if (!lastFullUpdate[sid] || now - lastFullUpdate[sid] > 10000) {
     lastFullUpdate[sid] = now;
@@ -1498,22 +1808,13 @@ function applyRealtimeTelemetry(newRow) {
   }
 }
 
-/**
- * Met à jour uniquement les métriques instantanées sans recalculer
- * l'historique complet (coûts cumulés, coupures, breakdown…).
- * Appelée à chaque nouvelle ligne Realtime — doit être < 5ms.
- */
 function applyInstantKPIs(sid, row, cache) {
-  /* ── Status badge ── */
   const { text, cls } = resolveStatus(row);
   const badge = document.getElementById(`status-badge-${sid}`);
   if (badge) { badge.textContent = text; badge.className = `status-badge ${cls}`; }
 
-  /* ── Puissance instantanée ── */
   setText(`kpi-power-${sid}`,  `${Math.round(row.power_w || 0)} W`);
   setText(`kpi-source-${sid}`, `Source : ${row.source || '—'}`);
-
-  /* ── Indicateurs électriques ── */
   setText(`elec-v-${sid}`,  fmtV(row.voltage));
   setText(`elec-i-${sid}`,  fmtA(row.current));
   setText(`elec-pf-${sid}`, fmtPF(row.pf));
@@ -1528,19 +1829,28 @@ function applyInstantKPIs(sid, row, cache) {
     else                                                     vEl.style.color = 'var(--accent-green)';
   }
   const pfEl = document.getElementById(`elec-pf-${sid}`);
-  if (pfEl && row.pf != null) {
-    pfEl.style.color = row.pf < 0.85
-      ? 'var(--accent-amber)' : 'var(--text-primary)';
-  }
+  if (pfEl && row.pf != null)
+    pfEl.style.color = row.pf < 0.85 ? 'var(--accent-amber)' : 'var(--text-primary)';
 
-  /* ── Dernière émission IoT ── */
   setText(`last-emit-${sid}`,
     new Date(row.created_at || Date.now()).toLocaleTimeString('fr-FR', {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
     })
   );
 
-  /* ── Alerte coupure SBEE instantanée ── */
+  /* Alerte groupe inutile en temps réel */
+  const cfg        = getSiteConfig(sid);
+  const kpiPartial = { totalKwh: 0, kwhGroupe: 0, costGroupe: 0, costTotal: 0, latestPF: row.pf, latestP: row.power_w || 0 };
+  const groupeInfo = detectGroupeInutile(row, kpiPartial, cfg);
+  const groupeBox  = document.getElementById(`groupe-alert-${sid}`);
+  if (groupeBox && groupeInfo.inutile) {
+    groupeBox.className = 'groupe-alert-box danger';
+    const titleEl = document.getElementById(`groupe-title-${sid}`);
+    const bodyEl  = document.getElementById(`groupe-body-${sid}`);
+    if (titleEl) { titleEl.className = 'groupe-title danger'; titleEl.textContent = '⚠️ Groupe inutile — SBEE disponible'; }
+    if (bodyEl)  bodyEl.textContent = `Groupe actif (${Math.round(row.power_w||0)} W) alors que SBEE présent (${fmtV(row.voltage)}). Coupez le groupe maintenant.`;
+  }
+
   if (row.voltage < DEFAULT_V_OUTAGE) {
     setText(`last-cut-${sid}`,
       new Date(row.created_at || Date.now()).toLocaleTimeString('fr-FR', {
@@ -1549,7 +1859,6 @@ function applyInstantKPIs(sid, row, cache) {
     );
   }
 
-  /* ── Graphique : ajout du point en temps réel ── */
   const chart = charts[sid];
   if (chart) {
     const sensorFilter = activeSensor[sid] || 'ALL';
@@ -1559,23 +1868,20 @@ function applyInstantKPIs(sid, row, cache) {
       chart.data.labels.push(label);
       chart.data.datasets[0].data.push(row.power_w || 0);
       chart.data.datasets[1].data.push(row.voltage || 0);
-      /* Garder seulement CHART_POINTS points visibles */
       if (chart.data.labels.length > CHART_POINTS) {
         chart.data.labels.shift();
         chart.data.datasets[0].data.shift();
         chart.data.datasets[1].data.shift();
       }
-      chart.update('none'); // animation désactivée pour fluidité max
+      chart.update('none');
     }
   }
 
-  /* ── last_seen du capteur — mis à jour en cache ET dans le DOM ── */
   const sid2 = sensorIndex[row.sensor_id];
   if (sid2 && cachedData[sid2]) {
     const sensorInCache = cachedData[sid2].sensors.find(s => s.id === row.sensor_id);
     if (sensorInCache) {
       sensorInCache.last_seen = row.created_at || new Date().toISOString();
-      /* Mise à jour de la tuile IoT correspondante sans reconstruire la grille entière */
       const iotBox = document.getElementById(`iot-box-${row.sensor_id}`);
       if (iotBox) {
         const seen = new Date(sensorInCache.last_seen).toLocaleTimeString('fr-FR', {
@@ -1584,12 +1890,11 @@ function applyInstantKPIs(sid, row, cache) {
         const statusEl = iotBox.querySelector('.iot-status');
         const metaEl   = iotBox.querySelector('.iot-meta');
         if (statusEl) { statusEl.textContent = '● ONLINE'; statusEl.style.color = 'var(--accent-green)'; }
-        if (metaEl)   { metaEl.textContent = `${sensorInCache.firmware_v ? 'v' + sensorInCache.firmware_v : '—'} · ${seen}`; }
+        if (metaEl)   metaEl.textContent = `${sensorInCache.firmware_v ? 'v'+sensorInCache.firmware_v : '—'} · ${seen}`;
       }
     }
   }
 
-  /* ── Timestamp MAJ ── */
   setText('lastRefreshTime',
     new Date().toLocaleTimeString('fr-FR', {
       hour: '2-digit', minute: '2-digit', second: '2-digit'
@@ -1597,32 +1902,24 @@ function applyInstantKPIs(sid, row, cache) {
   );
 }
 
-/**
- * Traite une nouvelle alerte reçue en Realtime.
- * Insère l'item dans le DOM sans reconstruire la liste entière.
- */
 function applyRealtimeAlert(newAlert) {
   const sid = sensorIndex[newAlert.sensor_id];
   if (!sid || !renderedSites.has(sid)) return;
 
-  /* Ajouter au cache local */
   if (cachedData[sid]) {
     const exists = cachedData[sid].alerts.some(a => a.id === newAlert.id);
     if (!exists) cachedData[sid].alerts.unshift(newAlert);
   }
 
-  /* Chercher le nom du capteur depuis le cache */
   const sensor = cachedData[sid]?.sensors.find(s => s.id === newAlert.sensor_id);
   newAlert.sensors = sensor ? { name: sensor.name } : { name: 'Général' };
 
   const alertsEl = document.getElementById(`alerts-list-${sid}`);
   if (!alertsEl) return;
 
-  /* Retirer le message "aucun dysfonctionnement" s'il est présent */
   const noIssue = alertsEl.querySelector('[data-no-issue]');
   if (noIssue) noIssue.remove();
 
-  /* Ne pas dupliquer si l'item existe déjà dans le DOM */
   if (document.getElementById(`alert-item-${newAlert.id}`)) return;
 
   const sev    = newAlert.severity || 'warning';
@@ -1641,26 +1938,19 @@ function applyRealtimeAlert(newAlert) {
     </div>
     ${ack}`;
 
-  /* Insérer en haut de la liste */
   alertsEl.insertAdjacentElement('afterbegin', item);
 
-  /* Incrémenter le badge KPI alertes */
   const kpiAl = document.getElementById(`kpi-alerts-${sid}`);
-  if (kpiAl) {
-    const current = parseInt(kpiAl.textContent) || 0;
-    kpiAl.textContent = current + 1;
-  }
+  if (kpiAl) kpiAl.textContent = (parseInt(kpiAl.textContent) || 0) + 1;
 }
 
 /* =================================================================
-   VITESSE 2 — RESYNC COMPLÈTE (toutes les 60s)
-   Recharge l'historique, les coûts cumulés, coupures, breakdown.
+   VITESSE 2 — RESYNC COMPLÈTE (60s)
    ================================================================= */
 async function loadDashboard() {
   const user = await getUser();
   if (!user) return;
 
-  /* Récupérer les deux colonnes de tarif (tariff_sbee + tariff_groupe) */
   const { data: userSettings } = await supabaseClient
     .from('settings')
     .select('tariff_sbee, tariff_groupe')
@@ -1675,7 +1965,6 @@ async function loadDashboard() {
   const container     = document.getElementById('sitesContainer');
   const aiEnabled     = await hasFeature('ai');
 
-  /* Cas liste vide */
   if (filteredSites.length === 0) {
     if (!renderedSites.has('__empty__')) {
       container.insertAdjacentHTML('beforeend', `
@@ -1690,7 +1979,6 @@ async function loadDashboard() {
     return;
   }
 
-  /* Nettoyage cartes orphelines (sites supprimés) */
   renderedSites.forEach(existingSid => {
     if (existingSid === '__empty__') return;
     if (!filteredSites.some(s => s.id === existingSid)) {
@@ -1702,27 +1990,17 @@ async function loadDashboard() {
     }
   });
 
-  /* Boucle sites */
   for (const site of filteredSites) {
     const sid = site.id;
-
-    /* ── Résolution config par site ──────────────────────────
-       Priorité : site.config (par site) > userSettings (global)
-       Fallback : constantes DEFAULT_*
-    ────────────────────────────────────────────────────────── */
     buildSiteConfig(sid, userSettings, site);
 
-    /* Capteurs */
     const { data: rawSensors } = await supabaseClient
       .from('sensors').select('*').eq('site_id', sid);
     let sensors = rawSensors || [];
     if (!canAccessMultiSensor && sensors.length > 1) sensors = sensors.slice(0, 1);
     const sensorIds = sensors.map(s => s.id);
-
-    /* Construire l'index sensor_id → siteId pour le Realtime instantané */
     sensorIds.forEach(id => { sensorIndex[id] = sid; });
 
-    /* Télémétrie — LIMIT obligatoire */
     let telemetry = [];
     if (sensorIds.length > 0) {
       const { data } = await supabaseClient
@@ -1734,7 +2012,6 @@ async function loadDashboard() {
       telemetry = data || [];
     }
 
-    /* Alertes DB (non acquittées) */
     let dbAlerts = [];
     if (sensorIds.length > 0) {
       const { data } = await supabaseClient
@@ -1747,63 +2024,44 @@ async function loadDashboard() {
       dbAlerts = data || [];
     }
 
-    /* Mise en cache */
     cachedData[sid] = { site, sensors, telemetry, alerts: dbAlerts, aiEnabled };
 
-    /* ── DÉCISION : 1er rendu vs mise à jour in-place ── */
     if (!renderedSites.has(sid)) {
-      /* Toujours construire la carte complète même sans données :
-         les éléments DOM doivent exister pour que le Realtime
-         puisse les mettre à jour dès le premier INSERT. */
       container.insertAdjacentHTML('beforeend', buildSiteCardHTML(site, sensors, aiEnabled));
       renderedSites.add(sid);
       activePeriod[sid] = 'today';
       activeSensor[sid] = 'ALL';
       if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
-
     } else {
-      /* Resync complète in-place — historique, coûts, coupures */
       if (telemetry.length > 0) updateSiteCard(site, sensors, telemetry, dbAlerts, aiEnabled);
     }
   }
 
-  /* Timestamp MAJ */
   setText('lastRefreshTime',
     new Date().toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit', second: '2-digit' })
   );
 }
 
-/* Planifie la prochaine resync complète */
 function scheduleFullSync() {
   clearTimeout(syncFullTimer);
   syncFullTimer = setTimeout(() => {
-    loadDashboard().finally(scheduleFullSync); // boucle auto toutes les 60s
+    loadDashboard().finally(scheduleFullSync);
   }, SYNC_FULL_MS);
 }
 
 /* =================================================================
-   REALTIME SUPABASE — deux canaux distincts
-   Canal 1 : telemetry INSERT → applyRealtimeTelemetry (instantané)
-   Canal 2 : alerts INSERT/UPDATE → applyRealtimeAlert (instantané)
+   REALTIME SUPABASE
    ================================================================= */
 function startRealtime() {
-  /* Canal télémétrie — vitesse maximale, payload.new utilisé directement */
   supabaseClient
     .channel('et-telemetry-live')
     .on(
       'postgres_changes',
       { event: 'INSERT', schema: 'public', table: 'telemetry' },
-      (payload) => {
-        if (payload.new) applyRealtimeTelemetry(payload.new);
-      }
+      (payload) => { if (payload.new) applyRealtimeTelemetry(payload.new); }
     )
-    .subscribe((status) => {
-      if (status === 'SUBSCRIBED') {
-        console.log('[Realtime] Canal télémétrie abonné ✓');
-      }
-    });
+    .subscribe();
 
-  /* Canal alertes — debounce court pour éviter les rafales */
   supabaseClient
     .channel('et-alerts-live')
     .on(
@@ -1812,10 +2070,7 @@ function startRealtime() {
       (payload) => {
         if (payload.new) {
           clearTimeout(alertDebounceTimer);
-          alertDebounceTimer = setTimeout(
-            () => applyRealtimeAlert(payload.new),
-            DEBOUNCE_ALERT
-          );
+          alertDebounceTimer = setTimeout(() => applyRealtimeAlert(payload.new), DEBOUNCE_ALERT);
         }
       }
     )
@@ -1823,7 +2078,6 @@ function startRealtime() {
       'postgres_changes',
       { event: 'UPDATE', schema: 'public', table: 'alerts' },
       () => {
-        /* Un acquittement externe → resync alertes légère */
         clearTimeout(alertDebounceTimer);
         alertDebounceTimer = setTimeout(loadDashboard, DEBOUNCE_ALERT);
       }
@@ -1845,9 +2099,9 @@ async function initDashboard() {
   canAccessMultiSite   = await canUseMultiSite();
   canAccessMultiSensor = await canUseMultiSensor();
   if (!canAccessMultiSite && !canAccessMultiSensor) showFreeBanner();
-  await loadDashboard();  // chargement initial complet
-  startRealtime();         // abonnements Realtime instantanés
-  scheduleFullSync();      // resync historique toutes les 60s
+  await loadDashboard();
+  startRealtime();
+  scheduleFullSync();
 }
 </script>
 
